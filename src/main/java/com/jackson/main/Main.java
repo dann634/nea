@@ -4,6 +4,7 @@ import com.jackson.ui.HelpController;
 import com.jackson.ui.MainMenuController;
 import javafx.application.Application;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
@@ -23,8 +24,8 @@ public class Main extends Application {
         stage.show(); //Show GUI
     }
 
-    public static Stage getStage() {
-        return stage;
+    public static void setScene(Scene scene) {
+        stage.setScene(scene);
     }
 
     public static void applyWindowSize(Parent root) {

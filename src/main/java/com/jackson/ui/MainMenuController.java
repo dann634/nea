@@ -6,9 +6,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class MainMenuController {
 
     private Scene scene;
@@ -41,17 +38,7 @@ public class MainMenuController {
 
         addFunctionality(singlePlayerButton, multiPlayerButton, settingsButton, helpButton, exitButton);
 
-        List<Button> btnList = new ArrayList<>(); //Adding buttons to a list to remove duplicate code
-        btnList.add(singlePlayerButton);
-        btnList.add(multiPlayerButton);
-        btnList.add(settingsButton);
-        btnList.add(helpButton);
-        btnList.add(exitButton);
-
-        for(Button btn : btnList) {
-            btn.getStyleClass().add("button");
-        }
-        root.getChildren().addAll(btnList);
+        root.getChildren().addAll(singlePlayerButton, multiPlayerButton, settingsButton, helpButton, exitButton);
 
     }
 
@@ -64,7 +51,7 @@ public class MainMenuController {
         multiplayerButton.setOnAction(e -> { //Goes to multiplayer lobby scene
         });
 
-        settingsButton.setOnAction(e -> Main.getStage().setScene(new SettingsController().getScene())); //Goes to settings scene
+        settingsButton.setOnAction(e -> Main.setScene(new SettingsController().getScene())); //Goes to settings scene
         helpButton.setOnAction(e -> {}); //Goes to help scene
         exitButton.setOnAction(e -> System.exit(0)); //Exits Game
 

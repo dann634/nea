@@ -1,6 +1,6 @@
 #root {
     -fx-alignment: center;
-    -fx-spacing: 15;
+    -fx-spacing: 20;
     -fx-padding: 30;
 
 }
@@ -14,14 +14,16 @@
     -fx-font-size: 25;
 }
 
-.textField {
-    -fx-pref-width: 150;
+.text-field {
+    -fx-pref-width: 200;
     -fx-pref-height: 30;
     -fx-font-size: 16;
 }
 
-.hbox {
-    -fx-pref-width: 250;
+
+
+.hBox {
+    -fx-max-width: 450;
     -fx-pref-height: 50;
     -fx-spacing: 10;
     -fx-alignment: center;
@@ -45,6 +47,8 @@
 #confirmButton {
     -fx-font-weight: bold;
     -fx-text-fill: black;
+    -fx-pref-height: 75;
+    -fx-pref-width: 150;
 }
 
 

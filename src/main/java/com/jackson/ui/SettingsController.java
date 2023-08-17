@@ -1,11 +1,21 @@
 package com.jackson.ui;
 
+import com.jackson.io.TextReader;
 import com.jackson.main.Main;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingsController {
 
@@ -13,6 +23,7 @@ public class SettingsController {
     private TextField displayNameTextField;
     private Button muteSoundEffectsButton;
     private Button muteBackgroundButton;
+    private Label title;
 
 
 
@@ -25,16 +36,40 @@ public class SettingsController {
         root.setId("root");
 
         addContent(root);
+        loadSettings();
 
         this.scene = new Scene(root);
         this.scene.getStylesheets().add("file:src/main/resources/stylesheets/settings.css");
     }
 
+    private void loadSettings() {
+        List<String> settingsList = TextReader.readFile("src/main/resources/settings/settings.txt"); //Reads settings file which holds display name, and if muted
+        if(settingsList.size() < 3) { //If there is less than 3 settings it will throw an ArrayOutOfBoundsException
+            return;
+        }
+        this.displayNameTextField.setText(settingsList.get(0)); //Set text to current display name
+
+        if(settingsList.get(1).equals("true")) { //If true set to muted (unmuted by default)
+            this.muteSoundEffectsButton.setId("redBtn");
+            this.muteSoundEffectsButton.setText("Muted");
+        }
+
+        if(settingsList.get(2).equals("true")) { //If true set to muted (unmuted by default)
+            this.muteBackgroundButton.setId("redBtn");
+            this.muteBackgroundButton.setText("Muted");
+        }
+
+
+
+    }
+
 
     private void addContent(VBox root) {
-        var title = new Label("Settings");
-        title.setId("title");
-        root.getChildren().add(title);
+        this.title = new Label("Settings");
+        this.title.setId("title");
+        root.getChildren().add(this.title);
+
+        // TODO: 17/08/2023 remove title as a field
 
         addDisplayName(root);
         addMuteSoundEffects(root);
@@ -48,26 +83,36 @@ public class SettingsController {
         var displayNameLabel = new Label("Display Name:");
         displayNameLabel.getStyleClass().add("label");
 
+        //Validity Check
+        Circle circle = new Circle(); //Circle that changes colour to indicate if display name is valid
+        circle.setRadius(10);
+
+
         this.displayNameTextField = new TextField();
         this.displayNameTextField.setPromptText("Display Name");
-        this.displayNameTextField.getStyleClass().add("textField");
-
-        root.getChildren().add(createHBox(displayNameLabel, this.displayNameTextField));
+        this.displayNameTextField.textProperty().length().addListener((observableValue, number, t1) -> { //Changes color of circle
+            if(t1.intValue() < 1 || t1.intValue() > 15) {
+                circle.setFill(Color.web("#c7200e"));
+            } else {
+                circle.setFill(Color.web("#0aad07"));
+            }
+        });
+        var hbox  = createHBox(displayNameLabel, this.displayNameTextField);
+        hbox.getChildren().add(2, circle);
+        root.getChildren().add(hbox);
     } //Adds option to change display name
 
-    private void addMuteSoundEffects(VBox root) { //Adds mute sound effects option
+    private void addMuteSoundEffects(VBox root) {
         var muteSoundEffectsLabel = new Label("Mute Sound Effects:");
-//        muteSoundEffectsLabel.getStyleClass().add("label");
-
-        var muteSoundEffectsToggle = getToggleButton();
-        root.getChildren().add(createHBox(muteSoundEffectsLabel, muteSoundEffectsToggle));
+        this.muteSoundEffectsButton = getToggleButton();
+        root.getChildren().add(createHBox(muteSoundEffectsLabel, this.muteSoundEffectsButton));
     } //Adds option to mute sound effects
 
     private void addMuteBackground(VBox root) {
         var muteBackgroundLabel = new Label("Mute Background Music:");
-        var muteBackgroundToggle = getToggleButton();
+        this.muteBackgroundButton = getToggleButton();
 
-        root.getChildren().add(createHBox(muteBackgroundLabel, muteBackgroundToggle));
+        root.getChildren().add(createHBox(muteBackgroundLabel, this.muteBackgroundButton));
     } //Adds option to mute background music
 
     private void deleteSinglePlayerSave(VBox root) {
@@ -81,19 +126,41 @@ public class SettingsController {
     private void addButtons(VBox root) {
         var saveButton = new Button("Save");
         saveButton.setId("confirmButton");
+        saveButton.setOnAction(e -> {
+            //Update Settings Text File
+            List<String> newSettings = new ArrayList<>();
+            String displayName = this.displayNameTextField.getText();
+            if(displayName.length() < 1 || displayName.length() > 15) { //If display name is not valid, settings not updated
+                return;
+            }
+
+            //Gets new data from ui
+            newSettings.add(displayName);
+            newSettings.add(this.muteSoundEffectsButton.getText().equals("Muted") ? "true" : "false");
+            newSettings.add(this.muteBackgroundButton.getText().equals("Muted") ? "true" : "false");
+
+            TextReader.updateFile("src/main/resources/settings/settings.txt", newSettings); //Updates text file with new settings
+
+        });
+
+        //Back Button
         var backButton = new Button("Back");
         backButton.setId("confirmButton");
-        backButton.setOnAction(e -> Main.getStage().setScene(new MainMenuController().getScene()));
-        root.getChildren().add(createHBox(saveButton, backButton));
+        backButton.setOnAction(e -> Main.setScene(new MainMenuController().getScene())); //Back to main menu
+
+        root.getChildren().add(createHBox(saveButton, backButton)); //Add Buttons to root
     }
 
+    private HBox createHBox(Node ... nodes) { //template for each row of settings (varargs for re-usability)
 
-
-    private HBox createHBox(Node ... nodes) {
         HBox hBox = new HBox();
-        hBox.getStyleClass().add("hbox");
+        hBox.getStyleClass().add("hBox"); //Can't find css for Hbox name
+
+        Region region = new Region(); //Used to push nodes to edge of hbox (alignment)
 
         hBox.getChildren().addAll(nodes);
+        HBox.setHgrow(region, Priority.ALWAYS);
+        hBox.getChildren().add(1, region); //Seperates label from button / text field
 
         return hBox;
     }
@@ -101,7 +168,7 @@ public class SettingsController {
     private Button getToggleButton() {
         Button btn = new Button("Unmuted");
         btn.setId("greenBtn");
-        btn.setOnAction(e -> {
+        btn.setOnAction(e -> { //Changes ui elements when pressed to act like a toggle
             if(btn.getText().equals("Unmuted")) {
                 btn.setId("redBtn");
                 btn.setText("Muted");
@@ -114,7 +181,7 @@ public class SettingsController {
     }
 
 
-    public Scene getScene() {
+    public Scene getScene() { //returns scene
         return this.scene;
     }
 
