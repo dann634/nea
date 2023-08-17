@@ -1,7 +1,7 @@
 package com.jackson.network.connections;
 
-import com.jackson.network.Lobby;
-import com.jackson.network.packet.RequestPacket;
+import com.jackson.network.shared.Lobby;
+import com.jackson.network.shared.RequestPacket;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,27 +22,27 @@ public class GlobalServerConnection {
 
 
     private static void connectToServer() throws IOException {
-        socket = new Socket(LAPTOP_IP, PORT);
+        socket = new Socket("localhost", PORT);
+        System.out.println("Connected to server");
         outStream = new ObjectOutputStream(socket.getOutputStream());
         inStream = new ObjectInputStream(socket.getInputStream());
     }
 
-    public static List<Lobby> getLobbyList() throws IOException {
-        if(socket == null) {
-            connectToServer();
-        }
+    public static List<Lobby> getLobbyList() throws IOException { //Gets lobby list from main server
+        connectToServer(); //inits a connection to main server
+        outStream.writeObject(new RequestPacket("ll")); //sends the request (ll = lobby list)
         final List<Lobby> lobbies = new ArrayList<>();
-        Thread globalServerThread = new Thread(() -> {
+        Thread thread = new Thread(() -> { //new thread to not block ui thread
             try {
-                List<Lobby> tempList = (List<Lobby>) inStream.readObject();
-                System.out.println(tempList.size());
+                List<Lobby> tempList = (List<Lobby>) inStream.readObject(); //will wait for response (may cause issues later)
+                System.out.println("Response Recieved");
                 lobbies.addAll(tempList);
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         });
-        globalServerThread.setDaemon(true);
-        globalServerThread.start();
+        thread.setDaemon(true);
+        thread.start();
         return lobbies;
     }
 }

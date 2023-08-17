@@ -1,11 +1,10 @@
 package com.jackson.ui;
 
-import com.jackson.network.Lobby;
+import com.jackson.network.shared.Lobby;
 import com.jackson.network.connections.GlobalServerConnection;
 import javafx.scene.Scene;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class LobbyController {

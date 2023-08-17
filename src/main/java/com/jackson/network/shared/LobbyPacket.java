@@ -1,6 +1,4 @@
-package com.jackson.network.packet;
-
-import com.jackson.network.Lobby;
+package com.jackson.network.shared;
 
 import java.util.List;
 
