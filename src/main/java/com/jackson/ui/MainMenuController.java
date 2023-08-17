@@ -6,6 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+import java.io.IOException;
+
 public class MainMenuController {
 
     private Scene scene;
@@ -48,7 +50,12 @@ public class MainMenuController {
 
         });
 
-        multiplayerButton.setOnAction(e -> { //Goes to multiplayer lobby scene
+        multiplayerButton.setOnAction(e -> {
+            try {
+                new LobbyController();//Goes to multiplayer lobby scene
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         settingsButton.setOnAction(e -> Main.setScene(new SettingsController().getScene())); //Goes to settings scene

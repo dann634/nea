@@ -1,8 +1,10 @@
 package com.jackson.ui;
 
 import com.jackson.network.Lobby;
+import com.jackson.network.connections.GlobalServerConnection;
 import javafx.scene.Scene;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,16 +14,12 @@ public class LobbyController {
 
     private List<Lobby> lobbyList;
 
-    public LobbyController() {
-        this.lobbyList = loadLobbyData();
+    public LobbyController() throws IOException {
+        this.lobbyList = GlobalServerConnection.getLobbyList();
+//        System.out.println(this.lobbyList.size());
     }
 
 
-    private List<Lobby> loadLobbyData() {
-        List<Lobby> lobbies = new ArrayList<>();
-
-        return lobbies;
-    }
 
 
 

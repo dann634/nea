@@ -1,4 +1,7 @@
 package com.jackson.network.packet;
 
-public abstract class Packet {
+import java.io.Serializable;
+
+public abstract class Packet implements Serializable {
+
 }
