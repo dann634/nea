@@ -1,0 +1,19 @@
+#title {
+    -fx-font-size: 40;
+    -fx-font-weight: bold;
+}
+
+.button {
+    -fx-pref-width: 300;
+    -fx-pref-height: 50;
+    -fx-background-radius: 8;
+    -fx-font-size: 24;
+}
+
+#root {
+    -fx-alignment: center;
+    -fx-spacing: 15;
+    -fx-padding: 30;
+
+}
+

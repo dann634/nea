@@ -1,0 +1,50 @@
+#root {
+    -fx-alignment: center;
+    -fx-spacing: 15;
+    -fx-padding: 30;
+
+}
+
+#title {
+    -fx-font-size: 40;
+    -fx-font-weight: bold;
+}
+
+.label {
+    -fx-font-size: 25;
+}
+
+.textField {
+    -fx-pref-width: 150;
+    -fx-pref-height: 30;
+    -fx-font-size: 16;
+}
+
+.hbox {
+    -fx-pref-width: 250;
+    -fx-pref-height: 50;
+    -fx-spacing: 10;
+    -fx-alignment: center;
+}
+
+.button {
+    -fx-pref-width: 100;
+    -fx-pref-height: 30;
+    -fx-text-fill: white;
+    -fx-font-size: 18;
+}
+
+#redBtn {
+    -fx-background-color: #c7200e;
+}
+
+#greenBtn {
+    -fx-background-color: #0aad07;
+}
+
+#confirmButton {
+    -fx-font-weight: bold;
+    -fx-text-fill: black;
+}
+
+
