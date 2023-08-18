@@ -90,8 +90,8 @@ public class SettingsController {
 
         this.displayNameTextField = new TextField();
         this.displayNameTextField.setPromptText("Display Name");
-        this.displayNameTextField.textProperty().length().addListener((observableValue, number, t1) -> { //Changes color of circle
-            if(t1.intValue() < 1 || t1.intValue() > 15) {
+        this.displayNameTextField.textProperty().addListener((observableValue, number, t1) -> { //Changes color of circle
+            if(t1.length() < 1 || t1.length() > 15) {
                 circle.setFill(Color.web("#c7200e"));
             } else {
                 circle.setFill(Color.web("#0aad07"));

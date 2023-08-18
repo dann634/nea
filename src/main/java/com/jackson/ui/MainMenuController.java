@@ -53,7 +53,7 @@ public class MainMenuController {
         multiplayerButton.setOnAction(e -> {
             try {
                 new LobbyController();//Goes to multiplayer lobby scene
-            } catch (IOException ex) {
+            } catch (IOException | InterruptedException ex) {
                 throw new RuntimeException(ex);
             }
         });

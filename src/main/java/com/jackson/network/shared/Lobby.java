@@ -15,6 +15,27 @@ public class Lobby implements Serializable {
     private Difficulty difficulty;
     private String password;
 
+    public String getName() {
+        return name;
+    }
 
+    public String getHostIP() {
+        return hostIP;
+    }
 
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public int getCurrentPlayers() {
+        return currentPlayers;
+    }
+
+    public Difficulty getDifficulty() {
+        return difficulty;
+    }
+
+    public String getPassword() {
+        return password;
+    }
 }

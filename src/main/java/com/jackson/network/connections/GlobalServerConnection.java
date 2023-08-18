@@ -1,7 +1,6 @@
 package com.jackson.network.connections;
 
 import com.jackson.network.shared.Lobby;
-import com.jackson.network.shared.RequestPacket;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -22,27 +21,31 @@ public class GlobalServerConnection {
 
 
     private static void connectToServer() throws IOException {
-        socket = new Socket("localhost", PORT);
-        System.out.println("Connected to server");
-        outStream = new ObjectOutputStream(socket.getOutputStream());
-        inStream = new ObjectInputStream(socket.getInputStream());
+        socket = new Socket("localhost", PORT); //initialises socket (localhost for testing only)
+        outStream = new ObjectOutputStream(socket.getOutputStream()); //initialises the outstream
+        inStream = new ObjectInputStream(socket.getInputStream()); //initialises the instream
     }
 
-    public static List<Lobby> getLobbyList() throws IOException { //Gets lobby list from main server
+    //Gets lobby list from main server
+    public static List<Lobby> getLobbyList() throws IOException, InterruptedException {
         connectToServer(); //inits a connection to main server
-        outStream.writeObject(new RequestPacket("ll")); //sends the request (ll = lobby list)
-        final List<Lobby> lobbies = new ArrayList<>();
-        Thread thread = new Thread(() -> { //new thread to not block ui thread
+        outStream.writeObject("ll"); //sends the request (ll = lobby list)
+        List<Lobby> lobbies = new ArrayList<>();
+
+        //Platform Thread
+        Thread thread = new Thread(() -> {
             try {
-                List<Lobby> tempList = (List<Lobby>) inStream.readObject(); //will wait for response (may cause issues later)
-                System.out.println("Response Recieved");
-                lobbies.addAll(tempList);
+                //will wait for response (may cause issues later)
+                List<Lobby> tempList = (List<Lobby>) inStream.readObject();
+                lobbies.addAll(tempList); //adds lobbies to list in scope
             } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                //Handles error and outputs message
+                System.err.println("Error: Failed to Process Response");
             }
         });
-        thread.setDaemon(true);
-        thread.start();
+        thread.start(); //Starts thread
+        thread.join(); //Waits for thread to terminate first before returning
+
         return lobbies;
     }
 }

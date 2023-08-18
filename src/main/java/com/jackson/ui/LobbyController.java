@@ -13,10 +13,12 @@ public class LobbyController {
 
     private List<Lobby> lobbyList;
 
-    public LobbyController() throws IOException {
+    public LobbyController() throws IOException, InterruptedException {
         this.lobbyList = GlobalServerConnection.getLobbyList();
-//        System.out.println(this.lobbyList.size());
+
     }
+
+
 
 
 
