@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TextReader {
+public class TextIO {
 
 
     public static List<String> readFile(String dir) {

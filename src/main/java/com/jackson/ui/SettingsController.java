@@ -1,6 +1,6 @@
 package com.jackson.ui;
 
-import com.jackson.io.TextReader;
+import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -43,7 +43,7 @@ public class SettingsController {
     }
 
     private void loadSettings() {
-        List<String> settingsList = TextReader.readFile("src/main/resources/settings/settings.txt"); //Reads settings file which holds display name, and if muted
+        List<String> settingsList = TextIO.readFile("src/main/resources/settings/settings.txt"); //Reads settings file which holds display name, and if muted
         if(settingsList.size() < 3) { //If there is less than 3 settings it will throw an ArrayOutOfBoundsException
             return;
         }
@@ -139,7 +139,7 @@ public class SettingsController {
             newSettings.add(this.muteSoundEffectsButton.getText().equals("Muted") ? "true" : "false");
             newSettings.add(this.muteBackgroundButton.getText().equals("Muted") ? "true" : "false");
 
-            TextReader.updateFile("src/main/resources/settings/settings.txt", newSettings); //Updates text file with new settings
+            TextIO.updateFile("src/main/resources/settings/settings.txt", newSettings); //Updates text file with new settings
 
         });
 

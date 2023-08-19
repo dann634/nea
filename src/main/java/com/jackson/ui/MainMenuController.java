@@ -50,13 +50,7 @@ public class MainMenuController {
 
         });
 
-        multiplayerButton.setOnAction(e -> {
-            try {
-                new LobbyController();//Goes to multiplayer lobby scene
-            } catch (IOException | InterruptedException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
+        multiplayerButton.setOnAction(e -> Main.setScene(new LobbyController().getScene()));
 
         settingsButton.setOnAction(e -> Main.setScene(new SettingsController().getScene())); //Goes to settings scene
         helpButton.setOnAction(e -> {}); //Goes to help scene

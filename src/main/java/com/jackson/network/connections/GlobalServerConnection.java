@@ -48,4 +48,9 @@ public class GlobalServerConnection {
 
         return lobbies;
     }
+
+    public static double pingServer() { //Returns ping time in ms
+        return -1;
+    }
+
 }
