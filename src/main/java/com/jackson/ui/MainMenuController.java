@@ -6,23 +6,20 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
+public class MainMenuController extends Scene {
 
-public class MainMenuController {
 
-    private Scene scene;
-
-    public MainMenuController() { //Constructor
-        //Root
+    public MainMenuController() {
+        super(new VBox());
         VBox root = new VBox(); //Initialise the parent root
+        setRoot(root);
+        //Root
         Main.applyWindowSize(root); //Sets standard window size
         root.setId("root");
 
         addContent(root);
 
-        //Scene
-        this.scene = new Scene(root); //Initialise scene with root
-        this.scene.getStylesheets().add("file:src/main/resources/stylesheets/mainMenu.css"); //Add stylesheets to scene
+        getStylesheets().add("file:src/main/resources/stylesheets/mainMenu.css"); //Add stylesheets to scene
     }
 
     private void addContent(VBox root) {
@@ -46,13 +43,11 @@ public class MainMenuController {
 
     private void addFunctionality(Button singlePlayerButton, Button multiplayerButton,
                                   Button settingsButton, Button helpButton, Button exitButton) { //Adds functionality to each individual button
-        singlePlayerButton.setOnAction(e -> { //Goes to create world or loading scene
+        singlePlayerButton.setOnAction(e -> Main.setScene(new CreateWorldController()));
 
-        });
+        multiplayerButton.setOnAction(e -> Main.setScene(new LobbyController()));
 
-        multiplayerButton.setOnAction(e -> Main.setScene(new LobbyController().getScene()));
-
-        settingsButton.setOnAction(e -> Main.setScene(new SettingsController().getScene())); //Goes to settings scene
+        settingsButton.setOnAction(e -> Main.setScene(new SettingsController())); //Goes to settings scene
         helpButton.setOnAction(e -> {}); //Goes to help scene
         exitButton.setOnAction(e -> System.exit(0)); //Exits Game
 
@@ -62,9 +57,6 @@ public class MainMenuController {
 
 
 
-   public Scene getScene() {
-       return scene;
-   }
 
 
 }

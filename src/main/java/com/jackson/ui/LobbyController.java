@@ -1,5 +1,6 @@
 package com.jackson.ui;
 
+import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.network.connections.GlobalServerConnection;
 import com.jackson.network.shared.Lobby;
@@ -15,9 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LobbyController {
-
-    private Scene scene;
+public class LobbyController extends Scene {
 
     //Center
     private GridPane updatableGrid;
@@ -27,7 +26,11 @@ public class LobbyController {
 
     //Left menu
     private Label connectedToServerLabel;
+    private Label pingLabel;
+    private Label lobbiesActiveLabel;
     public LobbyController() {
+
+        super(new VBox());
 
 
         BorderPane root = new BorderPane();
@@ -39,8 +42,8 @@ public class LobbyController {
 
         updateUI("none");
 
-        this.scene = new Scene(root);
-        this.scene.getStylesheets().add("file:src/main/resources/stylesheets/lobbyMenu.css");
+        setRoot(root);
+        getStylesheets().add("file:src/main/resources/stylesheets/lobbyMenu.css");
 
     }
 
@@ -55,9 +58,19 @@ public class LobbyController {
         });
 
         this.connectedToServerLabel = new Label();
+        this.pingLabel = new Label();
         setConnectedToServerLabel(true);
 
-        vBox.getChildren().addAll(searchBar, connectedToServerLabel);
+        this.lobbiesActiveLabel = new Label();
+
+
+
+        var displayNameLabel = new Label("Display Name: " +  TextIO.readFile("src/main/resources/settings/settings.txt").get(0)); //Get display name from file
+        displayNameLabel.setStyle("-fx-font-size: 17");
+
+
+
+        vBox.getChildren().addAll(searchBar, this.connectedToServerLabel, this.pingLabel, lobbiesActiveLabel ,displayNameLabel);
 
         return vBox;
     }
@@ -71,7 +84,7 @@ public class LobbyController {
         var hostButton = new Button("Host");
         var connectButton = new Button("Connect");
 
-        backButton.setOnAction(e -> Main.setScene(new MainMenuController().getScene()));
+        backButton.setOnAction(e -> Main.setScene(new MainMenuController()));
         refreshButton.setOnAction(e -> updateUI("none"));
 
         hBox.getChildren().addAll(backButton, refreshButton, hostButton, connectButton);
@@ -137,6 +150,14 @@ public class LobbyController {
             this.lobbyList = new ArrayList<>();
         }
 
+        if(filter.equals("none")) {
+            try {
+                this.pingLabel.setText("Ping: " + GlobalServerConnection.pingServer() + "ms");
+                this.lobbiesActiveLabel.setText("Lobbies Active: " + this.lobbyList.size());
+            } catch (IOException | InterruptedException ignored) {
+            }
+        }
+
         for(int i = 0; i < this.lobbyList.size(); i++) {
             var lobby = this.lobbyList.get(i);
 
@@ -170,19 +191,17 @@ public class LobbyController {
         }
 
     }
-    
-    private void updateSelectedLobby(Lobby lobby) {
-
-    }
 
 
-    public Scene getScene() {
-        return this.scene;
-    }
+    private void setConnectedToServerLabel(boolean isConnected) {
+        this.connectedToServerLabel.setText(isConnected ? "Connected to Main Server" : "Not Connected to Main Server");
+        this.connectedToServerLabel.setStyle("-fx-text-fill: " + (isConnected ? "#0aad07" : "#c7200e"));
 
-    private void setConnectedToServerLabel(boolean isConneceted) {
-        this.connectedToServerLabel.setText(isConneceted ? "Connected to Main Server" : "Not Connected to Main Server");
-        this.connectedToServerLabel.setStyle("-fx-text-fill: " + (isConneceted ? "#0aad07" : "#c7200e"));
+        this.pingLabel.setStyle("-fx-text-fill: " + (isConnected ? "#0aad07" : "#c7200e"));
+        if(!isConnected) {
+            this.pingLabel.setText("Ping: N/A");
+        }
+
     }
 
 }

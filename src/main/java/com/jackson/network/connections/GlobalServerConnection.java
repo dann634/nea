@@ -1,13 +1,17 @@
 package com.jackson.network.connections;
 
 import com.jackson.network.shared.Lobby;
+import javafx.scene.chart.PieChart;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class GlobalServerConnection {
 
@@ -44,13 +48,28 @@ public class GlobalServerConnection {
             }
         });
         thread.start(); //Starts thread
-        thread.join(); //Waits for thread to terminate first before returning
+        thread.join(500); //Waits for thread to terminate first before returning
+        // TODO: 19/08/2023 Holds up ui for 2 seconds if it doesnt connect 
 
         return lobbies;
     }
 
-    public static double pingServer() { //Returns ping time in ms
-        return -1;
+    public static double pingServer() throws IOException, InterruptedException { //Returns ping time in ms
+        connectToServer();
+        Date beforePacket = new Date();
+        outStream.writeObject("ping"); //Send Request#
+        AtomicLong ping = new AtomicLong(-1);
+        Thread thread = new Thread(() -> {
+            try {
+                inStream.readObject(); //We don't care about response packet
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            ping.set(new Date().getTime() - beforePacket.getTime());
+        });
+        thread.start();
+        thread.join(500);
+        return ping.get();
     }
 
 }

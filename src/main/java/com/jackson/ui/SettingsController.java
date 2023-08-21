@@ -17,9 +17,8 @@ import javafx.scene.shape.Circle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SettingsController {
+public class SettingsController extends Scene {
 
-    private Scene scene;
     private TextField displayNameTextField;
     private Button muteSoundEffectsButton;
     private Button muteBackgroundButton;
@@ -28,6 +27,7 @@ public class SettingsController {
 
 
     public SettingsController() {
+        super(new VBox());
 
        //Load Settings from File
 
@@ -38,8 +38,8 @@ public class SettingsController {
         addContent(root);
         loadSettings();
 
-        this.scene = new Scene(root);
-        this.scene.getStylesheets().add("file:src/main/resources/stylesheets/settings.css");
+        setRoot(root);
+        getStylesheets().add("file:src/main/resources/stylesheets/settings.css");
     }
 
     private void loadSettings() {
@@ -62,7 +62,6 @@ public class SettingsController {
 
 
     }
-
 
     private void addContent(VBox root) {
         this.title = new Label("Settings");
@@ -146,7 +145,7 @@ public class SettingsController {
         //Back Button
         var backButton = new Button("Back");
         backButton.setId("confirmButton");
-        backButton.setOnAction(e -> Main.setScene(new MainMenuController().getScene())); //Back to main menu
+        backButton.setOnAction(e -> Main.setScene(new MainMenuController())); //Back to main menu
 
         root.getChildren().add(createHBox(saveButton, backButton)); //Add Buttons to root
     }
@@ -181,9 +180,6 @@ public class SettingsController {
     }
 
 
-    public Scene getScene() { //returns scene
-        return this.scene;
-    }
 
 
 }
