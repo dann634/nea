@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,6 +119,8 @@ public class SettingsController extends Scene {
         var deleteSaveLabel = new Label("Singleplayer Save:");
         var deleteSaveBtn = new Button("Delete");
         deleteSaveBtn.setId("redBtn");
+
+        deleteSaveBtn.setOnAction(e -> new File("src/main/resources/saves/singleplayer.txt").delete());
 
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveBtn));
     } //Adds option to delete singleplayer save

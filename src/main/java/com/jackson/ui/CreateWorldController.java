@@ -8,6 +8,9 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
+import java.io.File;
+import java.io.IOException;
+
 public class CreateWorldController extends Scene {
 
     private static final String EASY_DESCRIPTION = "A relaxed experience, mobs have lowered HP and deal less damage (Recommended for Casual Players)";
@@ -57,6 +60,13 @@ public class CreateWorldController extends Scene {
         //Generate world button
         var generateWorldButton = new Button("Generate World");
         generateWorldButton.setId("generateWorldButton");
+        generateWorldButton.setOnAction(e -> {
+            try {
+                System.out.println(new File("src/main/resources/saves/singleplayer.txt").createNewFile());
+            } catch (IOException ex) {
+                System.err.println("Error: File not created");
+            }
+        });
 
         //Back button (back to main menu)
         var backButton = new Button("Back");
