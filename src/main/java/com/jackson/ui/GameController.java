@@ -21,14 +21,8 @@ public class GameController extends Scene {
         this.root = new AnchorPane();
         Main.applyWindowSize(this.root);
 
-        List<Integer> list = ProceduralGenerator.getHeightMapChunk(300, 300);
-        for(int i = 0; i<list.size(); i++) {
-            Circle circle = new Circle(3);
-            circle.setCenterX(i*4);
-            circle.setCenterY(list.get(i));
-            root.getChildren().add(circle);
+        ProceduralGenerator.createMapFile(true);
 
-        }
 
 
         setRoot(this.root);

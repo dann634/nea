@@ -1,6 +1,7 @@
 package com.jackson.io;
 
 import java.io.*;
+import java.time.chrono.HijrahEra;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,29 @@ public class TextIO {
             return false;
         }
         return true; // returns true if file write was successful
+    }
+
+
+
+
+    public static boolean writeMap(int[][] bitmap, String dir) {
+        if(bitmap == null) { //Gatekeeping
+            return false;
+        }
+
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(dir, false));
+            for (int i = 0; i < bitmap[0].length; i++) {
+                for (int j = 0; j < bitmap.length; j++) {
+                    writer.write(String.valueOf(bitmap[j][i]));
+                }
+                writer.write("\n");
+            }
+            writer.close();
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
     }
 
 }
