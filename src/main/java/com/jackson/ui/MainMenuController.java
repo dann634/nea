@@ -6,6 +6,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
+import java.io.File;
+
 public class MainMenuController extends Scene {
 
 
@@ -30,6 +32,12 @@ public class MainMenuController extends Scene {
 
         //Buttons (in order)
         var singlePlayerButton = new Button("Singleplayer");
+
+        //Does save exist
+        if(new File("src/main/resources/saves/singleplayer.txt").exists()) {
+            singlePlayerButton.setText("Continue Singleplayer");
+        }
+
         var multiPlayerButton = new Button("Multiplayer");
         var settingsButton = new Button("Settings");
         var helpButton = new Button("Help");
@@ -43,7 +51,13 @@ public class MainMenuController extends Scene {
 
     private void addFunctionality(Button singlePlayerButton, Button multiplayerButton,
                                   Button settingsButton, Button helpButton, Button exitButton) { //Adds functionality to each individual button
-        singlePlayerButton.setOnAction(e -> Main.setScene(new CreateWorldController()));
+        singlePlayerButton.setOnAction(e -> {
+            if(singlePlayerButton.getText().equals("Singleplayer")) {
+                Main.setScene(new CreateWorldController());
+                return;
+            }
+            Main.setScene(new GameController());
+        });
 
         multiplayerButton.setOnAction(e -> Main.setScene(new LobbyController()));
 

@@ -74,4 +74,26 @@ public class TextIO {
         return true;
     }
 
+    public static String[][] readMapFile(boolean isSingleplayer) {
+        String dir = "src/main/resources/saves/";
+        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt";
+
+        if(!new File(dir).exists()) {
+            System.err.println("Save file not found");
+        }
+
+        String[][] mapFile = new String[1000][300];
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(dir));
+            for (int i = 0; i < 300; i++) {
+                mapFile[i] = reader.readLine().split("");
+            }
+            reader.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return mapFile;
+    }
+
 }

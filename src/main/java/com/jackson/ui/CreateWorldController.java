@@ -1,5 +1,6 @@
 package com.jackson.ui;
 
+import com.jackson.game.ProceduralGenerator;
 import com.jackson.main.Main;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -59,11 +60,8 @@ public class CreateWorldController extends Scene {
         var generateWorldButton = new Button("Generate World");
         generateWorldButton.setId("generateWorldButton");
         generateWorldButton.setOnAction(e -> {
-            try {
-                System.out.println(new File("src/main/resources/saves/singleplayer.txt").createNewFile());
-            } catch (IOException ex) {
-                System.err.println("Error: File not created");
-            }
+            ProceduralGenerator.createMapFile(true);
+            Main.setScene(new GameController());
         });
 
         //Back button (back to main menu)
