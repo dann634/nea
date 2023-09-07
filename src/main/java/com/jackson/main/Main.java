@@ -1,5 +1,6 @@
 package com.jackson.main;
 
+import com.jackson.ui.GameController;
 import com.jackson.ui.MainMenuController;
 import javafx.application.Application;
 import javafx.scene.Parent;
@@ -18,7 +19,7 @@ public class Main extends Application {
         stage = pstage;
         stage.setTitle("Game"); //Set Window Title
         stage.getIcons().add(new Image("file:src/main/resources/images/grass.png")); //Add Window Icon
-        stage.setScene(new MainMenuController()); //Opens Main Menu
+        stage.setScene(new GameController()); //Opens Main Menu
         stage.setResizable(false); //Window cannot be resized
         stage.show(); //Show GUI
     }

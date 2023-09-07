@@ -123,7 +123,7 @@ public class SettingsController extends Scene {
         deleteSaveBtn.setOnAction(e -> new File("src/main/resources/saves/singleplayer.txt").delete());
 
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveBtn));
-    } //Adds option to delete singleplayer save
+    } //Adds option to delete single-player save
 
     private void addButtons(VBox root) {
         var saveButton = new Button("Save");
