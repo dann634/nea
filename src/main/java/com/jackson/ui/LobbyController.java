@@ -28,6 +28,9 @@ public class LobbyController extends Scene {
     private Label connectedToServerLabel;
     private Label pingLabel;
     private Label lobbiesActiveLabel;
+
+    // TODO: 01/09/2023 Add in sort by name/difficulty/players/password by clicking header (make a comparator that uses compareTo)
+
     public LobbyController() {
 
         super(new VBox());

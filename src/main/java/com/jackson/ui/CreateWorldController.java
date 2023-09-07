@@ -34,28 +34,26 @@ public class CreateWorldController extends Scene {
 
         var difficultyComboBox = new ComboBox<>(); //Drop down menu for selecting difficulty
         difficultyComboBox.getItems().addAll("Easy", "Medium", "Hard"); //Different difficulties added
-        difficultyComboBox.getSelectionModel().select(1); // Medium is the default choice
+        difficultyComboBox.getSelectionModel().selectFirst(); // Easy is the default choice
 
-        var description = new Label(MEDIUM_DESCRIPTION); //Description of difficulty
+        var description = new Label(EASY_DESCRIPTION); //Description of difficulty
         description.setId("descriptionLabel");
 
         //Combobox changes description to match difficulty chosen
         difficultyComboBox.setOnAction(e -> { // FIXME: 21/08/2023 BUG: Combobox won't close first time clicking item
             switch (difficultyComboBox.getValue().toString()) {
-                case "Easy":
-                    description.setText(EASY_DESCRIPTION);
-                    break;
-                case "Medium":
-                    description.setText(MEDIUM_DESCRIPTION);
-                    break;
-                case "Hard":
-                    description.setText(HARD_DESCRIPTION);
-                    break;
+                case "Easy" -> description.setText(EASY_DESCRIPTION);
+                case "Medium" -> description.setText(MEDIUM_DESCRIPTION);
+                case "Hard" -> description.setText(HARD_DESCRIPTION);
             }
         });
         var difficultyHbox = new HBox(); //hbox for label and combobox
         difficultyHbox.getStyleClass().add("hbox");
         difficultyHbox.getChildren().addAll(difficultyLabel, difficultyComboBox);
+
+        var difficultyVbox = new VBox();
+        difficultyVbox.setId("difficultyVbox");
+        difficultyVbox.getChildren().addAll(difficultyHbox, description);
 
         //Generate world button
         var generateWorldButton = new Button("Generate World");
@@ -78,7 +76,7 @@ public class CreateWorldController extends Scene {
         hbox.getStyleClass().add("hbox");
 
         //All elements added to scene graph
-        root.getChildren().addAll(title, difficultyHbox, description, hbox);
+        root.getChildren().addAll(title, difficultyVbox, hbox);
 
         //Css stylesheet added
         getStylesheets().add("file:src/main/resources/stylesheets/createWorld.css");

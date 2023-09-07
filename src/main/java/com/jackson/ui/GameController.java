@@ -1,48 +1,37 @@
 package com.jackson.ui;
 
+import com.jackson.game.ProceduralGenerator;
+import com.jackson.main.Main;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+
+import java.util.List;
 
 public class GameController extends Scene {
 
     private AnchorPane root;
 
     public GameController() {
-        super(new AnchorPane());
-        this.root = new AnchorPane();
-        this.root.setMinHeight(500);
-        this.root.setMinWidth(1000);
+        super(new VBox());
 
-        new NoiseGenerator().generateMap();
+        this.root = new AnchorPane();
+        Main.applyWindowSize(this.root);
+
+        List<Integer> list = ProceduralGenerator.getHeightMapChunk(300, 300);
+        for(int i = 0; i<list.size(); i++) {
+            Circle circle = new Circle(3);
+            circle.setCenterX(i*4);
+            circle.setCenterY(list.get(i));
+            root.getChildren().add(circle);
+
+        }
+
 
         setRoot(this.root);
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
     }
-
-    public class NoiseGenerator {
-
-        private static final int MAP_HEIGHT = 100;
-        private static final int MAP_WIDTH = 1000;
-        public String[][] generateMap() {
-            String[][] map = new String[MAP_WIDTH][MAP_HEIGHT];
-            for (int i = 0; i < MAP_WIDTH; i++) {
-                double rawSineWave = MAP_HEIGHT * Math.sin(i);
-                Circle circle = new Circle(1);
-                circle.setCenterX(i);
-                circle.setCenterY(rawSineWave + 100);
-                root.getChildren().add(circle);
-            }
-
-            for (int i = 0; i < map.length; i++) {
-                for (int j = 0; j < map[i].length; j++) {
-                    System.out.println(map[i][j]);
-                }
-            }
-            return map;
-        }
-    }
-
 }
