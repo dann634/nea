@@ -15,7 +15,7 @@ public class ProceduralGenerator {
     private static final int CHUNK_SIZE = 100;
     private static boolean isPositive;
     private static int START_Y = 150;
-    private static int RANGE = 50;
+    private static int RANGE = 25;
 
     private static int WIDTH = 1000;
     private static int HEIGHT = 300;
@@ -27,48 +27,42 @@ public class ProceduralGenerator {
     3 - Bedrock
      */
 
+    //Creates the 2D array of numbers to indicate block type
     public static void createMapFile(boolean isSingleplayer)  {
         List<Integer> fullHeightMap = new ArrayList<>();
         while (fullHeightMap.size() < WIDTH) { // Loops until map is 1000 blocks wide
-            fullHeightMap.addAll(getHeightMapChunk(RANGE));
+            fullHeightMap.addAll(getHeightMapChunk(RANGE)); //Adds chunks to height map until its 1000 in size
         }
         int[][] heightMapArray = new int[WIDTH][HEIGHT];
-        for (int i = 0; i < WIDTH; i++) {
+        for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
             try {
                 //Air blocks
-                for (int j = 0; j < fullHeightMap.get(i); j++) {
-                    heightMapArray[i][j] = 0;
-
-                }
+                for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
 
                 //Grass layer
                 heightMapArray[i][fullHeightMap.get(i)] = 2;
 
                 //Dirt Layer
-                for (int j = fullHeightMap.get(i)+1; j <= HEIGHT - 2; j++) {
-                    heightMapArray[i][j] = 1;
-                }
+                for (int j = fullHeightMap.get(i)+1; j <= HEIGHT - 2; j++) heightMapArray[i][j] = 1;
 
                 //Bedrock layer
                 heightMapArray[i][HEIGHT-1] = 3;
 
-                // TODO: 07/09/2023 Add stone
-            } catch (IndexOutOfBoundsException e) {
-                System.out.println(fullHeightMap.get(i));
+            } catch (IndexOutOfBoundsException e) { //Catches any errors
+                System.err.println("Error: Map File Creation Failed");
             }
         }
 
         //Add to file
         String dir = "src/main/resources/saves/";
-        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt";
+        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt"; //Adds correct file name
         try {
-            new File(dir).createNewFile();
+            new File(dir).createNewFile(); //Creates file
         } catch (IOException e) {
-            // TODO: 07/09/2023 Add error message
-            System.err.println("Map could not be created");
+            System.err.println("Map file could not be created");
         }
 
-        TextIO.writeMap(heightMapArray, dir);
+        TextIO.writeMap(heightMapArray, dir); //Writes 2D array to file
 
     }
 
@@ -89,24 +83,24 @@ public class ProceduralGenerator {
         inputList.set(0, START_Y); //Adds starting height of chunk
         inputList.set(inputList.size() - 1, endY); //Adds ending height of chunk
 
-        List<Integer> list = getSmallChunk(inputList);
-        START_Y = list.get(list.size()-1);
+        List<Integer> list = getChunk(inputList); //Gets chunk
+        START_Y = list.get(list.size()-1); //start location is updated for next chunk
         return list;
     }
 
-    private static List<Integer> getSmallChunk(List<Integer> heights) {
-
-        // FIXME: 07/09/2023 Creates values >300 or <0
+    private static List<Integer> getChunk(List<Integer> heights) {
 
         int midpoint = heights.size() / 2; //Gets midpoint of two points
         int lowerbound = heights.get(0); //Gets lowest point of line
         int upperbound = heights.get(heights.size() - 1); //Gets highest point of line
         int offset = 0;
         if(upperbound - lowerbound != 0) { //Range cannot be 0
+            //New offset is created from the different of upper and lower bounds
             offset = new Random().nextInt(Math.abs(upperbound - lowerbound));
         }
         int midpointY = isPositive ? offset + lowerbound : lowerbound - offset; //Adds offset depending on gradient
 
+        //Range check so array doesn't throw ArrayOutOfBoundsException
         if(midpointY < 1) {
             midpointY = 1;
         } else if(midpointY > 300) {
@@ -118,11 +112,11 @@ public class ProceduralGenerator {
             List<Integer> firstHalf = heights.subList(0, midpoint + 1); //Gets first half of array
             List<Integer> secondHalf = heights.subList(midpoint, heights.size()); //Gets second half of array
 
-            getSmallChunk(firstHalf); //Recursive call for first half
-            getSmallChunk(secondHalf); //Recursive call for second half
+            getChunk(firstHalf); //Recursive call for first half
+            getChunk(secondHalf); //Recursive call for second half
         }
 
-        return heights;
+        return heights; //Returns array to calling method
     }
 
     private static boolean isHeightsFull(List<Integer> heights) { //Checks if list is full
