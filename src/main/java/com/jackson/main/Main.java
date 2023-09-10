@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
 
     private static Stage stage;
-    private static final double HEIGHT = 550.0; // Height of window
+    private static final double HEIGHT = 544.0; // Height of window
     private static final double WIDTH = 1024.0; //Width of window
 
     @Override

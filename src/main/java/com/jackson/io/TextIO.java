@@ -1,5 +1,7 @@
 package com.jackson.io;
 
+import com.jackson.game.ProceduralGenerator;
+
 import java.io.*;
 import java.time.chrono.HijrahEra;
 import java.util.ArrayList;
@@ -82,11 +84,16 @@ public class TextIO {
             System.err.println("Save file not found");
         }
 
-        String[][] mapFile = new String[1000][300];
+        String[][] mapFile = new String[ProceduralGenerator.getWidth()][ProceduralGenerator.getHeight()];
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dir));
-            for (int i = 0; i < 300; i++) {
-                mapFile[i] = reader.readLine().split("");
+            String[] tempArray;
+            for (int i = 0; i < ProceduralGenerator.getHeight(); i++) {
+
+                tempArray = reader.readLine().split("");
+                for (int j = 0; j < ProceduralGenerator.getWidth(); j++) {
+                    mapFile[j][i] = tempArray[j];
+                }
             }
             reader.close();
         } catch (IOException e) {

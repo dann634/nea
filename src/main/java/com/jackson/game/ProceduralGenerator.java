@@ -4,8 +4,9 @@ import com.jackson.io.TextIO;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class ProceduralGenerator {
 
@@ -15,10 +16,9 @@ public class ProceduralGenerator {
     private static final int CHUNK_SIZE = 100;
     private static boolean isPositive;
     private static int START_Y = 150;
-    private static int RANGE = 25;
-
-    private static int WIDTH = 1000;
-    private static int HEIGHT = 300;
+    private static final int RANGE = 25;
+    private static final int WIDTH = 1000; //Map Width
+    private static final int HEIGHT = 300; //Map Height
 
     /*
     0 - Air
@@ -31,7 +31,7 @@ public class ProceduralGenerator {
     public static void createMapFile(boolean isSingleplayer)  {
         List<Integer> fullHeightMap = new ArrayList<>();
         while (fullHeightMap.size() < WIDTH) { // Loops until map is 1000 blocks wide
-            fullHeightMap.addAll(getHeightMapChunk(RANGE)); //Adds chunks to height map until its 1000 in size
+            fullHeightMap.addAll(getHeightMapChunk()); //Adds chunks to height map until its 1000 in size
         }
         int[][] heightMapArray = new int[WIDTH][HEIGHT];
         for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
@@ -66,7 +66,7 @@ public class ProceduralGenerator {
 
     }
 
-    private static List<Integer> getHeightMapChunk(int range) {
+    private static List<Integer> getHeightMapChunk() {
         /*
         It works in integers for block height
         It takes the range of values for displacement
@@ -75,7 +75,7 @@ public class ProceduralGenerator {
         Random rand = new Random();
         isPositive = rand.nextBoolean(); //Does chunk slope up or down
 
-        int endY = isPositive ? rand.nextInt(range) + START_Y : START_Y - rand.nextInt(range); //End Y location
+        int endY = isPositive ? rand.nextInt(RANGE) + START_Y : START_Y - rand.nextInt(RANGE); //End Y location
 
         //Main breakup of loop
         List<Integer> inputList = new ArrayList<>();
@@ -91,11 +91,11 @@ public class ProceduralGenerator {
     private static List<Integer> getChunk(List<Integer> heights) {
 
         int midpoint = heights.size() / 2; //Gets midpoint of two points
-        int lowerbound = heights.get(0); //Gets lowest point of line
-        int upperbound = heights.get(heights.size() - 1); //Gets highest point of line
+        int lowerbound = heights.get(0); //Gets the lowest point of line
+        int upperbound = heights.get(heights.size() - 1); //Gets the highest point of line
         int offset = 0;
         if(upperbound - lowerbound != 0) { //Range cannot be 0
-            //New offset is created from the different of upper and lower bounds
+            //New offset is created from the difference of upper and lower bounds
             offset = new Random().nextInt(Math.abs(upperbound - lowerbound));
         }
         int midpointY = isPositive ? offset + lowerbound : lowerbound - offset; //Adds offset depending on gradient
@@ -126,6 +126,14 @@ public class ProceduralGenerator {
             }
         }
         return true;
+    }
+
+    public static int getWidth() {
+        return WIDTH;
+    }
+
+    public static int getHeight() {
+        return HEIGHT;
     }
 
 
