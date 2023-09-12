@@ -25,8 +25,6 @@ public class Character extends ImageView {
         setX(486); //Half Screen size (512) - Character Width (48) + Some Value(22)
 
         initFeetCollision();
-
-
     }
 
     // TODO: 09/09/2023 add listeners to x and y location to update world
@@ -34,8 +32,21 @@ public class Character extends ImageView {
     private void initFeetCollision() {
         this.feetCollision = new Rectangle(24, 6);
         this.feetCollision.xProperty().bind(xProperty().add(6));
-        this.feetCollision.yProperty().bind(yProperty().add(48));
+        this.feetCollision.yProperty().bind(yProperty().add(50));
         this.feetCollision.setVisible(false);
+    }
+
+    public void swapMovingImage() {
+        if(getImage().getUrl().contains("1")) {
+            setImage(new Image("file:src/main/resources/images/playerRun2.png"));
+            return;
+        }
+        setImage(new Image("file:src/main/resources/images/playerRun1.png"));
+
+    }
+
+    public void setIdleImage() {
+        setImage(new Image("file:src/main/resources/images/playerIdle.png"));
     }
 
     public int getXPos() {

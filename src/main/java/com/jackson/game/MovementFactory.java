@@ -6,11 +6,17 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.NodeOrientation;
+import javafx.scene.image.Image;
 import javafx.util.Duration;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.lang.Math.abs;
 
 public class MovementFactory {
 
@@ -24,8 +30,9 @@ public class MovementFactory {
     private double jumpVelocity;
     private double jumpAcceleration;
 
+    private double oldX;
+
     public MovementFactory(Character character, GameController gameController) { //Start new thread for each character (Maybe change later)
-        //Look into making a virtual thread
         this.gameController = gameController;
         this.character = character;
 
@@ -33,8 +40,14 @@ public class MovementFactory {
         this.isDPressed = new SimpleBooleanProperty(false);
         this.isWPressed = new SimpleBooleanProperty(false);
 
-        this.isWPressed.or(this.isAPressed).or(this.isDPressed).addListener((observable, oldValue, newValue) -> {
-            //If character approaches borders update world
+        this.isAPressed.or(this.isDPressed).addListener((observable, oldValue, newValue) -> { //Faces new Direction
+            if(this.isAPressed.get()) {
+                this.character.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+            }
+            if(this.isDPressed.get()) {
+                this.character.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
+
+            }
         });
 
     }
@@ -50,6 +63,8 @@ public class MovementFactory {
         timeline.getKeyFrames().add(keyFrame);
         return timeline;
     }
+
+
 
 
     private void calculateYProperties() {
@@ -89,7 +104,16 @@ public class MovementFactory {
             }
             character.setX(character.getX() + offset.get());
         }
+        if(abs(oldX - this.character.getX()) > 30) {
+            this.character.swapMovingImage();
+            oldX = this.character.getX();
+        } else if(oldX == this.character.getX()) {
+            this.character.setIdleImage();
+        }
     }
+
+
+
 
     private void checkForEdgeOfScreen() {
         if(character.getX() < 100 || character.getX() > 924) {
