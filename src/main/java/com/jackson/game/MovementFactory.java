@@ -1,15 +1,18 @@
 package com.jackson.game;
 
 import com.jackson.ui.GameController;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.image.ImageView;
+import javafx.util.Duration;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MovementRunnable implements Runnable {
+public class MovementFactory {
 
     private static final double FPS = 60;
     private GameController gameController;
@@ -21,7 +24,7 @@ public class MovementRunnable implements Runnable {
     private double jumpVelocity;
     private double jumpAcceleration;
 
-    public MovementRunnable(Character character, GameController gameController) { //Start new thread for each character (Maybe change later)
+    public MovementFactory(Character character, GameController gameController) { //Start new thread for each character (Maybe change later)
         //Look into making a virtual thread
         this.gameController = gameController;
         this.character = character;
@@ -36,21 +39,18 @@ public class MovementRunnable implements Runnable {
 
     }
 
-    @Override
-    public void run() {
-        Timer timer = new Timer(true);
-        timer.scheduleAtFixedRate(new TimerTask() {
+    public Timeline getMovementTimeline() {
+        Timeline timeline = new Timeline();
+        timeline.setCycleCount(Animation.INDEFINITE);
 
-            @Override
-            public void run() {
-                calculateXProperties();
-                calculateYProperties();
-//                checkForEdgeOfScreen(); // TODO: 12/09/2023 Move to character x and y change listener
-
-            }
-        }, 0, (int) (1000/FPS));
-
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(1000/FPS), (e -> {
+            calculateXProperties();
+            calculateYProperties();
+        }));
+        timeline.getKeyFrames().add(keyFrame);
+        return timeline;
     }
+
 
     private void calculateYProperties() {
         boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
@@ -75,8 +75,7 @@ public class MovementRunnable implements Runnable {
             this.jumpAcceleration = -3;
             return;
         }
-
-        Platform.runLater(() -> this.character.setY(this.character.getY() + 3)); //Gravity
+        this.character.setY(this.character.getY() + 3);
 
 
 
@@ -88,7 +87,7 @@ public class MovementRunnable implements Runnable {
             if(this.isAPressed.get()) {
                 offset.set(-3);
             }
-            Platform.runLater(() -> character.setX(character.getX() + offset.get())); //Only works for left side
+            character.setX(character.getX() + offset.get());
         }
     }
 

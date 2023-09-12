@@ -1,17 +1,17 @@
 package com.jackson.ui;
 
 import com.jackson.game.Block;
-import com.jackson.game.MovementRunnable;
+import com.jackson.game.MovementFactory;
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import com.jackson.game.Character;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class GameController extends Scene {
@@ -24,7 +24,7 @@ public class GameController extends Scene {
     private Camera camera;
     private String[][] map;
     private Block[][] blocks;
-    private MovementRunnable movementRunnable;
+    private MovementFactory movementFactory;
 
     public GameController() {
         super(new VBox());
@@ -47,10 +47,9 @@ public class GameController extends Scene {
         this.root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        this.movementRunnable = new MovementRunnable(characters.get(0), this);
-        Thread thread = new Thread(this.movementRunnable);
-        thread.setDaemon(true);
-        thread.start();
+        this.movementFactory = new MovementFactory(this.characters.get(0), this);
+        Timeline movementTimeline = this.movementFactory.getMovementTimeline();
+        movementTimeline.play();
 
     }
 
@@ -127,17 +126,17 @@ public class GameController extends Scene {
     private void initOnKeyPressed() {
         setOnKeyPressed(e -> {
             switch (e.getCode()) {
-                case A -> this.movementRunnable.setIsAPressed(true);
-                case D -> this.movementRunnable.setIsDPressed(true);
-                case W -> this.movementRunnable.setIsWPressed(true);
+                case A -> this.movementFactory.setIsAPressed(true);
+                case D -> this.movementFactory.setIsDPressed(true);
+                case W -> this.movementFactory.setIsWPressed(true);
             }
         });
 
         setOnKeyReleased(e -> {
             switch (e.getCode()) {
-                case A -> this.movementRunnable.setIsAPressed(false);
-                case D -> this.movementRunnable.setIsDPressed(false);
-                case W -> this.movementRunnable.setIsWPressed(false);
+                case A -> this.movementFactory.setIsAPressed(false);
+                case D -> this.movementFactory.setIsDPressed(false);
+                case W -> this.movementFactory.setIsWPressed(false);
             }
         });
 
