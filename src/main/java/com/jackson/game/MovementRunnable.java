@@ -2,12 +2,12 @@ package com.jackson.game;
 
 import com.jackson.ui.GameController;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.scene.image.ImageView;
+
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MovementRunnable implements Runnable {
 
@@ -18,6 +18,8 @@ public class MovementRunnable implements Runnable {
     private SimpleBooleanProperty isAPressed;
     private SimpleBooleanProperty isDPressed;
     private SimpleBooleanProperty isWPressed;
+    private double jumpVelocity;
+    private double jumpAcceleration;
 
     public MovementRunnable(Character character, GameController gameController) { //Start new thread for each character (Maybe change later)
         //Look into making a virtual thread
@@ -36,30 +38,70 @@ public class MovementRunnable implements Runnable {
 
     @Override
     public void run() {
-        double prevTime = System.currentTimeMillis();
-        while (true) {
+        Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(new TimerTask() {
 
-            if (System.currentTimeMillis() - prevTime < 1000 / FPS) { //FPS lock
-                continue;
+            @Override
+            public void run() {
+                calculateXProperties();
+                calculateYProperties();
+//                checkForEdgeOfScreen(); // TODO: 12/09/2023 Move to character x and y change listener
+
             }
-            prevTime = System.currentTimeMillis();
+        }, 0, (int) (1000/FPS));
 
-            calculateYProperties();
-            calculateXProperties();
-        }
     }
 
     private void calculateYProperties() {
-        if (!this.gameController.isEntityTouchingGround(this.character)) {
-            Platform.runLater(() -> this.character.setY(this.character.getY() + 1)); //Gravity
+        boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
+
+        if(isCharacterTouchingFloor && !this.isWPressed.get() && this.jumpAcceleration >= 0) { //Not jumping and on floor
+            return;
         }
+        if(this.jumpAcceleration < 0) { //In Mid air jumping
+            this.jumpAcceleration += 0.2;
+            if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
+                this.jumpVelocity += this.jumpAcceleration;
+            }
+            this.character.setY(this.character.getY() + this.jumpVelocity);
+            return;
+        }
+
+        if(this.jumpAcceleration > 0) { //To fix floating point math
+            this.jumpAcceleration = 0;
+        }
+
+        if(isCharacterTouchingFloor && this.isWPressed.get()) { //Start jump
+            this.jumpAcceleration = -3;
+            return;
+        }
+
+        Platform.runLater(() -> this.character.setY(this.character.getY() + 3)); //Gravity
+
+
+
     }
 
     private void calculateXProperties() {
-        System.out.printf("%s %s \n", this.isAPressed.get(), this.isDPressed.get());
         if (this.isAPressed.get() != this.isDPressed.get()) {
-            Platform.runLater(() -> character.setX(character.getX() + (this.isAPressed.get() ? -3 : 3))); //Only works for left side
+            AtomicInteger offset = new AtomicInteger(3);
+            if(this.isAPressed.get()) {
+                offset.set(-3);
+            }
+            Platform.runLater(() -> character.setX(character.getX() + offset.get())); //Only works for left side
         }
+    }
+
+    private void checkForEdgeOfScreen() {
+        if(character.getX() < 100 || character.getX() > 924) {
+            Block blockTouchingPlayer = gameController.getBlockTouchingPlayer(character);
+            if(blockTouchingPlayer != null) {
+                character.setXPos(blockTouchingPlayer.getXPos());
+                character.setYPos(blockTouchingPlayer.getYPos());
+            }
+            Platform.runLater(() -> gameController.drawWorld());
+        }
+
     }
 
     public void setIsAPressed(boolean isAPressed) {
@@ -71,6 +113,6 @@ public class MovementRunnable implements Runnable {
     }
 
     public void setIsWPressed(boolean isWPressed) {
-        this.isAPressed.set(isWPressed);
+        this.isWPressed.set(isWPressed);
     }
 }

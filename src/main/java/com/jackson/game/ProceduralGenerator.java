@@ -16,7 +16,7 @@ public class ProceduralGenerator {
     private static final int CHUNK_SIZE = 100;
     private static boolean isPositive;
     private static int START_Y = 150;
-    private static final int RANGE = 25;
+    private static final int RANGE = 50;
     private static final int WIDTH = 1000; //Map Width
     private static final int HEIGHT = 300; //Map Height
 

@@ -32,9 +32,10 @@ public class Character extends ImageView {
     // TODO: 09/09/2023 add listeners to x and y location to update world
 
     private void initFeetCollision() {
-        this.feetCollision = new Rectangle(24, 4);
+        this.feetCollision = new Rectangle(24, 6);
         this.feetCollision.xProperty().bind(xProperty().add(6));
-        this.feetCollision.yProperty().bind(yProperty().add(44));
+        this.feetCollision.yProperty().bind(yProperty().add(48));
+        this.feetCollision.setVisible(false);
     }
 
     public int getXPos() {

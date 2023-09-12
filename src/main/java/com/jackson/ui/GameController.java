@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import com.jackson.game.Character;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GameController extends Scene {
@@ -58,6 +59,13 @@ public class GameController extends Scene {
         32 blocks fit length
         17.1 blocks fit high
          */
+        if (this.blocks != null) {
+            for(Block[] blockArr : this.blocks) {
+                for (Block block : blockArr) {
+                    this.root.getChildren().remove(block);
+                }
+            }
+        }
         this.blocks = this.camera.getRenderBlocks(this.map, this.characters.get(0));
         for (int i = 0; i < this.blocks.length; i++) {
             for (int j = 0; j < this.blocks[i].length; j++) {
@@ -66,7 +74,7 @@ public class GameController extends Scene {
                 this.root.getChildren().add(this.blocks[i][j]);
             }
         }
-
+        characters.get(0).toFront();
     }
 
     private String[][] loadMap() {
@@ -83,6 +91,7 @@ public class GameController extends Scene {
 
         root.getChildren().add(character);
         root.getChildren().addAll(character.getCollisions());
+        character.toFront();
 
         this.characters.add(character);
     }
@@ -97,14 +106,22 @@ public class GameController extends Scene {
     }
 
     public boolean isEntityTouchingGround(Character character) { //Can be optimised
+        Block block = getBlockTouchingPlayer(character);
+        if(block == null) {
+            return false;
+        }
+        return !block.getImage().getUrl().contains("air");
+    }
+
+    public Block getBlockTouchingPlayer(Character character) {
         for (int i = 0; i < this.blocks.length; i++) {
             for (int j = 0; j < this.blocks[i].length; j++) {
-                if(!blocks[i][j].getImage().getUrl().contains("air") && character.getFeetCollision().intersects(blocks[i][j].getBoundsInParent())) {
-                    return true;
+                if(character.getFeetCollision().intersects(blocks[i][j].getBoundsInParent())) {
+                    return blocks[i][j];
                 }
             }
         }
-        return false;
+        return null; //Should never happen
     }
 
     private void initOnKeyPressed() {
