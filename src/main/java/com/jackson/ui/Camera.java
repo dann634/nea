@@ -52,40 +52,33 @@ public class Camera {
                 character.setXPos(blocksTouchingPlayer.get(0).getXPos());
                 character.setYPos(blocksTouchingPlayer.get(0).getYPos());
             }
-
-
            //Move world
+            System.out.println(this.isWorldLoadable);
             if(this.isWorldLoadable) {
                 gameController.moveWorld();
                 this.isWorldLoadable = false;
             }
-
-
+            return;
         }
+        this.isWorldLoadable = true;
 
     }
 
     public Timeline getPanningTimeline(Block[][] oldBlocks, Block[][] screenBlocks, Character character, GameController gameController) {
         Timeline timeline = new Timeline();
 
-
-//        for (int i = 0; i < oldBlocks.length; i++) { //Shift old world
-//            for (int j = 0; j < oldBlocks[i].length; j++) {
-//                timeline.getKeyFrames().add(new KeyFrame(Duration.millis(3000), new KeyValue(oldBlocks[i][j].translateXProperty(), (i-1-RENDER_WIDTH) * 32, Interpolator.EASE_BOTH)));
-//            }
-//        }
-
+        int duration = 1;
         for(int i = 0; i< screenBlocks.length; i++) { //Shift new World
             for (int j = 0; j< screenBlocks[i].length; j++) {
-//                System.out.println((i-1) * 32);
-                timeline.getKeyFrames().add(new KeyFrame(Duration.millis(3000), new KeyValue(screenBlocks[i][j].translateXProperty(), (i-1) * 32, Interpolator.EASE_BOTH)));            }
+                timeline.getKeyFrames().add(new KeyFrame(Duration.ONE, new KeyValue(screenBlocks[i][j].translateXProperty(), (i-1) * 32, Interpolator.EASE_BOTH)));            }
         }
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(3000), new KeyValue(screenBlocks[0][0].translateXProperty(), 0, Interpolator.EASE_BOTH)));
-
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(3000), new KeyValue(character.xProperty(), 100, Interpolator.EASE_BOTH)));
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(3000), new KeyValue(character.yProperty(), character.getY(), Interpolator.EASE_BOTH)));
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), new KeyValue(character.xProperty(), 500, Interpolator.EASE_BOTH)));
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), new KeyValue(character.yProperty(), character.getY(), Interpolator.EASE_BOTH)));
 
         return timeline;
     }
+
+    public void setWorldLoadable(boolean isWorldLoadable) { this.isWorldLoadable = isWorldLoadable;}
+
 
 }

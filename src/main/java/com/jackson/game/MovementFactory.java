@@ -105,8 +105,6 @@ public class MovementFactory {
 
 
 
-
-
     public void setIsAPressed(boolean isAPressed) {
         this.isAPressed.set(isAPressed);
     }
