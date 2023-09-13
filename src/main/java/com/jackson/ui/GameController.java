@@ -6,10 +6,13 @@ import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import com.jackson.game.Character;
+import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +54,7 @@ public class GameController extends Scene {
 
     }
 
+
     public void drawWorld() {
         /*
         32 blocks fit length
@@ -84,13 +88,14 @@ public class GameController extends Scene {
         Character character = new Character();
         character.setXPos(500);
         character.setYPos(spawnYCoords);
-        initOnKeyPressed();
+
 
         root.getChildren().add(character);
         root.getChildren().addAll(character.getCollisions());
         character.toFront();
 
         this.characters.add(character);
+        initOnKeyPressed();
     }
 
     private int findStartingY(String[][] map) {
@@ -109,17 +114,17 @@ public class GameController extends Scene {
         return !blocks.isEmpty();
     }
 
-    public boolean isEntityTouchingSide(Character character) {
-        List<Block> blocks = getBlockTouchingSide(character);
+    public boolean isEntityTouchingSide(Rectangle collision) {
+        List<Block> blocks = getBlockTouchingSide(collision);
         blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
         return !blocks.isEmpty();
     }
 
-    public List<Block> getBlockTouchingSide(Character character) {
+    public List<Block> getBlockTouchingSide(Rectangle collision) {
         List<Block> blocks = new ArrayList<>();
         for(Block[] blockArr : this.blocks) {
             for(Block block : blockArr) {
-                if(character.getBodyCollision().intersects(block.getBoundsInParent())) {
+                if(collision.intersects(block.getBoundsInParent())) {
                     blocks.add(block);
                 }
             }
@@ -129,14 +134,14 @@ public class GameController extends Scene {
 
     public List<Block> getBlocksTouchingPlayer(Character character) {
         List<Block> blocks = new ArrayList<>();
-        for (Block[] block : this.blocks) {
+        for (Block[] block : this.blocks)
             for (Block value : block) {
                 if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
                     blocks.add(value);
                 }
             }
-        }
-        return blocks; //Should never happen
+
+        return blocks;
     }
 
     private void initOnKeyPressed() {
@@ -164,5 +169,15 @@ public class GameController extends Scene {
                 case W -> this.movementFactory.setIsWPressed(false);
             }
         });
+
+        this.characters.get(0).xProperty().addListener((observable, oldValue, newValue) -> {
+            camera.checkForEdgeOfScreen(this.characters.get(0), this);
+        });
+
+        this.characters.get(0).yProperty().addListener((observable, oldValue, newValue) -> {
+            camera.checkForEdgeOfScreen(this.characters.get(0), this);
+        });
+
+
     }
 }

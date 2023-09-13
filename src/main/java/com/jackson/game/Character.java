@@ -1,5 +1,6 @@
 package com.jackson.game;
 
+import com.jackson.ui.Camera;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -19,7 +20,9 @@ public class Character extends ImageView {
 
     private Rectangle feetCollision;
     private Rectangle headCollision;
-    private Rectangle bodyCollision;
+    private Rectangle leftCollision;
+    private Rectangle rightCollision;
+
 
 
 
@@ -32,13 +35,6 @@ public class Character extends ImageView {
         initFeetCollision();
         initBodyCollision();
 
-        xProperty().addListener((observable, oldValue, newValue) -> {
-
-        });
-
-        yProperty().addListener((observable, oldValue, newValue) -> {
-
-        });
 
         this.isModelFacingRight = new SimpleBooleanProperty(true);
         this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
@@ -56,10 +52,15 @@ public class Character extends ImageView {
     }
 
     private void initBodyCollision() {
-        this.bodyCollision = new Rectangle(35, 45);
-        this.bodyCollision.xProperty().bind(xProperty().subtract(2));
-        this.bodyCollision.yProperty().bind(yProperty());
-        this.bodyCollision.setVisible(false);
+        this.leftCollision = new Rectangle(5, 45);
+        this.leftCollision.xProperty().bind(xProperty().subtract(1));
+        this.leftCollision.yProperty().bind(yProperty());
+        this.leftCollision.setVisible(false);
+
+        this.rightCollision = new Rectangle(5, 45);
+        this.rightCollision.xProperty().bind(xProperty().add(30));
+        this.rightCollision.yProperty().bind(yProperty());
+        this.rightCollision.setVisible(false);
     }
 
     public void swapMovingImage() {
@@ -96,15 +97,19 @@ public class Character extends ImageView {
     }
 
     public List<Rectangle> getCollisions() {
-        return List.of(this.feetCollision, this.bodyCollision);
+        return List.of(this.feetCollision, this.leftCollision, this.rightCollision);
     }
 
     public Rectangle getFeetCollision() {
         return this.feetCollision;
     }
 
-    public Rectangle getBodyCollision() {
-        return this.bodyCollision;
+    public Rectangle getLeftCollision() {
+        return leftCollision;
+    }
+
+    public Rectangle getRightCollision() {
+        return rightCollision;
     }
 
     public void setIsModelFacingRight(boolean isModelFacingRight) {

@@ -15,7 +15,7 @@ public class Block extends ImageView {
             case "1" -> "dirt.png";
             case "2" -> "grass.png";
             case "3" -> "bedrock.png";
-            default -> ""; // FIXME: 09/09/2023 May Cause NPE#
+            default -> ""; // FIXME: 09/09/2023 May Cause NPE
         };
         setImage(new Image(dir));
 

@@ -4,18 +4,8 @@ import com.jackson.ui.GameController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.NodeOrientation;
-import javafx.scene.image.Image;
 import javafx.util.Duration;
-
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.abs;
 
@@ -62,12 +52,11 @@ public class MovementFactory {
     private void calculateYProperties() {
         boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
 
-        System.out.println(isCharacterTouchingFloor);
         if(isCharacterTouchingFloor && !this.isWPressed.get() && this.jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
         if(this.jumpAcceleration < 0) { //In Mid air jumping
-            this.jumpAcceleration += 0.2;
+            this.jumpAcceleration += 0.15;
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
@@ -91,16 +80,19 @@ public class MovementFactory {
 
     private void calculateXProperties() {
 
-        if(gameController.isEntityTouchingSide(character)) {
-            return;
-        }
+        boolean canMoveLeft = !gameController.isEntityTouchingSide(character.getLeftCollision());
+        boolean canMoveRight = !gameController.isEntityTouchingSide(character.getRightCollision());
 
+        int offset = 0;
         if (this.isAPressed.get() != this.isDPressed.get()) {
-            AtomicInteger offset = new AtomicInteger(3);
-            if(this.isAPressed.get()) {
-                offset.set(-3);
+            if(canMoveRight && this.isDPressed.get()) {
+                offset = 3;
             }
-            character.setX(character.getX() + offset.get());
+            if(this.isAPressed.get() && canMoveLeft) {
+                offset = -3;
+            }
+
+            character.setX(character.getX() + offset);
         }
         if(abs(oldX - this.character.getX()) > 30) {
             this.character.swapMovingImage();
@@ -113,17 +105,7 @@ public class MovementFactory {
 
 
 
-    private void checkForEdgeOfScreen() {
-//        if(character.getX() < 100 || character.getX() > 924) {
-//            List<Block> blockTouchingPlayer = gameController.getBlockTouchingPlayer(character);
-//            if(blockTouchingPlayer != null) {
-//                character.setXPos(blockTouchingPlayer.getXPos());
-//                character.setYPos(blockTouchingPlayer.getYPos());
-//            }
-//            Platform.runLater(() -> gameController.drawWorld());
-//        }
 
-    }
 
     public void setIsAPressed(boolean isAPressed) {
         this.isAPressed.set(isAPressed);
