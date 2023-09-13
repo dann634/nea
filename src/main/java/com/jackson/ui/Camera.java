@@ -53,14 +53,13 @@ public class Camera {
                 character.setYPos(blocksTouchingPlayer.get(0).getYPos());
             }
            //Move world
-            System.out.println(this.isWorldLoadable);
             if(this.isWorldLoadable) {
                 gameController.moveWorld();
                 this.isWorldLoadable = false;
             }
-            return;
+        } else {
+            this.isWorldLoadable = true;
         }
-        this.isWorldLoadable = true;
 
     }
 
