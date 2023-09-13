@@ -17,9 +17,6 @@ public class Camera {
         for (int i = character.getXPos() - RENDER_WIDTH; i < character.getXPos() + RENDER_WIDTH; i++) {
             blockYIndex = 0;
             for (int j = character.getYPos() - RENDER_HEIGHT; j < character.getYPos() + RENDER_HEIGHT; j++) {
-                if((character.getYPos() + RENDER_HEIGHT) - (character.getYPos() - RENDER_HEIGHT) > 18) {
-                    System.out.println("AHHH");
-                }
                 renderArray[blockXIndex][blockYIndex] = new Block(map[i][j], i, j);
                 blockYIndex++;
             }

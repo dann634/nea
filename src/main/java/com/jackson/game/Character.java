@@ -1,5 +1,9 @@
 package com.jackson.game;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
@@ -11,10 +15,11 @@ public class Character extends ImageView {
     private int xPos;
     private int yPos;
 
+    private SimpleBooleanProperty isModelFacingRight;
+
     private Rectangle feetCollision;
     private Rectangle headCollision;
-    private Rectangle leftCollision;
-    private Rectangle rightCollision;
+    private Rectangle bodyCollision;
 
 
 
@@ -25,15 +30,36 @@ public class Character extends ImageView {
         setX(486); //Half Screen size (512) - Character Width (48) + Some Value(22)
 
         initFeetCollision();
+        initBodyCollision();
+
+        xProperty().addListener((observable, oldValue, newValue) -> {
+
+        });
+
+        yProperty().addListener((observable, oldValue, newValue) -> {
+
+        });
+
+        this.isModelFacingRight = new SimpleBooleanProperty(true);
+        this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
+            setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
+        });
     }
 
     // TODO: 09/09/2023 add listeners to x and y location to update world
 
     private void initFeetCollision() {
-        this.feetCollision = new Rectangle(24, 6);
-        this.feetCollision.xProperty().bind(xProperty().add(6));
-        this.feetCollision.yProperty().bind(yProperty().add(50));
+        this.feetCollision = new Rectangle(25, 6);
+        this.feetCollision.xProperty().bind(xProperty().add(4));
+        this.feetCollision.yProperty().bind(yProperty().add(42));
         this.feetCollision.setVisible(false);
+    }
+
+    private void initBodyCollision() {
+        this.bodyCollision = new Rectangle(35, 45);
+        this.bodyCollision.xProperty().bind(xProperty().subtract(2));
+        this.bodyCollision.yProperty().bind(yProperty());
+        this.bodyCollision.setVisible(false);
     }
 
     public void swapMovingImage() {
@@ -70,10 +96,18 @@ public class Character extends ImageView {
     }
 
     public List<Rectangle> getCollisions() {
-        return List.of(this.feetCollision);
+        return List.of(this.feetCollision, this.bodyCollision);
     }
 
     public Rectangle getFeetCollision() {
         return this.feetCollision;
+    }
+
+    public Rectangle getBodyCollision() {
+        return this.bodyCollision;
+    }
+
+    public void setIsModelFacingRight(boolean isModelFacingRight) {
+        this.isModelFacingRight.set(isModelFacingRight);
     }
 }

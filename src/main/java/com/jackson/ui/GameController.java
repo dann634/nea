@@ -41,8 +41,6 @@ public class GameController extends Scene {
         spawnCharacter();
         drawWorld();
 
-
-
         setRoot(this.root);
         this.root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
@@ -105,30 +103,57 @@ public class GameController extends Scene {
     }
 
     public boolean isEntityTouchingGround(Character character) { //Can be optimised
-        Block block = getBlockTouchingPlayer(character);
-        if(block == null) {
-            return false;
-        }
-        return !block.getImage().getUrl().contains("air");
+        List<Block> blocks = getBlocksTouchingPlayer(character);
+        blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
+
+        return !blocks.isEmpty();
     }
 
-    public Block getBlockTouchingPlayer(Character character) {
-        for (int i = 0; i < this.blocks.length; i++) {
-            for (int j = 0; j < this.blocks[i].length; j++) {
-                if(character.getFeetCollision().intersects(blocks[i][j].getBoundsInParent())) {
-                    return blocks[i][j];
+    public boolean isEntityTouchingSide(Character character) {
+        List<Block> blocks = getBlockTouchingSide(character);
+        blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
+        return !blocks.isEmpty();
+    }
+
+    public List<Block> getBlockTouchingSide(Character character) {
+        List<Block> blocks = new ArrayList<>();
+        for(Block[] blockArr : this.blocks) {
+            for(Block block : blockArr) {
+                if(character.getBodyCollision().intersects(block.getBoundsInParent())) {
+                    blocks.add(block);
                 }
             }
         }
-        return null; //Should never happen
+        return blocks;
+    }
+
+    public List<Block> getBlocksTouchingPlayer(Character character) {
+        List<Block> blocks = new ArrayList<>();
+        for (Block[] block : this.blocks) {
+            for (Block value : block) {
+                if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
+                    blocks.add(value);
+                }
+            }
+        }
+        return blocks; //Should never happen
     }
 
     private void initOnKeyPressed() {
         setOnKeyPressed(e -> {
             switch (e.getCode()) {
-                case A -> this.movementFactory.setIsAPressed(true);
-                case D -> this.movementFactory.setIsDPressed(true);
-                case W -> this.movementFactory.setIsWPressed(true);
+                case A -> {
+                    this.movementFactory.setIsAPressed(true);
+                    this.characters.get(0).setIsModelFacingRight(false);
+                }
+                case D -> {
+                    this.movementFactory.setIsDPressed(true);
+                    this.characters.get(0).setIsModelFacingRight(true);
+                }
+                case W -> {
+                    this.movementFactory.setIsWPressed(true);
+                    this.characters.get(0).setIdleImage();
+                }
             }
         });
 
@@ -139,6 +164,5 @@ public class GameController extends Scene {
                 case W -> this.movementFactory.setIsWPressed(false);
             }
         });
-
     }
 }

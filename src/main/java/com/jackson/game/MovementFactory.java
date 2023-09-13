@@ -12,6 +12,7 @@ import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,15 +41,6 @@ public class MovementFactory {
         this.isDPressed = new SimpleBooleanProperty(false);
         this.isWPressed = new SimpleBooleanProperty(false);
 
-        this.isAPressed.or(this.isDPressed).addListener((observable, oldValue, newValue) -> { //Faces new Direction
-            if(this.isAPressed.get()) {
-                this.character.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-            }
-            if(this.isDPressed.get()) {
-                this.character.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-
-            }
-        });
 
     }
 
@@ -70,6 +62,7 @@ public class MovementFactory {
     private void calculateYProperties() {
         boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
 
+        System.out.println(isCharacterTouchingFloor);
         if(isCharacterTouchingFloor && !this.isWPressed.get() && this.jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
@@ -87,7 +80,7 @@ public class MovementFactory {
         }
 
         if(isCharacterTouchingFloor && this.isWPressed.get()) { //Start jump
-            this.jumpAcceleration = -3;
+            this.jumpAcceleration = -2.5;
             return;
         }
         this.character.setY(this.character.getY() + 3);
@@ -97,6 +90,11 @@ public class MovementFactory {
     }
 
     private void calculateXProperties() {
+
+        if(gameController.isEntityTouchingSide(character)) {
+            return;
+        }
+
         if (this.isAPressed.get() != this.isDPressed.get()) {
             AtomicInteger offset = new AtomicInteger(3);
             if(this.isAPressed.get()) {
@@ -116,14 +114,14 @@ public class MovementFactory {
 
 
     private void checkForEdgeOfScreen() {
-        if(character.getX() < 100 || character.getX() > 924) {
-            Block blockTouchingPlayer = gameController.getBlockTouchingPlayer(character);
-            if(blockTouchingPlayer != null) {
-                character.setXPos(blockTouchingPlayer.getXPos());
-                character.setYPos(blockTouchingPlayer.getYPos());
-            }
-            Platform.runLater(() -> gameController.drawWorld());
-        }
+//        if(character.getX() < 100 || character.getX() > 924) {
+//            List<Block> blockTouchingPlayer = gameController.getBlockTouchingPlayer(character);
+//            if(blockTouchingPlayer != null) {
+//                character.setXPos(blockTouchingPlayer.getXPos());
+//                character.setYPos(blockTouchingPlayer.getYPos());
+//            }
+//            Platform.runLater(() -> gameController.drawWorld());
+//        }
 
     }
 
