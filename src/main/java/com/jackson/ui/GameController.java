@@ -1,17 +1,15 @@
 package com.jackson.ui;
 
 import com.jackson.game.Block;
+import com.jackson.game.Character;
 import com.jackson.game.MovementFactory;
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import com.jackson.game.Character;
 import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
@@ -60,13 +58,6 @@ public class GameController extends Scene {
         32 blocks fit length
         17.1 blocks fit high
          */
-        if (this.blocks != null) {
-            for(Block[] blockArr : this.blocks) {
-                for (Block block : blockArr) {
-                    this.root.getChildren().remove(block);
-                }
-            }
-        }
         this.blocks = this.camera.getRenderBlocks(this.map, this.characters.get(0));
         for (int i = 0; i < this.blocks.length; i++) {
             for (int j = 0; j < this.blocks[i].length; j++) {
@@ -76,6 +67,36 @@ public class GameController extends Scene {
             }
         }
         characters.get(0).toFront();
+    }
+
+    public void drawNewWorld(Block[][] blocks) {
+        for (int i = 0; i < blocks.length; i++) {
+            for (int j = 0; j < blocks[i].length; j++) {
+                blocks[i][j].setTranslateX((i-1+Camera.RENDER_WIDTH*2) * 32);
+                blocks[i][j].setTranslateY((j-1) * 32);
+                this.root.getChildren().add(blocks[i][j]);
+            }
+        }
+    }
+
+    public void moveWorld() {
+        Block[][] newBlocks = this.camera.getRenderBlocks(this.map, characters.get(0));
+        drawNewWorld(newBlocks);
+
+        Timeline panTimeline = this.camera.getPanningTimeline(this.blocks, newBlocks,characters.get(0), this);
+        panTimeline.play();
+        clearWorld();
+        this.blocks = newBlocks;
+    }
+
+
+    public void clearWorld() {
+        for(Block[] blocks : this.blocks) {
+            for(Block block : blocks) {
+                this.root.getChildren().remove(block);
+            }
+        }
+
     }
 
     private String[][] loadMap() {
