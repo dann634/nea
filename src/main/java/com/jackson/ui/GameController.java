@@ -128,11 +128,10 @@ public class GameController extends Scene {
         return -1;
     }
 
-    public boolean isEntityTouchingGround(Character character) { //Can be optimised
-        List<Block> blocks = getBlocksTouchingPlayer(character);
-        blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
-
-        return !blocks.isEmpty();
+    public boolean isEntityTouchingGround(Character character) {
+        List<Block> blocks = getBlocksTouchingPlayer(character); //Gets list of blocks touching feet
+        blocks.removeIf(n -> n.getImage().getUrl().contains("air")); //Removes all air blocks
+        return !blocks.isEmpty(); //If any solid blocks are left
     }
 
     public boolean isEntityTouchingSide(Rectangle collision) {
@@ -154,14 +153,14 @@ public class GameController extends Scene {
     }
 
     public List<Block> getBlocksTouchingPlayer(Character character) {
-        List<Block> blocks = new ArrayList<>();
-        for (Block[] block : this.blocks)
+        List<Block> blocks = new ArrayList<>(); // Arraylist to store blocks touching player
+        for (Block[] block : this.blocks) //Loops through all blocks shown on screen
             for (Block value : block) {
+                //If the rectangle at the feet intersects with the block
                 if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
-                    blocks.add(value);
+                    blocks.add(value); //Add to list
                 }
             }
-
         return blocks;
     }
 

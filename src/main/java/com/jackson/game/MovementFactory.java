@@ -35,14 +35,15 @@ public class MovementFactory {
     }
 
     public Timeline getMovementTimeline() {
-        Timeline timeline = new Timeline();
-        timeline.setCycleCount(Animation.INDEFINITE);
+        Timeline timeline = new Timeline(); //Initialise Timeline object
+        timeline.setCycleCount(Animation.INDEFINITE); //So timeline is infinite
 
+        //Keyframe takes fps
         KeyFrame keyFrame = new KeyFrame(Duration.millis(1000/FPS), (e -> {
-            calculateXProperties();
-            calculateYProperties();
+            calculateXProperties(); //Updates X Values
+            calculateYProperties(); //Updates Y Values
         }));
-        timeline.getKeyFrames().add(keyFrame);
+        timeline.getKeyFrames().add(keyFrame); //Adds keyframe to timeline
         return timeline;
     }
 

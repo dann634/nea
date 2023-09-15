@@ -7,6 +7,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -45,22 +46,25 @@ public class Character extends ImageView {
     // TODO: 09/09/2023 add listeners to x and y location to update world
 
     private void initFeetCollision() {
-        this.feetCollision = new Rectangle(25, 6);
-        this.feetCollision.xProperty().bind(xProperty().add(4));
-        this.feetCollision.yProperty().bind(yProperty().add(42));
-        this.feetCollision.setVisible(false);
+        this.feetCollision = new Rectangle(25, 6); //Creates rectangle with Width 25 / Height 6
+        this.feetCollision.xProperty().bind(xProperty().add(4)); //Binds xProperty to character plus an offset
+        this.feetCollision.yProperty().bind(yProperty().add(42)); //Binds yProperty to character plus an offset
+        this.feetCollision.setVisible(false); //Sets invisible
     }
 
     private void initBodyCollision() {
-        this.leftCollision = new Rectangle(5, 45);
-        this.leftCollision.xProperty().bind(xProperty().subtract(1));
-        this.leftCollision.yProperty().bind(yProperty());
-        this.leftCollision.setVisible(false);
+        //Initialises both collisions
+        this.leftCollision = initSideCollisionRectangle(-1);
+        this.rightCollision = initSideCollisionRectangle(28);
+    }
 
-        this.rightCollision = new Rectangle(5, 45);
-        this.rightCollision.xProperty().bind(xProperty().add(30));
-        this.rightCollision.yProperty().bind(yProperty());
-        this.rightCollision.setVisible(false);
+    private Rectangle initSideCollisionRectangle(int offset) {
+        Rectangle rectangle = new Rectangle(5, 45); //Creates new rectangle with width 5 / height 45
+        rectangle.xProperty().bind(xProperty().add(offset)); //Binds to xProperty plus offset
+        rectangle.yProperty().bind(yProperty()); //Binds to yProperty
+        rectangle.setVisible(true); //Sets invisible
+        rectangle.setFill(Color.RED);
+        return rectangle;
     }
 
     public void swapMovingImage() {
