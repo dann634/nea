@@ -8,6 +8,8 @@ import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -24,7 +26,8 @@ public class GameController extends Scene {
 
     private Camera camera;
     private String[][] map;
-    private Block[][] blocks;
+    //    private Block[][] blocks;
+    private List<Block> blocks;
     private MovementFactory movementFactory;
 
     public GameController() {
@@ -38,6 +41,7 @@ public class GameController extends Scene {
         this.characters = new ArrayList<>();
         this.camera = new Camera();
         this.map = loadMap();
+        this.blocks = new ArrayList<>();
 
         spawnCharacter();
         drawWorld();
@@ -47,7 +51,7 @@ public class GameController extends Scene {
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
         this.movementFactory = new MovementFactory(this.characters.get(0), this);
-        Timeline movementTimeline = this.movementFactory.getMovementTimeline();
+        Timeline movementTimeline = this.movementFactory.getMovementTimeline(this.camera, map);
         movementTimeline.play();
 
     }
@@ -58,46 +62,17 @@ public class GameController extends Scene {
         32 blocks fit length
         17.1 blocks fit high
          */
-        this.blocks = this.camera.getRenderBlocks(this.map, this.characters.get(0));
-        for (int i = 0; i < this.blocks.length; i++) {
-            for (int j = 0; j < this.blocks[i].length; j++) {
-                this.blocks[i][j].setTranslateX((i-1) * 32);
-               this.blocks[i][j].setTranslateY((j-1) * 32);
-                this.root.getChildren().add(this.blocks[i][j]);
-            }
-        }
         characters.get(0).toFront();
     }
 
-    public void drawNewWorld(Block[][] blocks) {
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
-                blocks[i][j].setTranslateX((i-1+Camera.RENDER_WIDTH*2) * 32);
-                blocks[i][j].setTranslateY((j-1) * 32);
-                this.root.getChildren().add(blocks[i][j]);
-            }
-        }
+    public void drawBlock(Block block) {
+        this.root.getChildren().add(block);
     }
-
-    public void moveWorld() {
-        Block[][] newBlocks = this.camera.getRenderBlocks(this.map, characters.get(0));
-        drawNewWorld(newBlocks);
-
-        Timeline panTimeline = this.camera.getPanningTimeline(this.blocks, newBlocks,characters.get(0), this);
-        panTimeline.play();
-        clearWorld();
-        this.blocks = newBlocks;
-    }
-
 
     public void clearWorld() {
-        for(Block[] blocks : this.blocks) {
-            for(Block block : blocks) {
-                this.root.getChildren().remove(block);
-            }
-        }
-
+        this.root.getChildren().removeIf(n -> n instanceof ImageView && !((ImageView)n).getImage().getUrl().contains("player"));
     }
+
 
     private String[][] loadMap() {
         String[][] map = TextIO.readMapFile(true);
@@ -109,6 +84,7 @@ public class GameController extends Scene {
         Character character = new Character();
         character.setXPos(500);
         character.setYPos(spawnYCoords);
+        System.out.println(spawnYCoords);
 
 
         root.getChildren().add(character);
@@ -121,7 +97,7 @@ public class GameController extends Scene {
 
     private int findStartingY(String[][] map) {
         for (int i = 0; i < ProceduralGenerator.getHeight(); i++) {
-            if(map[500][i].equals("2")) {
+            if (map[500][i].equals("2")) {
                 return i;
             }
         }
@@ -142,11 +118,13 @@ public class GameController extends Scene {
 
     public List<Block> getBlockTouchingSide(Rectangle collision) {
         List<Block> blocks = new ArrayList<>();
-        for(Block[] blockArr : this.blocks) {
-            for(Block block : blockArr) {
-                if(collision.intersects(block.getBoundsInParent())) {
-                    blocks.add(block);
-                }
+//        for(Block[] blockArr : this.blocks) {
+//
+//            }
+
+        for (Block block : this.blocks) {
+            if (collision.intersects(block.getBoundsInParent())) {
+                blocks.add(block);
             }
         }
         return blocks;
@@ -154,50 +132,48 @@ public class GameController extends Scene {
 
     public List<Block> getBlocksTouchingPlayer(Character character) {
         List<Block> blocks = new ArrayList<>(); // Arraylist to store blocks touching player
-        for (Block[] block : this.blocks) //Loops through all blocks shown on screen
-            for (Block value : block) {
-                //If the rectangle at the feet intersects with the block
-                if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
-                    blocks.add(value); //Add to list
-                }
+//        for (Block[] blockArr : this.blocks) //Loops through all blocks shown on screen
+//
+//               }
+
+        for (Block block : this.blocks) {
+            //If the rectangle at the feet intersects with the block
+            if (character.getFeetCollision().intersects(block.getBoundsInParent())) {
+                blocks.add(block); //Add to list
             }
-        return blocks;
+        }
+            return blocks;
     }
 
-    private void initOnKeyPressed() {
-        setOnKeyPressed(e -> {
-            switch (e.getCode()) {
-                case A -> {
-                    this.movementFactory.setIsAPressed(true);
-                    this.characters.get(0).setIsModelFacingRight(false);
+        private void initOnKeyPressed () {
+            setOnKeyPressed(e -> {
+                switch (e.getCode()) {
+                    case A -> {
+                        this.movementFactory.setIsAPressed(true);
+                        this.characters.get(0).setIsModelFacingRight(false);
+                    }
+                    case D -> {
+                        this.movementFactory.setIsDPressed(true);
+                        this.characters.get(0).setIsModelFacingRight(true);
+                    }
+                    case W -> {
+                        this.movementFactory.setIsWPressed(true);
+                        this.characters.get(0).setIdleImage();
+                    }
                 }
-                case D -> {
-                    this.movementFactory.setIsDPressed(true);
-                    this.characters.get(0).setIsModelFacingRight(true);
+            });
+
+            setOnKeyReleased(e -> {
+                switch (e.getCode()) {
+                    case A -> this.movementFactory.setIsAPressed(false);
+                    case D -> this.movementFactory.setIsDPressed(false);
+                    case W -> this.movementFactory.setIsWPressed(false);
                 }
-                case W -> {
-                    this.movementFactory.setIsWPressed(true);
-                    this.characters.get(0).setIdleImage();
-                }
-            }
-        });
+            });
 
-        setOnKeyReleased(e -> {
-            switch (e.getCode()) {
-                case A -> this.movementFactory.setIsAPressed(false);
-                case D -> this.movementFactory.setIsDPressed(false);
-                case W -> this.movementFactory.setIsWPressed(false);
-            }
-        });
 
-        this.characters.get(0).xProperty().addListener((observable, oldValue, newValue) -> {
-            camera.checkForEdgeOfScreen(this.characters.get(0), this);
-        });
-
-        this.characters.get(0).yProperty().addListener((observable, oldValue, newValue) -> {
-            camera.checkForEdgeOfScreen(this.characters.get(0), this);
-        });
+        }
 
 
     }
-}
+

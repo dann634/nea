@@ -1,5 +1,6 @@
 package com.jackson.game;
 
+import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -34,14 +35,16 @@ public class MovementFactory {
 
     }
 
-    public Timeline getMovementTimeline() {
+    public Timeline getMovementTimeline(Camera camera, String[][] map) {
         Timeline timeline = new Timeline(); //Initialise Timeline object
         timeline.setCycleCount(Animation.INDEFINITE); //So timeline is infinite
 
         //Keyframe takes fps
-        KeyFrame keyFrame = new KeyFrame(Duration.millis(1000/FPS), (e -> {
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(200), (e -> {
+            gameController.clearWorld();
             calculateXProperties(); //Updates X Values
             calculateYProperties(); //Updates Y Values
+            camera.draw(this.character, this.gameController, map);
         }));
         timeline.getKeyFrames().add(keyFrame); //Adds keyframe to timeline
         return timeline;
@@ -61,7 +64,7 @@ public class MovementFactory {
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
-            this.character.setY(this.character.getY() + this.jumpVelocity);
+            this.character.setYPos((int) (this.character.getYPos() + this.jumpVelocity));
             return;
         }
 
@@ -73,9 +76,8 @@ public class MovementFactory {
             this.jumpAcceleration = -2.5;
             return;
         }
-        this.character.setY(this.character.getY() + 3);
 
-
+        this.character.setYPos(this.character.getYPos() + 3);
 
     }
 
@@ -93,7 +95,7 @@ public class MovementFactory {
                 offset = -3;
             }
 
-            character.setX(character.getX() + offset);
+            this.character.setXPos(this.character.getXPos() + offset);
         }
         if(abs(oldX - this.character.getX()) > 30) {
             this.character.swapMovingImage();
@@ -102,7 +104,6 @@ public class MovementFactory {
             this.character.setIdleImage();
         }
     }
-
 
 
 

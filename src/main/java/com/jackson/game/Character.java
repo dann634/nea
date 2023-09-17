@@ -32,6 +32,7 @@ public class Character extends ImageView {
         setPreserveRatio(true);
         setFitWidth(32);
         setX(486); //Half Screen size (512) - Character Width (48) + Some Value(22)
+        setY(272 - (getFitWidth() / 2));
 
         initFeetCollision();
         initBodyCollision();
