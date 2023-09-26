@@ -1,12 +1,10 @@
 package com.jackson.game;
 
+import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.util.Duration;
 
+import static com.jackson.ui.Camera.RENDER_HEIGHT;
+import static com.jackson.ui.Camera.RENDER_WIDTH;
 import static java.lang.Math.abs;
 
 public class MovementFactory {
@@ -15,105 +13,110 @@ public class MovementFactory {
     private GameController gameController;
     private Character character;
 
-    private SimpleBooleanProperty isAPressed;
-    private SimpleBooleanProperty isDPressed;
-    private SimpleBooleanProperty isWPressed;
     private double jumpVelocity;
     private double jumpAcceleration;
 
+    private Camera camera;
+
     private double oldX;
 
-    public MovementFactory(Character character, GameController gameController) { //Start new thread for each character (Maybe change later)
+    public MovementFactory(Character character, GameController gameController, Camera camera) { //Start new thread for each character (Maybe change later)
         this.gameController = gameController;
         this.character = character;
-
-        this.isAPressed = new SimpleBooleanProperty(false);
-        this.isDPressed = new SimpleBooleanProperty(false);
-        this.isWPressed = new SimpleBooleanProperty(false);
-
-
+        this.camera = camera;
     }
 
-    public Timeline getMovementTimeline() {
-        Timeline timeline = new Timeline();
-        timeline.setCycleCount(Animation.INDEFINITE);
-
-        KeyFrame keyFrame = new KeyFrame(Duration.millis(1000/FPS), (e -> {
-            calculateXProperties();
-            calculateYProperties();
-        }));
-        timeline.getKeyFrames().add(keyFrame);
-        return timeline;
-    }
-
-
-
-
-    private void calculateYProperties() {
+    public boolean calculateYProperties(boolean isWPressed) {
         boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
-
-        if(isCharacterTouchingFloor && !this.isWPressed.get() && this.jumpAcceleration >= 0) { //Not jumping and on floor
-            return;
+        boolean isCharacterMovingDown = true;
+        if(isCharacterTouchingFloor && !isWPressed && this.jumpAcceleration >= 0) { //Not jumping and on floor
+            return false;
         }
         if(this.jumpAcceleration < 0) { //In Mid air jumping
+            isCharacterMovingDown = false;
             this.jumpAcceleration += 0.15;
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
-            this.character.setY(this.character.getY() + this.jumpVelocity);
-            return;
+//            doYOffsetStuff((int) -this.jumpVelocity, false);
+            return false;
         }
 
         if(this.jumpAcceleration > 0) { //To fix floating point math
             this.jumpAcceleration = 0;
         }
 
-        if(isCharacterTouchingFloor && this.isWPressed.get()) { //Start jump
+        if(isCharacterTouchingFloor && isWPressed) { //Start jump
             this.jumpAcceleration = -2.5;
-            return;
+            return false;
         }
-        this.character.setY(this.character.getY() + 3);
+
+//        System.out.println("gravity");
+        return doYOffsetStuff(-3, true);
 
 
 
     }
 
-    private void calculateXProperties() {
+    private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) { // FIXME: 26/09/2023 something here breaks everything
+        boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 32;
+        System.out.println(condition);
+        System.out.println(this.camera.getyOffset());
+        if (condition) {
+            int yLocalOffset = isCharacterMovingDown ? RENDER_HEIGHT : -(RENDER_HEIGHT) ;
+            int newYPos = isCharacterMovingDown ? 1 : -1;
+            int newYOffset = isCharacterMovingDown ? 32 : -32;
+
+            this.camera.drawHorizontalLine(yLocalOffset); // FIXME: 24/09/2023 will probably break
+            this.camera.deleteHorizontal(isCharacterMovingDown);
+            this.character.addYPos(newYPos);
+            this.camera.addYOffset(newYOffset);
+        }
+        this.camera.translateBlocksByY(offset); // FIXME: 26/09/2023 this method :((
+        return condition;
+    }
+
+    public boolean calculateXProperties(boolean isAPressed, boolean isDPressed) {
+
+        if(!isAPressed && !isDPressed) { //For optimization
+            return false;
+        }
 
         boolean canMoveLeft = !gameController.isEntityTouchingSide(character.getLeftCollision());
         boolean canMoveRight = !gameController.isEntityTouchingSide(character.getRightCollision());
 
         int offset = 0;
-        if (this.isAPressed.get() != this.isDPressed.get()) {
-            if(canMoveRight && this.isDPressed.get()) {
-                offset = 3;
+        boolean isCharacterMovingLeft = false;
+        if (isAPressed != isDPressed) {
+            if(canMoveRight && isDPressed) {
+                offset = -6;
             }
-            if(this.isAPressed.get() && canMoveLeft) {
-                offset = -3;
+            if(isAPressed && canMoveLeft) {
+                offset = 6;
+                isCharacterMovingLeft = true;
             }
-
-            character.setX(character.getX() + offset);
         }
+        this.camera.translateBlocksByX(offset);
+        boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
+        if (condition) {
+            int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH - 1 : RENDER_WIDTH;
+            int newXPos = isCharacterMovingLeft ? -1 : 1;
+            int newXOffset = isCharacterMovingLeft ? -32 : 32;
+
+            this.camera.drawVerticalLine(xLocalOffset);
+            this.camera.deleteVertical(!isCharacterMovingLeft);
+            this.character.addXPos(newXPos);
+            this.camera.addXOffset(newXOffset);
+        }
+
         if(abs(oldX - this.character.getX()) > 30) {
             this.character.swapMovingImage();
             oldX = this.character.getX();
         } else if(oldX == this.character.getX()) {
             this.character.setIdleImage();
         }
+        return condition;
     }
 
 
-
-
-    public void setIsAPressed(boolean isAPressed) {
-        this.isAPressed.set(isAPressed);
-    }
-
-    public void setIsDPressed(boolean isDPressed) {
-        this.isDPressed.set(isDPressed);
-    }
-
-    public void setIsWPressed(boolean isWPressed) {
-        this.isWPressed.set(isWPressed);
-    }
 }

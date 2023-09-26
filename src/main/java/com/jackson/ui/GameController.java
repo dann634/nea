@@ -6,14 +6,22 @@ import com.jackson.game.MovementFactory;
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.function.Consumer;
+
+import static com.jackson.ui.Camera.RENDER_HEIGHT;
+import static com.jackson.ui.Camera.RENDER_WIDTH;
 
 public class GameController extends Scene {
 
@@ -24,8 +32,13 @@ public class GameController extends Scene {
 
     private Camera camera;
     private String[][] map;
-    private Block[][] blocks;
+    private List<List<Block>> blocks;
     private MovementFactory movementFactory;
+
+    private boolean isAPressed;
+    private boolean isDPressed;
+    private boolean isWPressed;
+
 
     public GameController() {
         super(new VBox());
@@ -36,66 +49,35 @@ public class GameController extends Scene {
 
         //Initialises fields
         this.characters = new ArrayList<>();
-        this.camera = new Camera();
+        this.blocks = new ArrayList<>();
         this.map = loadMap();
 
+        this.isAPressed = false;
+        this.isDPressed = false;
+        this.isWPressed = false;
+
         spawnCharacter();
-        drawWorld();
+        this.camera = new Camera(this.characters.get(0), this.map, this.root, this.blocks);
+        this.camera.initWorld();
+        this.characters.get(0).toFront();
 
         setRoot(this.root);
         this.root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        this.movementFactory = new MovementFactory(this.characters.get(0), this);
-        Timeline movementTimeline = this.movementFactory.getMovementTimeline();
-        movementTimeline.play();
+        this.movementFactory = new MovementFactory(this.characters.get(0), this, this.camera);
+        Timeline timeline = new Timeline();
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(30), e-> {
 
-    }
-
-
-    public void drawWorld() {
-        /*
-        32 blocks fit length
-        17.1 blocks fit high
-         */
-        this.blocks = this.camera.getRenderBlocks(this.map, this.characters.get(0));
-        for (int i = 0; i < this.blocks.length; i++) {
-            for (int j = 0; j < this.blocks[i].length; j++) {
-                this.blocks[i][j].setTranslateX((i-1) * 32);
-               this.blocks[i][j].setTranslateY((j-1) * 32);
-                this.root.getChildren().add(this.blocks[i][j]);
+            if(!this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed)) {
+                this.movementFactory.calculateYProperties(this.isWPressed);
             }
-        }
-        characters.get(0).toFront();
-    }
-
-    public void drawNewWorld(Block[][] blocks) {
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
-                blocks[i][j].setTranslateX((i-1+Camera.RENDER_WIDTH*2) * 32);
-                blocks[i][j].setTranslateY((j-1) * 32);
-                this.root.getChildren().add(blocks[i][j]);
-            }
-        }
-    }
-
-    public void moveWorld() {
-        Block[][] newBlocks = this.camera.getRenderBlocks(this.map, characters.get(0));
-        drawNewWorld(newBlocks);
-
-        Timeline panTimeline = this.camera.getPanningTimeline(this.blocks, newBlocks,characters.get(0), this);
-        panTimeline.play();
-        clearWorld();
-        this.blocks = newBlocks;
-    }
-
-
-    public void clearWorld() {
-        for(Block[] blocks : this.blocks) {
-            for(Block block : blocks) {
-                this.root.getChildren().remove(block);
-            }
-        }
+//            if(this.isWPressed) {
+//                this.camera.drawHorizontalLine(RENDER_HEIGHT*2-1);
+//            }
+        }));
+        timeline.play();
 
     }
 
@@ -131,7 +113,6 @@ public class GameController extends Scene {
     public boolean isEntityTouchingGround(Character character) { //Can be optimised
         List<Block> blocks = getBlocksTouchingPlayer(character);
         blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
-
         return !blocks.isEmpty();
     }
 
@@ -143,7 +124,7 @@ public class GameController extends Scene {
 
     public List<Block> getBlockTouchingSide(Rectangle collision) {
         List<Block> blocks = new ArrayList<>();
-        for(Block[] blockArr : this.blocks) {
+        for(List<Block> blockArr : this.blocks) {
             for(Block block : blockArr) {
                 if(collision.intersects(block.getBoundsInParent())) {
                     blocks.add(block);
@@ -155,7 +136,7 @@ public class GameController extends Scene {
 
     public List<Block> getBlocksTouchingPlayer(Character character) {
         List<Block> blocks = new ArrayList<>();
-        for (Block[] block : this.blocks)
+        for (List<Block> block : this.blocks)
             for (Block value : block) {
                 if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
                     blocks.add(value);
@@ -166,38 +147,35 @@ public class GameController extends Scene {
     }
 
     private void initOnKeyPressed() {
-        setOnKeyPressed(e -> {
-            switch (e.getCode()) {
-                case A -> {
-                    this.movementFactory.setIsAPressed(true);
-                    this.characters.get(0).setIsModelFacingRight(false);
+
+            setOnKeyPressed(e -> {
+                switch (e.getCode()) {
+                    case A -> {
+                        this.isAPressed = true;
+                        this.characters.get(0).setIsModelFacingRight(false);
+
+                    }
+                    case D -> {
+                        this.isDPressed = true;
+                        this.characters.get(0).setIsModelFacingRight(true);
+                    }
+
+                    case W -> {
+                        this.isWPressed = true;
+                        this.characters.get(0).setIdleImage();
+
+                    }
                 }
-                case D -> {
-                    this.movementFactory.setIsDPressed(true);
-                    this.characters.get(0).setIsModelFacingRight(true);
-                }
-                case W -> {
-                    this.movementFactory.setIsWPressed(true);
-                    this.characters.get(0).setIdleImage();
-                }
-            }
-        });
+            });
 
         setOnKeyReleased(e -> {
             switch (e.getCode()) {
-                case A -> this.movementFactory.setIsAPressed(false);
-                case D -> this.movementFactory.setIsDPressed(false);
-                case W -> this.movementFactory.setIsWPressed(false);
+                case A -> this.isAPressed = false;
+                case D -> this.isDPressed = false;
+                case W -> this.isWPressed = false;
             }
         });
 
-        this.characters.get(0).xProperty().addListener((observable, oldValue, newValue) -> {
-            camera.checkForEdgeOfScreen(this.characters.get(0), this);
-        });
-
-        this.characters.get(0).yProperty().addListener((observable, oldValue, newValue) -> {
-            camera.checkForEdgeOfScreen(this.characters.get(0), this);
-        });
 
 
     }

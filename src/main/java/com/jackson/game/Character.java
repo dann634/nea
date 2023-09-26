@@ -26,11 +26,14 @@ public class Character extends ImageView {
 
 
 
+
+
     public Character() {
         setImage(new Image("file:src/main/resources/images/playerIdle.png"));
         setPreserveRatio(true);
         setFitWidth(32);
         setX(486); //Half Screen size (512) - Character Width (48) + Some Value(22)
+        setY(180);
 
         initFeetCollision();
         initBodyCollision();
@@ -42,7 +45,6 @@ public class Character extends ImageView {
         });
     }
 
-    // TODO: 09/09/2023 add listeners to x and y location to update world
 
     private void initFeetCollision() {
         this.feetCollision = new Rectangle(25, 6);
@@ -92,8 +94,20 @@ public class Character extends ImageView {
         this.yPos = yPos;
     }
 
+    public void addXPos(int value) {
+        this.xPos += value;
+    }
+
+    public void addYPos(int value) {
+        this.yPos += value;
+    }
+
     public double getWidth() {
         return 48;
+    }
+
+    public double getHeight() {
+        return 72 * (32 / getWidth());
     }
 
     public List<Rectangle> getCollisions() {

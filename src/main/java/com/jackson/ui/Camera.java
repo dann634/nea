@@ -2,14 +2,7 @@ package com.jackson.ui;
 
 import com.jackson.game.Block;
 import com.jackson.game.Character;
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.util.Duration;
+import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,66 +11,119 @@ public class Camera {
 
     public static final int RENDER_WIDTH = 17;
     public static final int RENDER_HEIGHT = 9;
-    private boolean isWorldLoadable;
+    private Character character;
+    private String[][] map;
+    private AnchorPane root;
 
-    public Camera() {
-        this.isWorldLoadable = true;
+    private List<List<Block>> blocks;
+
+    private int xOffset;
+    private int yOffset;
+    private int currentYTranslation;
+
+    public Camera(Character character, String[][] map, AnchorPane root, List<List<Block>> blocks) {
+        this.character = character;
+        this.map = map;
+        this.root = root;
+        this.blocks = blocks;
+        this.xOffset = 0;
+        this.yOffset = 0;
+        this.currentYTranslation = 0;
     }
 
-    public Block[][] getRenderBlocks(String[][] map, Character character) { //Render 34 wide and 19 high
-        //Get blocks around character
-        Block[][] renderArray = new Block[RENDER_WIDTH * 2][RENDER_HEIGHT * 2];
-        int blockXIndex = 0;
-        int blockYIndex = 0;
+    public void drawVerticalLine(int xLocalOffset) {
+        int nextXIndex = this.character.getXPos() + xLocalOffset;
+        int blockIndex = 0;
+        List<Block> line = new ArrayList<>();
+        for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT+1; i++) {
+            Block block = new Block(map[nextXIndex][i], nextXIndex, i);
+            block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
+            block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
+            line.add(block); // FIXME: 26/09/2023 WHEN YOU ADD A BLOCK ITS TRANSLATION IS 0
+            root.getChildren().add(block);
+            blockIndex++;
+        }
+        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) {
+            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
+            return;
+        }
+        this.blocks.add(line);
+    }
 
+    public void drawHorizontalLine(int yLocalOffset) {
+        int nextIndex = this.character.getYPos() + yLocalOffset;
+        int blockIndex = 0;
+        List<Block> line = new ArrayList<>();
         for (int i = character.getXPos() - RENDER_WIDTH; i < character.getXPos() + RENDER_WIDTH; i++) {
-            blockYIndex = 0;
-            for (int j = character.getYPos() - RENDER_HEIGHT; j < character.getYPos() + RENDER_HEIGHT; j++) {
-                renderArray[blockXIndex][blockYIndex] = new Block(map[i][j], i, j);
-                blockYIndex++;
-            }
-            blockXIndex++;
+            Block block = new Block(map[i][nextIndex], nextIndex, i);
+            block.setTranslateX((blockIndex - 1) * 32);
+            block.setTranslateY((yLocalOffset * 32)*2); // FIXME: 25/09/2023 wrong y
+            line.add(block);
+            root.getChildren().add(block);
+            blockIndex++;
         }
-
-
-        return renderArray;
+        for (int i = 0; i < line.size(); i++) {
+            this.blocks.get(i).add(line.get(i));
+        }
     }
 
-    public void checkForEdgeOfScreen(Character character, GameController gameController) {
-        if(character.getX() < 100 || character.getX() > 924) {
-            List<Block> blocksTouchingPlayer = gameController.getBlocksTouchingPlayer(character);
-            //Just take first
-
-            if(!blocksTouchingPlayer.isEmpty()) {
-                character.setXPos(blocksTouchingPlayer.get(0).getXPos());
-                character.setYPos(blocksTouchingPlayer.get(0).getYPos());
-            }
-           //Move world
-            if(this.isWorldLoadable) {
-                gameController.moveWorld();
-                this.isWorldLoadable = false;
-            }
-        } else {
-            this.isWorldLoadable = true;
-        }
-
+    public void deleteVertical(boolean isLeft) {
+        int index = isLeft ? 0 : this.blocks.size() - 2;
+        this.root.getChildren().removeAll(this.blocks.get(index));
+        this.blocks.remove(index);
     }
 
-    public Timeline getPanningTimeline(Block[][] oldBlocks, Block[][] screenBlocks, Character character, GameController gameController) {
-        Timeline timeline = new Timeline();
+    public void deleteHorizontal(boolean isDown) {
 
-        int duration = 1;
-        for(int i = 0; i< screenBlocks.length; i++) { //Shift new World
-            for (int j = 0; j< screenBlocks[i].length; j++) {
-                timeline.getKeyFrames().add(new KeyFrame(Duration.ONE, new KeyValue(screenBlocks[i][j].translateXProperty(), (i-1) * 32, Interpolator.EASE_BOTH)));            }
+        if(this.blocks.get(0).isEmpty()) {
+            return;
         }
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), new KeyValue(character.xProperty(), 500, Interpolator.EASE_BOTH)));
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(duration), new KeyValue(character.yProperty(), character.getY(), Interpolator.EASE_BOTH)));
 
-        return timeline;
+        int index = isDown ? 0 : this.blocks.get(0).size() - 1 ;
+        for(List<Block> blocks : this.blocks) {
+            this.root.getChildren().remove(blocks.get(index));
+            blocks.remove(index);
+        }
     }
 
-    public void setWorldLoadable(boolean isWorldLoadable) { this.isWorldLoadable = isWorldLoadable;}
+
+    public void translateBlocksByX(int offset) {
+        this.xOffset += offset;
+        for (List<Block> blocks : this.blocks) {
+            for (Block block : blocks) {
+                block.setTranslateX(block.getTranslateX() + offset);
+            }
+        }
+    }
+
+    public void translateBlocksByY(int offset) {
+        this.yOffset = this.yOffset + offset;
+        for (List<Block> blocks : this.blocks) {
+            for (Block block : blocks) {
+                block.setTranslateY(block.getTranslateY() + offset); // FIXME: 26/09/2023 maybe blocks added after translation
+            }
+        }
+    }
+    public void initWorld() {
+        for (int i = -RENDER_WIDTH; i < RENDER_WIDTH; i++) { //Init world
+            drawVerticalLine(i);
+        }
+    }
+
+    public int getxOffset() {
+        return xOffset;
+    }
+
+    public int getyOffset() {
+        return yOffset;
+    }
 
 
+    public void addXOffset(int value) {
+        this.xOffset += value;
+    }
+
+    public void addYOffset(int value) {
+        this.yOffset += value;
+    }
 }
