@@ -10,6 +10,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -17,11 +18,6 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.function.Consumer;
-
-import static com.jackson.ui.Camera.RENDER_HEIGHT;
-import static com.jackson.ui.Camera.RENDER_WIDTH;
 
 public class GameController extends Scene {
 
@@ -32,7 +28,7 @@ public class GameController extends Scene {
 
     private Camera camera;
     private String[][] map;
-    private List<List<Block>> blocks;
+    private static List<List<Block>> blocks;
     private MovementFactory movementFactory;
 
     private boolean isAPressed;
@@ -68,14 +64,11 @@ public class GameController extends Scene {
         this.movementFactory = new MovementFactory(this.characters.get(0), this, this.camera);
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(30), e-> {
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(25), e -> {
 
-            if(!this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed)) {
-                this.movementFactory.calculateYProperties(this.isWPressed);
-            }
-//            if(this.isWPressed) {
-//                this.camera.drawHorizontalLine(RENDER_HEIGHT*2-1);
-//            }
+            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
+            this.movementFactory.calculateYProperties(this.isWPressed);
+
         }));
         timeline.play();
 
@@ -87,6 +80,10 @@ public class GameController extends Scene {
         return map;
     }
 
+    public static List<List<Block>> getBlocks() {
+        return blocks;
+    }
+
     private void spawnCharacter() {
         Character character = new Character();
         character.setXPos(500);
@@ -95,6 +92,7 @@ public class GameController extends Scene {
 
         root.getChildren().add(character);
         root.getChildren().addAll(character.getCollisions());
+        root.getChildren().add(character.getDisplayNameLabel());
         character.toFront();
 
         this.characters.add(character);
@@ -153,7 +151,6 @@ public class GameController extends Scene {
                     case A -> {
                         this.isAPressed = true;
                         this.characters.get(0).setIsModelFacingRight(false);
-
                     }
                     case D -> {
                         this.isDPressed = true;
@@ -163,7 +160,7 @@ public class GameController extends Scene {
                     case W -> {
                         this.isWPressed = true;
                         this.characters.get(0).setIdleImage();
-
+                        System.out.println(this.characters.get(0).getXPos());
                     }
                 }
             });

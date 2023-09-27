@@ -1,7 +1,10 @@
 package com.jackson.game;
 
+import com.jackson.ui.GameController;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+
+import java.util.List;
 
 public class Block extends ImageView {
 
@@ -15,12 +18,20 @@ public class Block extends ImageView {
             case "1" -> "dirt.png";
             case "2" -> "grass.png";
             case "3" -> "bedrock.png";
-            default -> ""; // FIXME: 09/09/2023 May Cause NPE
+            default -> "";
         };
         setImage(new Image(dir));
 
         this.xPos = xPos;
         this.yPos = yPos;
+
+        setOnMouseClicked(e -> {
+            System.out.println(this.xPos);
+            List<List<Block>> blocks = GameController.getBlocks();
+            for(List<Block> blocks1 : blocks) {
+                System.out.println(blocks1.get(0).getXPos());
+            }
+        });
 
         setPreserveRatio(true);
         setFitHeight(32);

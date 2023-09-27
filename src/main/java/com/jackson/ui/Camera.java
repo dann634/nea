@@ -10,7 +10,7 @@ import java.util.List;
 public class Camera {
 
     public static final int RENDER_WIDTH = 17;
-    public static final int RENDER_HEIGHT = 9;
+    public static final int RENDER_HEIGHT = 11;
     private Character character;
     private String[][] map;
     private AnchorPane root;
@@ -35,15 +35,21 @@ public class Camera {
         int nextXIndex = this.character.getXPos() + xLocalOffset;
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
-        for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT+1; i++) {
+        for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) {
             Block block = new Block(map[nextXIndex][i], nextXIndex, i);
-            block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
+
+            if(nextXIndex  == 516) {
+                System.out.println(nextXIndex);
+            }
+
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
-            line.add(block); // FIXME: 26/09/2023 WHEN YOU ADD A BLOCK ITS TRANSLATION IS 0
+            block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
+            line.add(block);
             root.getChildren().add(block);
             blockIndex++;
         }
-        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) {
+        // FIXME: 27/09/2023 fix this
+        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) { //Maybe breaking eveeyrhing
             this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
             return;
         }
@@ -55,14 +61,16 @@ public class Camera {
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
         for (int i = character.getXPos() - RENDER_WIDTH; i < character.getXPos() + RENDER_WIDTH; i++) {
-            Block block = new Block(map[i][nextIndex], nextIndex, i);
-            block.setTranslateX((blockIndex - 1) * 32);
-            block.setTranslateY((yLocalOffset * 32)*2); // FIXME: 25/09/2023 wrong y
+            Block block = new Block(map[i][nextIndex], i, nextIndex);
+
+
+            block.setTranslateX((blockIndex - 1) * 32 + this.xOffset);
+            block.setTranslateY((((yLocalOffset) * 32)*2) + this.yOffset); // FIXME: 25/09/2023 wrong y
             line.add(block);
             root.getChildren().add(block);
             blockIndex++;
         }
-        for (int i = 0; i < line.size(); i++) {
+        for (int i = 0; i < line.size(); i++) { //only works down
             this.blocks.get(i).add(line.get(i));
         }
     }

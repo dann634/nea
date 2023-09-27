@@ -1,12 +1,16 @@
 package com.jackson.game;
 
+import com.jackson.io.TextIO;
 import com.jackson.ui.Camera;
+import com.jackson.ui.SettingsController;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -22,27 +26,32 @@ public class Character extends ImageView {
     private Rectangle headCollision;
     private Rectangle leftCollision;
     private Rectangle rightCollision;
-
-
-
-
-
+    private Label displayNameLabel;
 
     public Character() {
         setImage(new Image("file:src/main/resources/images/playerIdle.png"));
         setPreserveRatio(true);
         setFitWidth(32);
-        setX(486); //Half Screen size (512) - Character Width (48) + Some Value(22)
+        setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
         setY(180);
 
         initFeetCollision();
         initBodyCollision();
+        initDisplayNameLabel();
 
 
         this.isModelFacingRight = new SimpleBooleanProperty(true);
         this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
         });
+    }
+
+    private void initDisplayNameLabel() {
+        this.displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
+        this.displayNameLabel.translateXProperty().bind(this.xProperty().subtract(this.displayNameLabel.getWidth() / 2));
+        this.displayNameLabel.translateYProperty().bind(this.yProperty().subtract(15));
+        this.displayNameLabel.setStyle("-fx-font-weight: bold");
+        this.displayNameLabel.setVisible(false); // not for singleplayer
     }
 
 
@@ -112,6 +121,10 @@ public class Character extends ImageView {
 
     public List<Rectangle> getCollisions() {
         return List.of(this.feetCollision, this.leftCollision, this.rightCollision);
+    }
+
+    public Label getDisplayNameLabel() {
+        return this.displayNameLabel;
     }
 
     public Rectangle getFeetCollision() {

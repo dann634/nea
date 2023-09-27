@@ -9,7 +9,6 @@ import static java.lang.Math.abs;
 
 public class MovementFactory {
 
-    private static final double FPS = 60;
     private GameController gameController;
     private Character character;
 
@@ -28,17 +27,15 @@ public class MovementFactory {
 
     public boolean calculateYProperties(boolean isWPressed) {
         boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
-        boolean isCharacterMovingDown = true;
         if(isCharacterTouchingFloor && !isWPressed && this.jumpAcceleration >= 0) { //Not jumping and on floor
             return false;
         }
         if(this.jumpAcceleration < 0) { //In Mid air jumping
-            isCharacterMovingDown = false;
             this.jumpAcceleration += 0.15;
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
-//            doYOffsetStuff((int) -this.jumpVelocity, false);
+//            doYOffsetStuff((int) -this.jumpVelocity, false); // FIXME: 27/09/2023 jumping deletes top layer
             return false;
         }
 
@@ -51,23 +48,20 @@ public class MovementFactory {
             return false;
         }
 
-//        System.out.println("gravity");
         return doYOffsetStuff(-3, true);
 
 
 
     }
 
-    private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) { // FIXME: 26/09/2023 something here breaks everything
+    private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) {
         boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 32;
-        System.out.println(condition);
-        System.out.println(this.camera.getyOffset());
         if (condition) {
-            int yLocalOffset = isCharacterMovingDown ? RENDER_HEIGHT : -(RENDER_HEIGHT) ;
+            int yLocalOffset = isCharacterMovingDown ? RENDER_HEIGHT-1 : -(RENDER_HEIGHT) ;
             int newYPos = isCharacterMovingDown ? 1 : -1;
             int newYOffset = isCharacterMovingDown ? 32 : -32;
 
-            this.camera.drawHorizontalLine(yLocalOffset); // FIXME: 24/09/2023 will probably break
+            this.camera.drawHorizontalLine(yLocalOffset);
             this.camera.deleteHorizontal(isCharacterMovingDown);
             this.character.addYPos(newYPos);
             this.camera.addYOffset(newYOffset);
@@ -98,20 +92,21 @@ public class MovementFactory {
         }
         this.camera.translateBlocksByX(offset);
         boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
+
         if (condition) {
             int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH - 1 : RENDER_WIDTH;
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
             this.camera.drawVerticalLine(xLocalOffset);
-            this.camera.deleteVertical(!isCharacterMovingLeft);
+            this.camera.deleteVertical(!isCharacterMovingLeft); //Add check here
             this.character.addXPos(newXPos);
             this.camera.addXOffset(newXOffset);
         }
 
-        if(abs(oldX - this.character.getX()) > 30) {
+        if(abs(this.oldX - this.camera.getxOffset()) > 100) {
             this.character.swapMovingImage();
-            oldX = this.character.getX();
+            this.oldX = this.character.getX();
         } else if(oldX == this.character.getX()) {
             this.character.setIdleImage();
         }
