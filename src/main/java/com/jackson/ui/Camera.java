@@ -38,10 +38,6 @@ public class Camera {
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) {
             Block block = new Block(map[nextXIndex][i], nextXIndex, i);
 
-            if(nextXIndex  == 516) {
-                System.out.println(nextXIndex);
-            }
-
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
             block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
             line.add(block);
@@ -49,9 +45,29 @@ public class Camera {
             blockIndex++;
         }
         // FIXME: 27/09/2023 fix this
-        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) { //Maybe breaking eveeyrhing
-            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
+//        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) { //Maybe breaking eveeyrhing
+//            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
+//            return;
+//        }
+
+       addLineToCorrectIndex(line);
+    }
+
+    private void addLineToCorrectIndex(List<Block> line) {
+        if(line == null || line.isEmpty()) {
             return;
+        }
+
+        for(int i  = 0; i<this.blocks.size(); i++) {
+            List<Block> blockList = this.blocks.get(i);
+            if(blockList.isEmpty()) {
+                continue;
+            }
+            int xPos = blockList.get(0).getXPos() + 1;
+            if(xPos == line.get(0).getXPos()) {
+                this.blocks.add(i+1, line);
+                return;
+            }
         }
         this.blocks.add(line);
     }
@@ -75,8 +91,8 @@ public class Camera {
         }
     }
 
-    public void deleteVertical(boolean isLeft) {
-        int index = isLeft ? 0 : this.blocks.size() - 2;
+    public void deleteVertical(boolean isLeft) { // FIXME: 28/09/2023 probkem i think
+        int index = isLeft ? 0 : this.blocks.size() - 1;
         this.root.getChildren().removeAll(this.blocks.get(index));
         this.blocks.remove(index);
     }
