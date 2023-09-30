@@ -9,8 +9,8 @@ import java.util.List;
 
 public class Camera {
 
-    public static final int RENDER_WIDTH = 17;
-    public static final int RENDER_HEIGHT = 11;
+    public static final int RENDER_WIDTH = 18;
+    public static final int RENDER_HEIGHT = 10;
     private Character character;
     private String[][] map;
     private AnchorPane root;
@@ -37,23 +37,27 @@ public class Camera {
         List<Block> line = new ArrayList<>();
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) {
             Block block = new Block(map[nextXIndex][i], nextXIndex, i);
-
-            if(nextXIndex  == 516) {
-                System.out.println(nextXIndex);
+            if(nextXIndex == 516) {
+                System.out.println();
             }
-
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
             block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
             line.add(block);
             root.getChildren().add(block);
             blockIndex++;
         }
-        // FIXME: 27/09/2023 fix this
-        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) { //Maybe breaking eveeyrhing
+        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) { //Maybe breaking eveeyrhing
             this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
             return;
         }
         this.blocks.add(line);
+    }
+
+    public void printBlocks() {
+        for(List<Block> blocks1 : this.blocks) {
+            System.out.println(blocks1.get(0).getXPos());
+        }
+        System.out.println("---");
     }
 
     public void drawHorizontalLine(int yLocalOffset) {
@@ -76,7 +80,7 @@ public class Camera {
     }
 
     public void deleteVertical(boolean isLeft) {
-        int index = isLeft ? 0 : this.blocks.size() - 2;
+        int index = isLeft ? 0 : this.blocks.size() - 1;
         this.root.getChildren().removeAll(this.blocks.get(index));
         this.blocks.remove(index);
     }

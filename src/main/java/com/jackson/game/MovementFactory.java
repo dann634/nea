@@ -3,6 +3,8 @@ package com.jackson.game;
 import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
 
+import java.util.List;
+
 import static com.jackson.ui.Camera.RENDER_HEIGHT;
 import static com.jackson.ui.Camera.RENDER_WIDTH;
 import static java.lang.Math.abs;
@@ -70,7 +72,7 @@ public class MovementFactory {
         return condition;
     }
 
-    public boolean calculateXProperties(boolean isAPressed, boolean isDPressed) {
+    public boolean calculateXProperties(boolean isAPressed, boolean isDPressed, boolean w) {
 
         if(!isAPressed && !isDPressed) { //For optimization
             return false;
@@ -90,11 +92,16 @@ public class MovementFactory {
                 isCharacterMovingLeft = true;
             }
         }
+
+        if(w) {
+            this.camera.printBlocks();
+        }
+
         this.camera.translateBlocksByX(offset);
         boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
 
         if (condition) {
-            int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH - 1 : RENDER_WIDTH;
+            int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH : RENDER_WIDTH;
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 

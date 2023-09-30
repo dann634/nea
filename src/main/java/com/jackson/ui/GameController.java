@@ -66,7 +66,7 @@ public class GameController extends Scene {
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(25), e -> {
 
-            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
+            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed, this.isWPressed);
             this.movementFactory.calculateYProperties(this.isWPressed);
 
         }));
@@ -160,7 +160,7 @@ public class GameController extends Scene {
                     case W -> {
                         this.isWPressed = true;
                         this.characters.get(0).setIdleImage();
-                        System.out.println(this.characters.get(0).getXPos());
+
                     }
                 }
             });
