@@ -68,6 +68,9 @@ public class MovementFactory {
             this.character.addYPos(newYPos);
             this.camera.addYOffset(newYOffset);
         }
+
+
+
         this.camera.translateBlocksByY(offset); // FIXME: 26/09/2023 this method :((
         return condition;
     }
