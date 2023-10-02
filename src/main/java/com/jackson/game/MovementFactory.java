@@ -67,6 +67,7 @@ public class MovementFactory {
             this.camera.deleteHorizontal(isCharacterMovingDown);
             this.character.addYPos(newYPos);
             this.camera.addYOffset(newYOffset);
+            this.character.updateLabel();
         }
 
 
@@ -112,6 +113,7 @@ public class MovementFactory {
             this.camera.deleteVertical(!isCharacterMovingLeft); //Add check here
             this.character.addXPos(newXPos);
             this.camera.addXOffset(newXOffset);
+            this.character.updateLabel();
         }
 
         if(abs(this.oldX - this.camera.getxOffset()) > 100) {

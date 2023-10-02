@@ -27,10 +27,6 @@ public class Block extends ImageView {
 
         setOnMouseClicked(e -> {
             System.out.println(this.xPos);
-            List<List<Block>> blocks = GameController.getBlocks();
-            for(List<Block> blocks1 : blocks) {
-                System.out.println(blocks1.get(0).getXPos());
-            }
         });
 
         setPreserveRatio(true);

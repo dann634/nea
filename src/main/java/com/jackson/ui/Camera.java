@@ -47,7 +47,14 @@ public class Camera {
             blockIndex++;
         }
         if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) { //Maybe breaking eveeyrhing
+            if(!this.blocks.isEmpty() && this.blocks.get((xLocalOffset < 0) ? 0 : this.blocks.size() - 1).get(0).getXPos() == nextXIndex) {
+                return;
+            }
             this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
+            return;
+        }
+
+        if(!this.blocks.isEmpty() && this.blocks.get((xLocalOffset < 0) ? 0 : this.blocks.size() - 1).get(0).getXPos() == nextXIndex) {
             return;
         }
         this.blocks.add(line);
@@ -80,9 +87,20 @@ public class Camera {
     }
 
     public void deleteVertical(boolean isLeft) {
+        System.out.println("----");
+        System.out.println("Before");
+        this.blocks.forEach(n -> {
+            System.out.println(n.get(0).getXPos());
+        });
+
         int index = isLeft ? 0 : this.blocks.size() - 1;
         this.root.getChildren().removeAll(this.blocks.get(index));
         this.blocks.remove(index);
+
+        System.out.println("After");
+        this.blocks.forEach(n -> {
+            System.out.println(n.get(0).getXPos());
+        });
     }
 
     public void deleteHorizontal(boolean isDown) {

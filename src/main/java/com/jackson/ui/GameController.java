@@ -67,7 +67,7 @@ public class GameController extends Scene {
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(25), e -> {
 
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed, this.isWPressed);
-            this.movementFactory.calculateYProperties(this.isWPressed);
+//            this.movementFactory.calculateYProperties(this.isWPressed);
 
         }));
         timeline.play();
