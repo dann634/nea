@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Camera {
 
-    public static final int RENDER_WIDTH = 17;
+    public static final int RENDER_WIDTH = 18;
     public static final int RENDER_HEIGHT = 11;
     private Character character;
     private String[][] map;
@@ -19,7 +19,6 @@ public class Camera {
 
     private int xOffset;
     private int yOffset;
-    private int currentYTranslation;
 
     public Camera(Character character, String[][] map, AnchorPane root, List<List<Block>> blocks) {
         this.character = character;
@@ -28,13 +27,14 @@ public class Camera {
         this.blocks = blocks;
         this.xOffset = 0;
         this.yOffset = 0;
-        this.currentYTranslation = 0;
     }
 
     public void drawVerticalLine(int xLocalOffset) {
         int nextXIndex = this.character.getXPos() + xLocalOffset;
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
+//        System.out.println(512 + (xLocalOffset * 32) + this.xOffset);
+        System.out.println(nextXIndex);
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) {
             Block block = new Block(map[nextXIndex][i], nextXIndex, i);
 
@@ -45,12 +45,13 @@ public class Camera {
             blockIndex++;
         }
         // FIXME: 27/09/2023 fix this
-//        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH - 1) { //Maybe breaking eveeyrhing
-//            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
-//            return;
-//        }
+        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) { //Maybe breaking eveeyrhing
+            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
+            return;
+        }
+        this.blocks.add(line);
 
-       addLineToCorrectIndex(line);
+//       addLineToCorrectIndex(line);
     }
 
     private void addLineToCorrectIndex(List<Block> line) {

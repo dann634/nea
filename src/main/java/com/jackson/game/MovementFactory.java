@@ -97,7 +97,10 @@ public class MovementFactory {
         boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
 
         if (condition) {
-            int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH - 1 : RENDER_WIDTH;
+
+            //Get block x at edge and add one
+            //Will break if blocks is not ordered
+            int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH : RENDER_WIDTH;
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
@@ -107,7 +110,7 @@ public class MovementFactory {
             this.camera.addXOffset(newXOffset);
         }
 
-        if(abs(this.oldX - this.camera.getxOffset()) > 100) {
+        if(abs(this.oldX - this.camera.getxOffset()) > 16) {
             this.character.swapMovingImage();
             this.oldX = this.character.getX();
         } else if(oldX == this.character.getX()) {
