@@ -64,7 +64,7 @@ public class MovementFactory {
             int newYOffset = isCharacterMovingDown ? 32 : -32;
 
             this.camera.drawHorizontalLine(yOffset);
-            this.camera.deleteHorizontal(isCharacterMovingDown);
+            this.camera.deleteHorizontal(yOffset);
             this.character.addYPos(newYPos);
             this.camera.addYOffset(newYOffset);
         }
