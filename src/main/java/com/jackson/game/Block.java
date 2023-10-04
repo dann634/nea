@@ -14,7 +14,7 @@ public class Block extends ImageView {
     public Block(String key, int xPos, int yPos) {
         String dir = "file:src/main/resources/images/";
         dir += switch (key) {
-            case "0" -> "air.png";
+            case "0" -> "air1.png";
             case "1" -> "dirt.png";
             case "2" -> "grass.png";
             case "3" -> "bedrock.png";
@@ -22,12 +22,17 @@ public class Block extends ImageView {
         };
         setImage(new Image(dir));
 
+        if(key.equals("0")) {
+            setOpacity(0);
+        }
+
         this.xPos = xPos;
         this.yPos = yPos;
 
         setOnMouseClicked(e -> {
-            System.out.println(this.xPos);
+            System.out.printf("%s %s", this.xPos, this.yPos);
         });
+
 
         setPreserveRatio(true);
         setFitHeight(32);

@@ -1,5 +1,6 @@
 package com.jackson.game;
 
+import com.jackson.io.TextIO;
 import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
 
@@ -35,7 +36,7 @@ public class MovementFactory {
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
-//            doYOffsetStuff((int) -this.jumpVelocity, false); // FIXME: 27/09/2023 jumping deletes top layer
+            doYOffsetStuff((int) -this.jumpVelocity, false); // FIXME: 27/09/2023 jumping deletes top layer
             return false;
         }
 
@@ -55,21 +56,21 @@ public class MovementFactory {
     }
 
     private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) {
-        boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 32;
+        boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 0;
         if (condition) {
-            int yLocalOffset = isCharacterMovingDown ? RENDER_HEIGHT-1 : -(RENDER_HEIGHT) ;
+
+            int yOffset = isCharacterMovingDown ? RENDER_HEIGHT : -RENDER_HEIGHT;
             int newYPos = isCharacterMovingDown ? 1 : -1;
             int newYOffset = isCharacterMovingDown ? 32 : -32;
 
-            this.camera.drawHorizontalLine(yLocalOffset);
+            this.camera.drawHorizontalLine(yOffset);
             this.camera.deleteHorizontal(isCharacterMovingDown);
             this.character.addYPos(newYPos);
             this.camera.addYOffset(newYOffset);
         }
 
 
-
-        this.camera.translateBlocksByY(offset); // FIXME: 26/09/2023 this method :((
+        this.camera.translateBlocksByY(offset);
         return condition;
     }
 
@@ -110,7 +111,7 @@ public class MovementFactory {
             this.camera.addXOffset(newXOffset);
         }
 
-        if(abs(this.oldX - this.camera.getxOffset()) > 16) {
+        if(abs(this.oldX - this.camera.getxOffset()) > 32) {
             this.character.swapMovingImage();
             this.oldX = this.character.getX();
         } else if(oldX == this.character.getX()) {
@@ -118,6 +119,8 @@ public class MovementFactory {
         }
         return condition;
     }
+
+
 
 
 }

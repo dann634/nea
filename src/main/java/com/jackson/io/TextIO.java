@@ -9,6 +9,10 @@ import java.util.List;
 
 public class TextIO {
 
+    private TextIO() {
+
+    }
+
 
     public static List<String> readFile(String dir) {
 

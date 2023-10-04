@@ -5,6 +5,7 @@ import com.jackson.game.Character;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Camera {
@@ -33,8 +34,6 @@ public class Camera {
         int nextXIndex = this.character.getXPos() + xLocalOffset;
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
-//        System.out.println(512 + (xLocalOffset * 32) + this.xOffset);
-        System.out.println(nextXIndex);
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) {
             Block block = new Block(map[nextXIndex][i], nextXIndex, i);
 
@@ -44,45 +43,26 @@ public class Camera {
             root.getChildren().add(block);
             blockIndex++;
         }
-        // FIXME: 27/09/2023 fix this
-        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) { //Maybe breaking eveeyrhing
+        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) {
             this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
             return;
         }
         this.blocks.add(line);
 
-//       addLineToCorrectIndex(line);
     }
 
-    private void addLineToCorrectIndex(List<Block> line) {
-        if(line == null || line.isEmpty()) {
-            return;
-        }
-
-        for(int i  = 0; i<this.blocks.size(); i++) {
-            List<Block> blockList = this.blocks.get(i);
-            if(blockList.isEmpty()) {
-                continue;
-            }
-            int xPos = blockList.get(0).getXPos() + 1;
-            if(xPos == line.get(0).getXPos()) {
-                this.blocks.add(i+1, line);
-                return;
-            }
-        }
-        this.blocks.add(line);
-    }
-
-    public void drawHorizontalLine(int yLocalOffset) {
-        int nextIndex = this.character.getYPos() + yLocalOffset;
+    public void drawHorizontalLine(int nextYIndex) {
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
+
+        int nextYOffset = this.character.getYPos() + nextYIndex;
+
         for (int i = character.getXPos() - RENDER_WIDTH; i < character.getXPos() + RENDER_WIDTH; i++) {
-            Block block = new Block(map[i][nextIndex], i, nextIndex);
+            Block block = new Block(map[i][nextYOffset], i, nextYOffset);
 
 
             block.setTranslateX((blockIndex - 1) * 32 + this.xOffset);
-            block.setTranslateY((((yLocalOffset) * 32)*2) + this.yOffset); // FIXME: 25/09/2023 wrong y
+            block.setTranslateY(((nextYOffset) * 64) + this.yOffset);
             line.add(block);
             root.getChildren().add(block);
             blockIndex++;
@@ -98,17 +78,20 @@ public class Camera {
         this.blocks.remove(index);
     }
 
-    public void deleteHorizontal(boolean isDown) {
+    public void deleteHorizontal(boolean isDown) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
 
-        if(this.blocks.get(0).isEmpty()) {
+        if(this.blocks.isEmpty() || this.blocks.get(0).isEmpty()) {
             return;
         }
 
-        int index = isDown ? 0 : this.blocks.get(0).size() - 1 ;
-        for(List<Block> blocks : this.blocks) {
-            this.root.getChildren().remove(blocks.get(index));
-            blocks.remove(index);
+        for(List<Block> blockList : this.blocks) {
+            int index = isDown ? blockList.size() - 1 : 0;
+            this.root.getChildren().remove(blockList.get(index));
+            blockList.remove(index);
         }
+
+
+
     }
 
 
@@ -129,6 +112,7 @@ public class Camera {
             }
         }
     }
+
     public void initWorld() {
         for (int i = -RENDER_WIDTH; i < RENDER_WIDTH; i++) { //Init world
             drawVerticalLine(i);
