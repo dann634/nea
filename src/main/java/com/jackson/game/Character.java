@@ -47,11 +47,15 @@ public class Character extends ImageView {
     }
 
     private void initDisplayNameLabel() {
-        this.displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
+        this.displayNameLabel = new Label(this.xPos + "," + this.yPos); //TextIO.readFile("src/main/resources/settings/settings.txt").get(0)
         this.displayNameLabel.translateXProperty().bind(this.xProperty().subtract(this.displayNameLabel.getWidth() / 2));
         this.displayNameLabel.translateYProperty().bind(this.yProperty().subtract(15));
         this.displayNameLabel.setStyle("-fx-font-weight: bold");
-        this.displayNameLabel.setVisible(false); // not for singleplayer
+//        this.displayNameLabel.setVisible(false); // not for singleplayer
+    }
+
+    public void updateLabel() {
+        this.displayNameLabel.setText(this.xPos + "," + this.yPos);
     }
 
 
