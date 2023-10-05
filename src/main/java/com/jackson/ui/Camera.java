@@ -78,7 +78,7 @@ public class Camera {
         this.blocks.remove(index);
     }
 
-    public void deleteHorizontal(boolean isDown) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
+    public void deleteHorizontal(boolean isDown) {
 
         if(this.blocks.isEmpty() || this.blocks.get(0).isEmpty()) {
             return;
