@@ -28,7 +28,7 @@ public class GameController extends Scene {
 
     private Camera camera;
     private String[][] map;
-    private static List<List<Block>> blocks;
+    private List<List<Block>> blocks;
     private MovementFactory movementFactory;
 
     private boolean isAPressed;
@@ -66,8 +66,32 @@ public class GameController extends Scene {
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(25), e -> {
 
+            // TODO: 05/10/2023 starts here
+            /*
+            README
+            1. If player has moved more than block width (32px) render a new line
+            2. Delete the line on the opposite side for performance
+            3. Update x position
+            4. Reset camera offset
+
+            For some reason the blocks 2d arraylist isnt ordered correctly
+            So when deleteVertical is called the line at the edge of the array
+            has a xPos of somewhere in the middle of screen and is deleted
+
+            Also there might be duplicate lines in the array but that probably stems
+            from the old line not being deleted as its jumbled
+
+            Only worrying about the x movement for now
+            Adding in the y movement creates a monster
+            Literally the buggiest thing ive ever made
+
+            sorry for messy code might clean it up later who knows
+            if you see any glaring ways to optimise please let me know, i need all the performance i can get
+            email me with questions
+
+             */
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
-            this.movementFactory.calculateYProperties(this.isWPressed);
+//            this.movementFactory.calculateYProperties(this.isWPressed);
 
         }));
         timeline.play();
@@ -80,9 +104,6 @@ public class GameController extends Scene {
         return map;
     }
 
-    public static List<List<Block>> getBlocks() {
-        return blocks;
-    }
 
     private void spawnCharacter() {
         Character character = new Character();

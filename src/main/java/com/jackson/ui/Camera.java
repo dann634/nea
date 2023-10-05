@@ -5,7 +5,6 @@ import com.jackson.game.Character;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 public class Camera {
@@ -30,34 +29,57 @@ public class Camera {
         this.yOffset = 0;
     }
 
+    // TODO: 05/10/2023 Gets vertical line and adds to scene and 2d array
     public void drawVerticalLine(int xLocalOffset) {
-        int nextXIndex = this.character.getXPos() + xLocalOffset;
+        int nextXIndex = this.character.getXPos() + xLocalOffset; //Gets index of line to be loaded
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
-        for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) {
-            Block block = new Block(map[nextXIndex][i], nextXIndex, i);
+        for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
+            Block block = new Block(map[nextXIndex][i], nextXIndex, i); //takes a string for block type and X pos and Y pos
 
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
             block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
             line.add(block);
-            root.getChildren().add(block);
+            this.root.getChildren().add(block);
+
             blockIndex++;
         }
 
-        blocks.forEach(n -> {
-            if(!blocks.isEmpty() && n.get(0).getXPos() == line.get(0).getXPos()) { // FIXME: 04/10/2023 line bug caught here?
-                System.out.println("AHH");
-                return;
-            }
-        });
+        //trying to add line into correct place
+//        int index = 0;
+//        for(List<Block> blockList : this.blocks) {
+//            if(blockList.isEmpty()) { //gatekeeping
+//                return;
+//            }
+//            int indexXPos = blockList.get(0).getXPos();
+//            int lineXPos = line.get(0).getXPos();
+//
+//            if(indexXPos == lineXPos - 1) {
+//                this.blocks.add(index + 1, line);
+//                this.root.getChildren().addAll(line);
+//                return;
+//            }
+//
+//            index++;
+//
+//        }
 
+        // TODO: 05/10/2023 adding line to correct side of 2d arraylist
         if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) {
             this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
             return;
         }
-        this.blocks.add(line);
-
+        this.blocks.add(line); //for initialising the world (xLocalOffset wont be either)
     }
+
+    // TODO: 05/10/2023 this is where the bug happens
+    //2d array isnt ordered correctly
+    public void deleteVertical(boolean isLeft) {
+        int index = isLeft ? 0 : this.blocks.size() - 1;
+        this.root.getChildren().removeAll(this.blocks.get(index));
+        this.blocks.remove(index);
+    }
+
 
     public void drawHorizontalLine(int nextYIndex) {
         int blockIndex = 0;
@@ -80,11 +102,7 @@ public class Camera {
         }
     }
 
-    public void deleteVertical(boolean isLeft) { // FIXME: 28/09/2023 probkem i think
-        int index = isLeft ? 0 : this.blocks.size() - 1;
-        this.root.getChildren().removeAll(this.blocks.get(index));
-        this.blocks.remove(index);
-    }
+
 
     public void deleteHorizontal(int yOffset) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
 

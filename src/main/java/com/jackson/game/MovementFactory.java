@@ -20,7 +20,7 @@ public class MovementFactory {
 
     private double oldX;
 
-    public MovementFactory(Character character, GameController gameController, Camera camera) { //Start new thread for each character (Maybe change later)
+    public MovementFactory(Character character, GameController gameController, Camera camera) {
         this.gameController = gameController;
         this.character = character;
         this.camera = camera;
@@ -74,10 +74,13 @@ public class MovementFactory {
         return condition;
     }
 
-    public boolean calculateXProperties(boolean isAPressed, boolean isDPressed) {
+
+    // TODO: 05/10/2023 this happens every frame
+
+    public void calculateXProperties(boolean isAPressed, boolean isDPressed) {
 
         if(!isAPressed && !isDPressed) { //For optimization
-            return false;
+            return;
         }
 
         boolean canMoveLeft = !gameController.isEntityTouchingSide(character.getLeftCollision());
@@ -97,6 +100,7 @@ public class MovementFactory {
         this.camera.translateBlocksByX(offset);
         boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
 
+        // TODO: 05/10/2023 If character has moved more than 32 (block width) render new line
         if (condition) {
 
             //Get block x at edge and add one
@@ -105,19 +109,19 @@ public class MovementFactory {
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
-            this.camera.drawVerticalLine(xLocalOffset);
-            this.camera.deleteVertical(!isCharacterMovingLeft); //Add check here
-            this.character.addXPos(newXPos);
-            this.camera.addXOffset(newXOffset);
+            this.camera.drawVerticalLine(xLocalOffset); //Renders new line
+            this.camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
+            this.character.addXPos(newXPos); //Updates x pos of character
+            this.camera.addXOffset(newXOffset); //Resets camera offset
         }
 
+        //for walking animation (dont worry)
         if(abs(this.oldX - this.camera.getxOffset()) > 32) {
             this.character.swapMovingImage();
             this.oldX = this.character.getX();
         } else if(oldX == this.character.getX()) {
             this.character.setIdleImage();
         }
-        return condition;
     }
 
 
