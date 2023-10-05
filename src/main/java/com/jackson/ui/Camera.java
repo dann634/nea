@@ -43,6 +43,14 @@ public class Camera {
             root.getChildren().add(block);
             blockIndex++;
         }
+
+        blocks.forEach(n -> {
+            if(!blocks.isEmpty() && n.get(0).getXPos() == line.get(0).getXPos()) { // FIXME: 04/10/2023 line bug caught here?
+                System.out.println("AHH");
+                return;
+            }
+        });
+
         if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) {
             this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
             return;
@@ -78,16 +86,20 @@ public class Camera {
         this.blocks.remove(index);
     }
 
-    public void deleteHorizontal(boolean isDown) {
+    public void deleteHorizontal(int yOffset) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
 
         if(this.blocks.isEmpty() || this.blocks.get(0).isEmpty()) {
             return;
         }
 
         for(List<Block> blockList : this.blocks) {
-            int index = isDown ? blockList.size() - 1 : 0;
-            this.root.getChildren().remove(blockList.get(index));
-            blockList.remove(index);
+            Block removeBlock = new Block("0", -1, -1);
+            for(Block block : blockList) {
+                if(block.getYPos() == this.character.getYPos() + yOffset) {
+                    removeBlock = block;
+                }
+            }
+            blockList.remove(removeBlock);
         }
 
 

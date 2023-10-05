@@ -22,15 +22,16 @@ public class Block extends ImageView {
         };
         setImage(new Image(dir));
 
-        if(key.equals("0")) {
-            setOpacity(0);
-        }
+//        if(key.equals("0")) {
+//            setOpacity(1);
+//        }
 
         this.xPos = xPos;
         this.yPos = yPos;
 
         setOnMouseClicked(e -> {
             System.out.printf("%s %s", this.xPos, this.yPos);
+            System.out.println();
         });
 
 
