@@ -27,6 +27,7 @@ public class GameController extends Scene {
     private List<Character> characters;
 
     private Camera camera;
+    private Inventory inventory;
     private String[][] map;
     private List<List<Block>> blocks;
     private MovementFactory movementFactory;
@@ -47,6 +48,7 @@ public class GameController extends Scene {
         this.characters = new ArrayList<>();
         this.blocks = new ArrayList<>();
         this.map = loadMap();
+        this.inventory = new Inventory();
 
         this.isAPressed = false;
         this.isDPressed = false;
@@ -56,6 +58,8 @@ public class GameController extends Scene {
         this.camera = new Camera(this.characters.get(0), this.map, this.root, this.blocks);
         this.camera.initWorld();
         this.characters.get(0).toFront();
+
+        this.root.getChildren().add(this.inventory.getHotBarHBox());
 
         setRoot(this.root);
         this.root.setId("root");
@@ -92,9 +96,10 @@ public class GameController extends Scene {
              */
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
 //            this.movementFactory.calculateYProperties(this.isWPressed);
-
+            this.inventory.getHotBarHBox().toFront();
         }));
         timeline.play();
+
 
     }
 
