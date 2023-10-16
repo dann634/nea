@@ -6,11 +6,12 @@ import com.jackson.game.MovementFactory;
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import com.jackson.ui.hud.HealthBar;
+import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -28,6 +29,7 @@ public class GameController extends Scene {
 
     private Camera camera;
     private Inventory inventory;
+    private HealthBar healthBar;
     private String[][] map;
     private List<List<Block>> blocks;
     private MovementFactory movementFactory;
@@ -48,18 +50,27 @@ public class GameController extends Scene {
         this.characters = new ArrayList<>();
         this.blocks = new ArrayList<>();
         this.map = loadMap();
-        this.inventory = new Inventory();
 
+        spawnCharacter();
+
+        //HUD
+        this.inventory = new Inventory();
+        this.healthBar = new HealthBar(this.characters.get(0).healthProperty());
+
+        this.root.getChildren().add(this.inventory.getInventoryVbox());
+        this.root.getChildren().add(this.healthBar.getHealthHud());
+
+        //Movement
         this.isAPressed = false;
         this.isDPressed = false;
         this.isWPressed = false;
 
-        spawnCharacter();
+
         this.camera = new Camera(this.characters.get(0), this.map, this.root, this.blocks);
         this.camera.initWorld();
         this.characters.get(0).toFront();
 
-        this.root.getChildren().add(this.inventory.getHotBarHBox());
+
 
         setRoot(this.root);
         this.root.setId("root");
@@ -68,7 +79,7 @@ public class GameController extends Scene {
         this.movementFactory = new MovementFactory(this.characters.get(0), this, this.camera);
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(25), e -> {
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
 
             // TODO: 05/10/2023 starts here
             /*
@@ -95,8 +106,14 @@ public class GameController extends Scene {
 
              */
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
-//            this.movementFactory.calculateYProperties(this.isWPressed);
-            this.inventory.getHotBarHBox().toFront();
+            this.movementFactory.calculateYProperties(this.isWPressed);
+
+            //Everything to front (maybe make a method for it)
+            this.inventory.getInventoryVbox().toFront();
+            this.characters.get(0).toFront();
+            this.healthBar.getHealthHud().toFront();
+
+            System.out.println(this.characters.get(0).getHealth());
         }));
         timeline.play();
 
@@ -186,6 +203,11 @@ public class GameController extends Scene {
                     case W -> {
                         this.isWPressed = true;
                         this.characters.get(0).setIdleImage();
+                        this.characters.get(0).addHealth(-10);
+                    }
+
+                    case I -> {
+                        this.inventory.toggleInventory();
                     }
                 }
             });

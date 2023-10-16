@@ -4,6 +4,8 @@ import com.jackson.io.TextIO;
 import com.jackson.ui.Camera;
 import com.jackson.ui.SettingsController;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
@@ -22,6 +24,8 @@ public class Character extends ImageView {
 
     private SimpleBooleanProperty isModelFacingRight;
 
+    private SimpleDoubleProperty health;
+
     private Rectangle feetCollision;
     private Rectangle headCollision;
     private Rectangle leftCollision;
@@ -38,6 +42,8 @@ public class Character extends ImageView {
         initFeetCollision();
         initBodyCollision();
         initDisplayNameLabel();
+
+        this.health = new SimpleDoubleProperty(100);
 
 
         this.isModelFacingRight = new SimpleBooleanProperty(true);
@@ -145,5 +151,24 @@ public class Character extends ImageView {
 
     public void setIsModelFacingRight(boolean isModelFacingRight) {
         this.isModelFacingRight.set(isModelFacingRight);
+    }
+
+    public double getHealth() {
+        return health.get();
+    }
+
+    public SimpleDoubleProperty healthProperty() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health.set(health);
+    }
+
+    public void addHealth(int value) {
+        if(this.health.get() + value > 100 || this.health.get() + value < 0) {
+            return;
+        }
+        this.health.set(this.health.get() + value);
     }
 }
