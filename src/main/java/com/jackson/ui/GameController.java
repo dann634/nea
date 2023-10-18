@@ -106,14 +106,13 @@ public class GameController extends Scene {
 
              */
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
-            this.movementFactory.calculateYProperties(this.isWPressed);
+//            this.movementFactory.calculateYProperties(this.isWPressed);
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
             this.characters.get(0).toFront();
             this.healthBar.getHealthHud().toFront();
 
-            System.out.println(this.characters.get(0).getHealth());
         }));
         timeline.play();
 

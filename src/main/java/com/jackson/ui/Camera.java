@@ -30,7 +30,7 @@ public class Camera {
     }
 
     // TODO: 05/10/2023 Gets vertical line and adds to scene and 2d array
-    public void drawVerticalLine(int xLocalOffset) {
+    public List<Block> getVerticalLine(int xLocalOffset) {
         int nextXIndex = this.character.getXPos() + xLocalOffset; //Gets index of line to be loaded
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
@@ -45,31 +45,13 @@ public class Camera {
             blockIndex++;
         }
 
-        //trying to add line into correct place
-//        int index = 0;
-//        for(List<Block> blockList : this.blocks) {
-//            if(blockList.isEmpty()) { //gatekeeping
-//                return;
-//            }
-//            int indexXPos = blockList.get(0).getXPos();
-//            int lineXPos = line.get(0).getXPos();
-//
-//            if(indexXPos == lineXPos - 1) {
-//                this.blocks.add(index + 1, line);
-//                this.root.getChildren().addAll(line);
-//                return;
-//            }
-//
-//            index++;
-//
-//        }
-
         // TODO: 05/10/2023 adding line to correct side of 2d arraylist
-        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) {
-            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
-            return;
-        }
-        this.blocks.add(line); //for initialising the world (xLocalOffset wont be either)
+//        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) {
+//            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
+//            return line;
+//        }
+//        this.blocks.add(line); //for initialising the world (xLocalOffset wont be either)
+        return line;
     }
 
     // TODO: 05/10/2023 this is where the bug happens
@@ -145,8 +127,21 @@ public class Camera {
 
     public void initWorld() {
         for (int i = -RENDER_WIDTH; i < RENDER_WIDTH; i++) { //Init world
-            drawVerticalLine(i);
+            addLine(getVerticalLine(i));
         }
+    }
+
+    public void addLine(List<Block> line) {
+        this.blocks.add(line);
+    }
+
+    public void addLine(List<Block> line, boolean isLeft) {
+        if(isLeft) {
+            this.blocks.add(0, line);
+            return;
+        }
+        this.blocks.add(line);
+
     }
 
     public int getxOffset() {

@@ -109,7 +109,8 @@ public class MovementFactory {
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
-            this.camera.drawVerticalLine(xLocalOffset); //Renders new line
+//            this.camera.drawVerticalLine(xLocalOffset); //Renders new line
+            this.camera.addLine(this.camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft);
             this.camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
             this.character.addXPos(newXPos); //Updates x pos of character
             this.camera.addXOffset(newXOffset); //Resets camera offset
