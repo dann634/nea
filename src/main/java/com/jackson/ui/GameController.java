@@ -23,16 +23,14 @@ import java.util.List;
 public class GameController extends Scene {
 
     private static int spawnYCoords;
-    private AnchorPane root;
+    private final AnchorPane root;
 
-    private List<Character> characters;
+    private final List<Character> characters;
 
-    private Camera camera;
-    private Inventory inventory;
-    private HealthBar healthBar;
-    private String[][] map;
-    private List<List<Block>> blocks;
-    private MovementFactory movementFactory;
+    private final Inventory inventory;
+    private final HealthBar healthBar;
+    private final List<List<Block>> blocks;
+    private final MovementFactory movementFactory;
 
     private boolean isAPressed;
     private boolean isDPressed;
@@ -49,7 +47,7 @@ public class GameController extends Scene {
         //Initialises fields
         this.characters = new ArrayList<>();
         this.blocks = new ArrayList<>();
-        this.map = loadMap();
+        String[][] map = loadMap();
 
         spawnCharacter();
 
@@ -66,8 +64,8 @@ public class GameController extends Scene {
         this.isWPressed = false;
 
 
-        this.camera = new Camera(this.characters.get(0), this.map, this.root, this.blocks);
-        this.camera.initWorld();
+        Camera camera = new Camera(this.characters.get(0), map, this.root, this.blocks);
+        camera.initWorld();
         this.characters.get(0).toFront();
 
 
@@ -76,37 +74,13 @@ public class GameController extends Scene {
         this.root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        this.movementFactory = new MovementFactory(this.characters.get(0), this, this.camera);
+        this.movementFactory = new MovementFactory(this.characters.get(0), this, camera);
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
 
-            // TODO: 05/10/2023 starts here
-            /*
-            README
-            1. If player has moved more than block width (32px) render a new line
-            2. Delete the line on the opposite side for performance
-            3. Update x position
-            4. Reset camera offset
-
-            For some reason the blocks 2d arraylist isnt ordered correctly
-            So when deleteVertical is called the line at the edge of the array
-            has a xPos of somewhere in the middle of screen and is deleted
-
-            Also there might be duplicate lines in the array but that probably stems
-            from the old line not being deleted as its jumbled
-
-            Only worrying about the x movement for now
-            Adding in the y movement creates a monster
-            Literally the buggiest thing ive ever made
-
-            sorry for messy code might clean it up later who knows
-            if you see any glaring ways to optimise please let me know, i need all the performance i can get
-            email me with questions
-
-             */
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
-//            this.movementFactory.calculateYProperties(this.isWPressed);
+            this.movementFactory.calculateYProperties(this.isWPressed);
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();

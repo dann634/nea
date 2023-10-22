@@ -5,17 +5,18 @@ import com.jackson.game.Character;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class Camera {
 
     public static final int RENDER_WIDTH = 18;
     public static final int RENDER_HEIGHT = 11;
-    private Character character;
-    private String[][] map;
-    private AnchorPane root;
+    private final Character character;
+    private final String[][] map;
+    private final AnchorPane root;
 
-    private List<List<Block>> blocks;
+    private final List<List<Block>> blocks;
 
     private int xOffset;
     private int yOffset;
@@ -29,7 +30,6 @@ public class Camera {
         this.yOffset = 0;
     }
 
-    // TODO: 05/10/2023 Gets vertical line and adds to scene and 2d array
     public List<Block> getVerticalLine(int xLocalOffset) {
         int nextXIndex = this.character.getXPos() + xLocalOffset; //Gets index of line to be loaded
         int blockIndex = 0;
@@ -45,17 +45,9 @@ public class Camera {
             blockIndex++;
         }
 
-        // TODO: 05/10/2023 adding line to correct side of 2d arraylist
-//        if (xLocalOffset == RENDER_WIDTH || xLocalOffset == -RENDER_WIDTH) {
-//            this.blocks.add((xLocalOffset < 0) ? 0 : this.blocks.size() - 1, line);
-//            return line;
-//        }
-//        this.blocks.add(line); //for initialising the world (xLocalOffset wont be either)
         return line;
     }
 
-    // TODO: 05/10/2023 this is where the bug happens
-    //2d array isnt ordered correctly
     public void deleteVertical(boolean isLeft) {
         int index = isLeft ? 0 : this.blocks.size() - 1;
         this.root.getChildren().removeAll(this.blocks.get(index));
@@ -63,47 +55,48 @@ public class Camera {
     }
 
 
-    public void drawHorizontalLine(int nextYIndex) {
-        int blockIndex = 0;
-        List<Block> line = new ArrayList<>();
+    public void drawHorizontalLine(boolean isUp) {
+//
+//        Block block = new Block("1", 50, 50);
+//        block.setTranslateX(30);
+//        block.setTranslateY(605);
+//        this.root.getChildren().add(block);
 
-        int nextYOffset = this.character.getYPos() + nextYIndex;
-
-        for (int i = character.getXPos() - RENDER_WIDTH; i < character.getXPos() + RENDER_WIDTH; i++) {
-            Block block = new Block(map[i][nextYOffset], i, nextYOffset);
-
-
-            block.setTranslateX((blockIndex - 1) * 32 + this.xOffset);
-            block.setTranslateY(((nextYOffset) * 64) + this.yOffset);
-            line.add(block);
-            root.getChildren().add(block);
-            blockIndex++;
+        for (List<Block> line : this.blocks) {
+            if(line.isEmpty()) {
+                continue;
+            }
+            int newIndex;
+            double yTranslate;
+            if(isUp) {
+                newIndex = line.get(0).getYPos() - 1;
+                yTranslate = line.get(0).getTranslateY() - 32;
+            } else {
+                newIndex = line.get(line.size() - 1).getYPos() + 1;
+                yTranslate = line.get(line.size() - 1).getTranslateY() + 32;
+            }
+            int xIndex = line.get(0).getXPos();
+            Block block = new Block(this.map[xIndex][newIndex], xIndex, newIndex);
+            block.setTranslateX(line.get(0).getTranslateX());
+            block.setTranslateY(yTranslate);
+            line.add((isUp) ? 0 : line.size(), block);
+            this.root.getChildren().add(block);
         }
-        for (int i = 0; i < line.size(); i++) { //only works down
-            this.blocks.get(i).add(line.get(i));
-        }
+
     }
 
 
+    public void deleteHorizontal(boolean isUp) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
 
-    public void deleteHorizontal(int yOffset) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
-
-        if(this.blocks.isEmpty() || this.blocks.get(0).isEmpty()) {
+        if (this.blocks.isEmpty() || this.blocks.get(0).isEmpty()) {
             return;
         }
 
-        for(List<Block> blockList : this.blocks) {
-            Block removeBlock = new Block("0", -1, -1);
-            for(Block block : blockList) {
-                if(block.getYPos() == this.character.getYPos() + yOffset) {
-                    removeBlock = block;
-                }
-            }
-            blockList.remove(removeBlock);
+        for (List<Block> blockList : this.blocks) {
+            Block block = blockList.get(isUp ? 0 : blockList.size() - 1);
+            blockList.remove(block);
+            this.root.getChildren().remove(block);
         }
-
-
-
     }
 
 
@@ -136,7 +129,7 @@ public class Camera {
     }
 
     public void addLine(List<Block> line, boolean isLeft) {
-        if(isLeft) {
+        if (isLeft) {
             this.blocks.add(0, line);
             return;
         }

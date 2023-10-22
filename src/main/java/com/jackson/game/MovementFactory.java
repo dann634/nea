@@ -7,16 +7,17 @@ import com.jackson.ui.GameController;
 import static com.jackson.ui.Camera.RENDER_HEIGHT;
 import static com.jackson.ui.Camera.RENDER_WIDTH;
 import static java.lang.Math.abs;
+import static java.lang.Math.divideExact;
 
 public class MovementFactory {
 
-    private GameController gameController;
-    private Character character;
+    private final GameController gameController;
+    private final Character character;
 
     private double jumpVelocity;
     private double jumpAcceleration;
 
-    private Camera camera;
+    private final Camera camera;
 
     private double oldX;
 
@@ -26,10 +27,10 @@ public class MovementFactory {
         this.camera = camera;
     }
 
-    public boolean calculateYProperties(boolean isWPressed) {
+    public void calculateYProperties(boolean isWPressed) {
         boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
         if(isCharacterTouchingFloor && !isWPressed && this.jumpAcceleration >= 0) { //Not jumping and on floor
-            return false;
+            return;
         }
         if(this.jumpAcceleration < 0) { //In Mid air jumping
             this.jumpAcceleration += 0.15;
@@ -37,7 +38,7 @@ public class MovementFactory {
                 this.jumpVelocity += this.jumpAcceleration;
             }
             doYOffsetStuff((int) -this.jumpVelocity, false); // FIXME: 27/09/2023 jumping deletes top layer
-            return false;
+            return;
         }
 
         if(this.jumpAcceleration > 0) { //To fix floating point math
@@ -46,25 +47,21 @@ public class MovementFactory {
 
         if(isCharacterTouchingFloor && isWPressed) { //Start jump
             this.jumpAcceleration = -2.5;
-            return false;
+            return;
         }
-
-        return doYOffsetStuff(-3, true);
-
-
+        doYOffsetStuff(-3, true);
 
     }
 
     private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) {
-        boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 0;
+        boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 32; // FIXME: 22/10/2023 problem
         if (condition) {
 
-            int yOffset = isCharacterMovingDown ? RENDER_HEIGHT : -RENDER_HEIGHT;
             int newYPos = isCharacterMovingDown ? 1 : -1;
             int newYOffset = isCharacterMovingDown ? 32 : -32;
 
-            this.camera.drawHorizontalLine(yOffset);
-            this.camera.deleteHorizontal(yOffset);
+            this.camera.drawHorizontalLine(!isCharacterMovingDown);
+//            this.camera.deleteHorizontal(isCharacterMovingDown);
             this.character.addYPos(newYPos);
             this.camera.addYOffset(newYOffset);
         }
@@ -75,7 +72,6 @@ public class MovementFactory {
     }
 
 
-    // TODO: 05/10/2023 this happens every frame
 
     public void calculateXProperties(boolean isAPressed, boolean isDPressed) {
 
