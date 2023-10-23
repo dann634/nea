@@ -1,43 +1,83 @@
 package com.jackson.game;
 
 import com.jackson.ui.GameController;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Timeline;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import java.util.List;
 
-public class Block extends ImageView {
+public class Block extends VBox {
 
     private int xPos;
     private int yPos;
+    private String blockName;
 
+    private int toughness;
+
+    private Timeline breakingTimeline;
+
+    private ImageView imageView;
     public Block(String key, int xPos, int yPos) {
         String dir = "file:src/main/resources/images/";
-        dir += switch (key) {
-            case "0" -> "air1.png";
-            case "1" -> "dirt.png";
-            case "2" -> "grass.png";
-            case "3" -> "bedrock.png";
+        this.blockName = switch (key) {
+            case "0" -> "air";
+            case "1" -> "dirt";
+            case "2" -> "grass";
+            case "3" -> "bedrock";
             default -> "";
         };
-        setImage(new Image(dir));
+        dir += this.blockName + ".png";
+        this.imageView = new ImageView(new Image(dir));
 
-//        if(key.equals("0")) {
-//            setOpacity(1);
-//        }
+        getChildren().add(this.imageView);
 
         this.xPos = xPos;
         this.yPos = yPos;
 
-        setOnMouseClicked(e -> {
-            System.out.printf("%s %s", this.xPos, this.yPos);
-            System.out.println();
+        setOnMouseEntered(e -> {
+            setStyle("-fx-border-width: 2;" +
+                    "-fx-border-color: black;");
+            toFront();
+
         });
 
+        setOnMouseExited(e -> {
+            setStyle("-fx-border-width: 0");
+        });
 
-        setPreserveRatio(true);
-        setFitHeight(32);
-        setFitWidth(32);
+        setOnMousePressed(e -> {
+            if(getOpacity() == 0) {
+                return;
+            }
+            this.breakingTimeline = new Timeline();
+            this.breakingTimeline.setCycleCount(4);
+            KeyFrame breakingFrame = new KeyFrame(Duration.millis(50), m -> {
+               setOpacity(getOpacity() - 0.25);
+            });
+            KeyFrame waitFrame = new KeyFrame(Duration.millis(200));
+            this.breakingTimeline.getKeyFrames().addAll(breakingFrame, waitFrame);
+            this.breakingTimeline.play();
+        });
+
+        setOnMouseReleased(e -> {
+            this.breakingTimeline.stop();
+            if(getOpacity() != 0) { //Not finished breaking so reset
+                setOpacity(1);
+            }
+        });
+
+        this.imageView.setPreserveRatio(true);
+        this.imageView.setFitWidth(32);
+        this.imageView.setFitHeight(32);
+
 
     }
 
@@ -55,5 +95,9 @@ public class Block extends ImageView {
 
     public void setYPos(int yPos) {
         this.yPos = yPos;
+    }
+
+    public String getBlockName() {
+        return this.blockName;
     }
 }

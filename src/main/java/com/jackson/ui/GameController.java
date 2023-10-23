@@ -12,6 +12,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -77,10 +78,11 @@ public class GameController extends Scene {
         this.movementFactory = new MovementFactory(this.characters.get(0), this, camera);
         Timeline timeline = new Timeline();
         timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(20), e -> {
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000 / 60), e -> {
 
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
             this.movementFactory.calculateYProperties(this.isWPressed);
+
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
@@ -126,13 +128,13 @@ public class GameController extends Scene {
 
     public boolean isEntityTouchingGround(Character character) { //Can be optimised
         List<Block> blocks = getBlocksTouchingPlayer(character);
-        blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
+        blocks.removeIf(n -> n.getBlockName().equals("air"));
         return !blocks.isEmpty();
     }
 
     public boolean isEntityTouchingSide(Rectangle collision) {
         List<Block> blocks = getBlockTouchingSide(collision);
-        blocks.removeIf(n -> n.getImage().getUrl().contains("air"));
+        blocks.removeIf(n -> n.getBlockName().equals("air"));
         return !blocks.isEmpty();
     }
 
@@ -176,11 +178,25 @@ public class GameController extends Scene {
                     case W -> {
                         this.isWPressed = true;
                         this.characters.get(0).setIdleImage();
-                        this.characters.get(0).addHealth(-10);
                     }
 
                     case I -> {
                         this.inventory.toggleInventory();
+                    }
+                    case DIGIT1 -> {
+                        this.inventory.selectSlot(0);
+                    }
+                    case DIGIT2 -> {
+                        this.inventory.selectSlot(1);
+                    }
+                    case DIGIT3 -> {
+                        this.inventory.selectSlot(2);
+                    }
+                    case DIGIT4 -> {
+                        this.inventory.selectSlot(3);
+                    }
+                    case DIGIT5 -> {
+                        this.inventory.selectSlot(4);
                     }
                 }
             });

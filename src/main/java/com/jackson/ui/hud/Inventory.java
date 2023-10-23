@@ -1,5 +1,7 @@
 package com.jackson.ui.hud;
 
+import com.jackson.game.ItemStack;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -9,15 +11,20 @@ import java.util.List;
 public class Inventory {
 
     private HBox hotBarHBox;
-    private VBox[] hotBarSlots;
-    private VBox[][] inventoryArr;
+    private AnchorPane[] hotBarSlots;
+    private AnchorPane[][] inventoryArr;
+    private ItemStack[][] itemArray;
     private VBox wholeInventoryVbox;
+
+    private int selectedSlotIndex;
+
 
     private List<HBox> hboxRows;
 
 
     private static final int HOTBAR_SIZE = 5;
     private static final int INVENTORY_SIZE = 4;
+    private static final int SLOT_SIZE = 40;
     private boolean isInventoryOpen;
 
     public Inventory() {
@@ -25,25 +32,27 @@ public class Inventory {
     }
 
     private void initHotBar() {
-
+        this.selectedSlotIndex = -1;
         this.isInventoryOpen = false;
+
+        this.itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE];
 
         this.wholeInventoryVbox = new VBox(10); //Whole vbox
         this.wholeInventoryVbox.setStyle("-fx-padding: 10");
 
         this.hboxRows = new ArrayList<>(); //Array of all hbox rows
 
-        this.inventoryArr = new VBox[HOTBAR_SIZE][INVENTORY_SIZE]; //Array of all vbox squares
+        this.inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //Array of all vbox squares
 
         this.hotBarHBox = new HBox(3); //First row
-        this.hotBarSlots = new VBox[HOTBAR_SIZE];
+        this.hotBarSlots = new AnchorPane[HOTBAR_SIZE];
         this.hboxRows.add(this.hotBarHBox);
 
         for (int i = 0; i < HOTBAR_SIZE ; i++) { //Hotbar
-            VBox vBox = getInventorySquare();
-            this.hotBarSlots[i] = vBox;
-            this.hotBarHBox.getChildren().add(vBox);
-            this.inventoryArr[i][0] = vBox;
+            AnchorPane pane = getInventorySquare();
+            this.hotBarSlots[i] = pane;
+            this.hotBarHBox.getChildren().add(pane);
+            this.inventoryArr[i][0] = pane;
         }
 
         //Rest of inventory
@@ -62,33 +71,30 @@ public class Inventory {
             this.wholeInventoryVbox.getChildren().add(hBox);
         }
 
-
         setHideInventory(true); //Should be hidden by default
+        selectSlot(0); //Start with slot 1 selected
 
 
 
 
     }
 
-    private VBox getInventorySquare() {
-        VBox vBox = new VBox();
-        vBox.setStyle("-fx-background-color: rgba(0,0,0,.65);" +
-                "-fx-border-radius: 6;" +
-                "-fx-background-radius: 8;" +
-                "-fx-min-width: 40;" +
-                "-fx-min-height: 40;" +
-                "-fx-border-color: black;" +
-                "-fx-border-width: 2;");
+    private AnchorPane getInventorySquare() {
+        AnchorPane pane = new AnchorPane();
+        pane.setId("inventory-unselected");
 
-        vBox.setOnMouseClicked(e -> {
+        pane.setOnMouseClicked(e -> {
             if(this.isInventoryOpen) {
                 setHideInventory(true);
             } else {
                 setHideInventory(false);
             }
+            ItemStack itemStack = new ItemStack("dirt");
+            this.itemArray[0][0] = itemStack;
+            this.inventoryArr[0][0].getChildren().addAll(itemStack.getNodes());
         });
 
-        return vBox;
+        return pane;
     }
 
     public void toggleInventory() {
@@ -108,5 +114,17 @@ public class Inventory {
 
     public VBox getInventoryVbox() {
         return this.wholeInventoryVbox;
+    }
+
+    public static int getSlotSize() {
+        return SLOT_SIZE;
+    }
+
+    public void selectSlot(int index) {
+        if(this.selectedSlotIndex != -1) {
+            this.hotBarSlots[this.selectedSlotIndex].setId("inventory-unselected");
+        }
+        this.hotBarSlots[index].setId("inventory-selected");
+        this.selectedSlotIndex = index;
     }
 }

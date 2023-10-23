@@ -11,7 +11,7 @@ import java.util.List;
 public class Camera {
 
     public static final int RENDER_WIDTH = 18;
-    public static final int RENDER_HEIGHT = 11;
+    public static final int RENDER_HEIGHT = 10;
     private final Character character;
     private final String[][] map;
     private final AnchorPane root;
@@ -33,17 +33,23 @@ public class Camera {
     public List<Block> getVerticalLine(int xLocalOffset) {
         int nextXIndex = this.character.getXPos() + xLocalOffset; //Gets index of line to be loaded
         int blockIndex = 0;
+        long totalTime = 0;
         List<Block> line = new ArrayList<>();
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
+//            long oldTime = System.nanoTime();
             Block block = new Block(map[nextXIndex][i], nextXIndex, i); //takes a string for block type and X pos and Y pos
 
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
             block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
             line.add(block);
+//            totalTime += (System.nanoTime() - oldTime);
+//            long oldTime = System.nanoTime();
             this.root.getChildren().add(block);
+//            System.out.println((System.nanoTime() - oldTime) / 1000);
 
             blockIndex++;
         }
+//        System.out.println(totalTime / 1000000 + "ms");
 
         return line;
     }
@@ -56,11 +62,6 @@ public class Camera {
 
 
     public void drawHorizontalLine(boolean isUp) {
-//
-//        Block block = new Block("1", 50, 50);
-//        block.setTranslateX(30);
-//        block.setTranslateY(605);
-//        this.root.getChildren().add(block);
 
         for (List<Block> line : this.blocks) {
             if(line.isEmpty()) {
@@ -153,4 +154,6 @@ public class Camera {
     public void addYOffset(int value) {
         this.yOffset += value;
     }
+
+
 }

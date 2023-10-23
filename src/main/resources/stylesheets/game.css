@@ -1,3 +1,23 @@
 #root {
     -fx-background-color: lightblue;
 }
+
+#inventory-unselected {
+    -fx-background-color: rgba(0,0,0,.65);
+    -fx-background-radius: 8;
+    -fx-border-radius: 6;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
+
+#inventory-selected {
+    -fx-background-color: rgba(0,0,0,.65);
+    -fx-background-radius: 8;
+    -fx-border-radius: 6;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-border-color: gold;
+    -fx-border-width: 2;
+}
