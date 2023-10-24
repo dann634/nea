@@ -113,7 +113,6 @@ public class Block extends VBox {
 
     public void drop() {
         int blockHeight = 16;
-
         this.imageView.setFitHeight(blockHeight);
         this.imageView.setFitWidth(blockHeight);
         this.imageView.setRotate(new Random().nextDouble(360) + 1);

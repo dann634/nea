@@ -112,6 +112,7 @@ public class Camera {
         for(Block block : this.droppedBlocks) {
             block.setTranslateX(block.getTranslateX() + offset);
         }
+
     }
 
     public void translateBlocksByY(int offset) {
@@ -156,10 +157,12 @@ public class Camera {
 
     public void addXOffset(int value) {
         this.xOffset += value;
+        cleanupEntities();
     }
 
     public void addYOffset(int value) {
         this.yOffset += value;
+        cleanupEntities();
     }
 
     public void removeBlock(Block remBlock) { //Remove block and replaces with air block
@@ -245,5 +248,18 @@ public class Camera {
 
     public void setBlockJustBroken(boolean blockJustBroken) {
         this.blockJustBroken = blockJustBroken;
+    }
+
+    public void cleanupEntities() { //Despawn stuff off screen
+        //If 200 pixels on X and 100 pixels on Y for despawn
+        Iterator<Block> droppedBlockIterator = this.droppedBlocks.listIterator();
+        while(droppedBlockIterator.hasNext()) {
+            Block block = droppedBlockIterator.next();
+            if(block.getTranslateX() < -200 || block.getTranslateX() > 1224
+                    || block.getTranslateY() < -100 || block.getTranslateY() > 644) {
+                this.root.getChildren().remove(block);
+                droppedBlockIterator.remove();
+            }
+        }
     }
 }
