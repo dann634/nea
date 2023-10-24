@@ -1,5 +1,6 @@
 package com.jackson.game;
 
+import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -13,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.Random;
 
 public class Block extends VBox {
 
@@ -24,8 +26,10 @@ public class Block extends VBox {
 
     private Timeline breakingTimeline;
 
-    private ImageView imageView;
-    public Block(String key, int xPos, int yPos) {
+    private final Camera camera;
+
+    private final ImageView imageView;
+    public Block(String key, int xPos, int yPos, Camera camera) {
         String dir = "file:src/main/resources/images/";
         this.blockName = switch (key) {
             case "0" -> "air";
@@ -36,6 +40,7 @@ public class Block extends VBox {
         };
         dir += this.blockName + ".png";
         this.imageView = new ImageView(new Image(dir));
+        this.camera = camera;
 
         getChildren().add(this.imageView);
 
@@ -54,7 +59,7 @@ public class Block extends VBox {
         });
 
         setOnMousePressed(e -> {
-            if(getOpacity() == 0) {
+            if(getOpacity() == 0 || this.blockName.equals("air")) {
                 return;
             }
             this.breakingTimeline = new Timeline();
@@ -68,9 +73,14 @@ public class Block extends VBox {
         });
 
         setOnMouseReleased(e -> {
+            if(blockName.equals("air")) {
+                return;
+            }
             this.breakingTimeline.stop();
             if(getOpacity() != 0) { //Not finished breaking so reset
                 setOpacity(1);
+            } else {
+                drop();
             }
         });
 
@@ -99,5 +109,15 @@ public class Block extends VBox {
 
     public String getBlockName() {
         return this.blockName;
+    }
+
+    public void drop() {
+        int blockHeight = 16;
+
+        this.imageView.setFitHeight(blockHeight);
+        this.imageView.setFitWidth(blockHeight);
+        this.imageView.setRotate(new Random().nextDouble(360) + 1);
+        this.setOpacity(1);
+        this.camera.removeBlock(this);
     }
 }

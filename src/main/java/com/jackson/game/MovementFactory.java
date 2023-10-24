@@ -3,6 +3,12 @@ package com.jackson.game;
 import com.jackson.io.TextIO;
 import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.util.Duration;
+
+import java.util.List;
 
 import static com.jackson.ui.Camera.RENDER_HEIGHT;
 import static com.jackson.ui.Camera.RENDER_WIDTH;
@@ -28,7 +34,7 @@ public class MovementFactory {
     }
 
     public void calculateYProperties(boolean isWPressed) {
-        boolean isCharacterTouchingFloor = this.gameController.isEntityTouchingGround(this.character);
+        boolean isCharacterTouchingFloor = this.camera.isEntityTouchingGround(this.character);
         if(isCharacterTouchingFloor && !isWPressed && this.jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
@@ -78,8 +84,8 @@ public class MovementFactory {
         if(!isAPressed && !isDPressed) { //For optimization
             return;
         }
-        boolean canMoveLeft = !gameController.isEntityTouchingSide(character.getLeftCollision());
-        boolean canMoveRight = !gameController.isEntityTouchingSide(character.getRightCollision());
+        boolean canMoveLeft = !this.camera.isEntityTouchingSide(character.getLeftCollision());
+        boolean canMoveRight = !this.camera.isEntityTouchingSide(character.getRightCollision());
 
         int offset = 0;
         boolean isCharacterMovingLeft = false;
@@ -122,6 +128,34 @@ public class MovementFactory {
         } else if(oldX == this.character.getX()) {
             this.character.setIdleImage();
         }
+    }
+
+    public void calculateDroppedBlockGravity() {
+        this.camera.setBlockJustBroken(false);
+        List<Block> droppedBlocks = this.camera.getDroppedBlocks();
+        double[] targetYArr = new double[droppedBlocks.size()];
+        for (int i = 0; i < droppedBlocks.size(); i++) {
+            targetYArr[i] = this.camera.getBlockHeightUnderBlock(droppedBlocks.get(i)) - 16;
+        }
+
+
+        Timeline fallingTimeline = new Timeline();
+        KeyFrame fallingKeyFrame = new KeyFrame(Duration.ONE, e -> {
+            boolean canStop = true;
+            for(int i = 0; i < droppedBlocks.size(); i++) {
+                Block block = droppedBlocks.get(i);
+                if(targetYArr[i] >= block.getTranslateY()) {
+                    block.setTranslateY(block.getTranslateY() + 1);
+                    canStop = false;
+                }
+            }
+            if(canStop) {
+                fallingTimeline.stop();
+            }
+        });
+        fallingTimeline.setCycleCount(Animation.INDEFINITE);
+        fallingTimeline.getKeyFrames().add(fallingKeyFrame);
+        fallingTimeline.play();
     }
 
 

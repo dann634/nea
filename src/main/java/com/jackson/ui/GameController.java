@@ -12,6 +12,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -30,7 +31,6 @@ public class GameController extends Scene {
 
     private final Inventory inventory;
     private final HealthBar healthBar;
-    private final List<List<Block>> blocks;
     private final MovementFactory movementFactory;
 
     private boolean isAPressed;
@@ -47,7 +47,6 @@ public class GameController extends Scene {
 
         //Initialises fields
         this.characters = new ArrayList<>();
-        this.blocks = new ArrayList<>();
         String[][] map = loadMap();
 
         spawnCharacter();
@@ -65,7 +64,7 @@ public class GameController extends Scene {
         this.isWPressed = false;
 
 
-        Camera camera = new Camera(this.characters.get(0), map, this.root, this.blocks);
+        Camera camera = new Camera(this.characters.get(0), map, this.root);
         camera.initWorld();
         this.characters.get(0).toFront();
 
@@ -82,6 +81,10 @@ public class GameController extends Scene {
 
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
             this.movementFactory.calculateYProperties(this.isWPressed);
+
+            if(camera.isBlockJustBroken()) {
+                this.movementFactory.calculateDroppedBlockGravity();
+            }
 
 
             //Everything to front (maybe make a method for it)
@@ -126,41 +129,7 @@ public class GameController extends Scene {
         return -1;
     }
 
-    public boolean isEntityTouchingGround(Character character) { //Can be optimised
-        List<Block> blocks = getBlocksTouchingPlayer(character);
-        blocks.removeIf(n -> n.getBlockName().equals("air"));
-        return !blocks.isEmpty();
-    }
 
-    public boolean isEntityTouchingSide(Rectangle collision) {
-        List<Block> blocks = getBlockTouchingSide(collision);
-        blocks.removeIf(n -> n.getBlockName().equals("air"));
-        return !blocks.isEmpty();
-    }
-
-    public List<Block> getBlockTouchingSide(Rectangle collision) {
-        List<Block> blocks = new ArrayList<>();
-        for(List<Block> blockArr : this.blocks) {
-            for(Block block : blockArr) {
-                if(collision.intersects(block.getBoundsInParent())) {
-                    blocks.add(block);
-                }
-            }
-        }
-        return blocks;
-    }
-
-    public List<Block> getBlocksTouchingPlayer(Character character) {
-        List<Block> blocks = new ArrayList<>();
-        for (List<Block> block : this.blocks)
-            for (Block value : block) {
-                if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
-                    blocks.add(value);
-                }
-            }
-
-        return blocks;
-    }
 
     private void initOnKeyPressed() {
 
@@ -209,7 +178,8 @@ public class GameController extends Scene {
             }
         });
 
-
-
     }
+
+
+
 }
