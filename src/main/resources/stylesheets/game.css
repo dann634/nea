@@ -21,3 +21,12 @@
     -fx-border-color: gold;
     -fx-border-width: 2;
 }
+
+/*Pause Menu*/
+.button {
+    -fx-min-width: 300;
+    -fx-min-height: 75;
+    -fx-font-weight: bold;
+    -fx-font-size: 24;
+    -fx-background-radius: 10;
+}

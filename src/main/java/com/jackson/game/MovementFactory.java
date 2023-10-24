@@ -17,7 +17,6 @@ import static java.lang.Math.divideExact;
 
 public class MovementFactory {
 
-    private final GameController gameController;
     private final Character character;
 
     private double jumpVelocity;
@@ -27,8 +26,7 @@ public class MovementFactory {
 
     private double oldX;
 
-    public MovementFactory(Character character, GameController gameController, Camera camera) {
-        this.gameController = gameController;
+    public MovementFactory(Character character, Camera camera) {
         this.character = character;
         this.camera = camera;
     }
@@ -43,7 +41,7 @@ public class MovementFactory {
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
-            doYOffsetStuff((int) -this.jumpVelocity, false); // FIXME: 27/09/2023 jumping deletes top layer
+            doYOffsetStuff((int) -this.jumpVelocity, false);
             return;
         }
 
@@ -104,7 +102,6 @@ public class MovementFactory {
 
         boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
 
-        // TODO: 05/10/2023 If character has moved more than 32 (block width) render new line
         if (condition) {
 
             //Get block x at edge and add one

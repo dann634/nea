@@ -13,8 +13,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+
+import static com.jackson.ui.GameController.lookupTable;
 
 public class Block extends VBox {
 
@@ -28,19 +31,17 @@ public class Block extends VBox {
 
     private final Camera camera;
 
+
+
     private final ImageView imageView;
     public Block(String key, int xPos, int yPos, Camera camera) {
         String dir = "file:src/main/resources/images/";
-        this.blockName = switch (key) {
-            case "0" -> "air";
-            case "1" -> "dirt";
-            case "2" -> "grass";
-            case "3" -> "bedrock";
-            default -> "";
-        };
+        this.blockName = lookupTable.get(key);
         dir += this.blockName + ".png";
         this.imageView = new ImageView(new Image(dir));
         this.camera = camera;
+
+
 
         getChildren().add(this.imageView);
 
@@ -119,4 +120,6 @@ public class Block extends VBox {
         this.setOpacity(1);
         this.camera.removeBlock(this);
     }
+
+
 }

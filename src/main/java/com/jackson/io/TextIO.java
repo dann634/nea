@@ -68,8 +68,8 @@ public class TextIO {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(dir, false));
             for (int i = 0; i < bitmap[0].length; i++) {
-                for (int j = 0; j < bitmap.length; j++) {
-                    writer.write(String.valueOf(bitmap[j][i]));
+                for (int[] ints : bitmap) {
+                    writer.write(String.valueOf(ints[i]));
                 }
                 writer.write("\n");
             }

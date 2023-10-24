@@ -12,6 +12,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
@@ -20,6 +21,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GameController extends Scene {
@@ -29,14 +31,19 @@ public class GameController extends Scene {
 
     private final List<Character> characters;
 
+    public static HashMap<String, String> lookupTable;
+
     private final Inventory inventory;
     private final HealthBar healthBar;
     private final MovementFactory movementFactory;
+
+    private final Timeline gameTimeline;
 
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
 
+    // TODO: 24/10/2023 Add autosave feature -> no close and save
 
     public GameController() {
         super(new VBox());
@@ -48,6 +55,7 @@ public class GameController extends Scene {
         //Initialises fields
         this.characters = new ArrayList<>();
         String[][] map = loadMap();
+        initLookupTable();
 
         spawnCharacter();
 
@@ -64,7 +72,7 @@ public class GameController extends Scene {
         this.isWPressed = false;
 
 
-        Camera camera = new Camera(this.characters.get(0), map, this.root);
+        Camera camera = new Camera(this.characters.get(0), map, this.root, this);
         camera.initWorld();
         this.characters.get(0).toFront();
 
@@ -74,16 +82,16 @@ public class GameController extends Scene {
         this.root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        this.movementFactory = new MovementFactory(this.characters.get(0), this, camera);
-        Timeline timeline = new Timeline();
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000 / 60), e -> {
+        this.movementFactory = new MovementFactory(this.characters.get(0),  camera);
+        this.gameTimeline = new Timeline();
+        this.gameTimeline.setCycleCount(Animation.INDEFINITE);
+        this.gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000 / 60), e -> {
 
-            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed);
-            this.movementFactory.calculateYProperties(this.isWPressed);
+            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed); //Player X movement
+            this.movementFactory.calculateYProperties(this.isWPressed); //Player y movement
 
-            if(camera.isBlockJustBroken()) {
-                this.movementFactory.calculateDroppedBlockGravity();
+            if(camera.isBlockJustBroken()) { //Check to save cpu
+                this.movementFactory.calculateDroppedBlockGravity(); //Block dropping
             }
 
 
@@ -93,7 +101,7 @@ public class GameController extends Scene {
             this.healthBar.getHealthHud().toFront();
 
         }));
-        timeline.play();
+        this.gameTimeline.play();
 
 
     }
@@ -167,6 +175,12 @@ public class GameController extends Scene {
                     case DIGIT5 -> {
                         this.inventory.selectSlot(4);
                     }
+
+                    case ESCAPE -> {
+                        if(this.gameTimeline.getStatus() != Animation.Status.PAUSED) {
+                            this.root.getChildren().add(new PauseMenuController());
+                        }
+                    }
                 }
             });
 
@@ -179,6 +193,47 @@ public class GameController extends Scene {
         });
 
     }
+
+    private void initLookupTable() {
+        lookupTable = new HashMap<>();
+        lookupTable.put("0", "air");
+        lookupTable.put("1", "dirt");
+        lookupTable.put("2", "grass");
+        lookupTable.put("3", "bedrock");
+    }
+
+    private class PauseMenuController extends VBox {
+        public PauseMenuController() {
+            setStyle("-fx-background-color: rgba(209, 222, 227, .5);" +
+                    "-fx-min-height: 544;" +
+                    "-fx-min-width: 1024;" +
+                    "-fx-alignment: center;" +
+                    "-fx-spacing: 12;");
+            gameTimeline.pause();
+
+            getChildren().addAll(addResumeButton(), addSaveAndExitButton());
+            toFront();
+        }
+
+        private Button addResumeButton() {
+            Button button = new Button("Resume");
+            button.setOnAction(e -> { //Resume game
+                root.getChildren().remove(this);
+                gameTimeline.play();
+            });
+            return button;
+        }
+
+        private Button addSaveAndExitButton() {
+            Button button = new Button("Save and Exit");
+            button.setOnAction(e -> {
+                //Save first
+                Main.setScene(new MainMenuController());
+            });
+            return button;
+        }
+    }
+
 
 
 

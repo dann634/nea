@@ -17,19 +17,14 @@ public class Camera {
     private final Character character;
     private final String[][] map;
     private final AnchorPane root;
-
     private boolean blockJustBroken;
-
     private final List<List<Block>> blocks;
-
     private final List<Block> droppedBlocks;
-
     private GameController gameController;
-
     private int xOffset;
     private int yOffset;
 
-    public Camera(Character character, String[][] map, AnchorPane root) {
+    public Camera(Character character, String[][] map, AnchorPane root, GameController gameController) {
         this.character = character;
         this.map = map;
         this.root = root;
@@ -38,6 +33,7 @@ public class Camera {
         this.yOffset = 0;
         this.droppedBlocks = new ArrayList<>();
         this.blockJustBroken = false;
+        this.gameController = gameController;
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -182,10 +178,11 @@ public class Camera {
                 }
             }
         }
-        this.droppedBlocks.add(remBlock);
-        this.root.getChildren().add(newBlock);
-        this.blocks.get(index[0]).set(index[1], newBlock);
-        this.blockJustBroken = true;
+        this.droppedBlocks.add(remBlock); //Adds block to dropped blocks list
+        this.root.getChildren().add(newBlock); //Adds air block in place to pane
+        this.blocks.get(index[0]).set(index[1], newBlock); //Adds air block to blocks
+        this.blockJustBroken = true; //Sets flag to true so blocks fall
+        this.map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
     }
 
     public boolean isEntityTouchingGround(Character character) { //Can be optimised
@@ -250,7 +247,8 @@ public class Camera {
         this.blockJustBroken = blockJustBroken;
     }
 
-    public void cleanupEntities() { //Despawn stuff off screen
+    public void cleanupEntities() {
+        //Despawn stuff off screen
         //If 200 pixels on X and 100 pixels on Y for despawn
         Iterator<Block> droppedBlockIterator = this.droppedBlocks.listIterator();
         while(droppedBlockIterator.hasNext()) {

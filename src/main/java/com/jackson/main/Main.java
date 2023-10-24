@@ -20,7 +20,7 @@ public class Main extends Application {
         stage.setTitle("Game"); //Set Window Title
         stage.getIcons().add(new Image("file:src/main/resources/images/grass.png")); //Add Window Icon
         stage.setScene(new MainMenuController()); //Opens Main Menu
-//        stage.setResizable(false); //Window cannot be resized
+        stage.setResizable(false); //Window cannot be resized
         stage.show(); //Show GUI
     }
 
@@ -29,8 +29,8 @@ public class Main extends Application {
     }
 
     public static void applyWindowSize(Parent root) {
-        root.setStyle("-fx-pref-height: " + HEIGHT + ";" +
-                "-fx-pref-width: " + WIDTH + ";");
+        root.setStyle("-fx-min-height: " + HEIGHT + ";" +
+                "-fx-min-width: " + WIDTH + ";");
     }
 
 
