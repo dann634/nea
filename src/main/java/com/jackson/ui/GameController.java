@@ -94,6 +94,8 @@ public class GameController extends Scene {
                 this.movementFactory.calculateDroppedBlockGravity(); //Block dropping
             }
 
+            camera.checkBlockPickup();
+
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
@@ -232,6 +234,10 @@ public class GameController extends Scene {
             });
             return button;
         }
+    }
+
+    public Inventory getInventory() {
+        return this.inventory;
     }
 
 

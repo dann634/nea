@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 
+import java.nio.channels.AcceptPendingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,14 @@ public class Camera {
         this.droppedBlocks = new ArrayList<>();
         this.blockJustBroken = false;
         this.gameController = gameController;
+    }
+
+    public Camera() {
+        this.character = null;
+        this.droppedBlocks = new ArrayList<>();
+        this.blocks = new ArrayList<>();
+        this.map = new String[2][2];
+        this.root = new AnchorPane();
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -76,7 +85,13 @@ public class Camera {
                 yTranslate = line.get(line.size() - 1).getTranslateY() + 32;
             }
             int xIndex = line.get(0).getXPos();
-            Block block = new Block(this.map[xIndex][newIndex], xIndex, newIndex, this);
+            String key;
+            if(newIndex > 300) {
+                key = "3"; //Just bedrock below
+            } else {
+                key = this.map[xIndex][newIndex];
+            }
+            Block block = new Block(key, xIndex, newIndex, this);
             block.setTranslateX(line.get(0).getTranslateX());
             block.setTranslateY(yTranslate);
             line.add((isUp) ? 0 : line.size(), block);
@@ -257,6 +272,22 @@ public class Camera {
                     || block.getTranslateY() < -100 || block.getTranslateY() > 644) {
                 this.root.getChildren().remove(block);
                 droppedBlockIterator.remove();
+            }
+        }
+    }
+
+    public void checkBlockPickup() {
+        Iterator<Block> droppedBlocksIterator = this.droppedBlocks.listIterator();
+        while(droppedBlocksIterator.hasNext()) {
+            Block block = droppedBlocksIterator.next();
+            if(this.character.intersects(block.getBoundsInParent())) {
+                //Touching
+                if(!this.gameController.getInventory().addItem(block)) {
+                    continue;
+                }
+                droppedBlocksIterator.remove();
+                this.root.getChildren().remove(block);
+
             }
         }
     }

@@ -14,6 +14,7 @@ public class ItemStack {
     private String itemName;
     private int durability;
     private SimpleIntegerProperty stackSize;
+    private int maxStackSize;
     private Label stackSizeLabel;
 
     public ItemStack(String itemName) {
@@ -21,6 +22,7 @@ public class ItemStack {
 
         initIcon();
         initStackSize();
+        this.maxStackSize = 100;
 
     }
 
@@ -33,10 +35,10 @@ public class ItemStack {
     }
 
     private void initStackSize() {
-        this.stackSize = new SimpleIntegerProperty(100);
+        this.stackSize = new SimpleIntegerProperty(0);
         this.stackSizeLabel = new Label();
         this.stackSizeLabel.textProperty().bind(this.stackSize.asString());
-        this.stackSizeLabel.setPrefWidth(Inventory.getSlotSize());
+        this.stackSizeLabel.setPrefWidth(Inventory.getSlotSize() - 6);
         this.stackSizeLabel.setTranslateY(Inventory.getSlotSize() - 20);
         this.stackSizeLabel.setStyle("-fx-text-fill: white;" +
                 "-fx-font-weight: bold;" +
@@ -54,6 +56,10 @@ public class ItemStack {
 
     public int getStackSize() {
         return stackSize.get();
+    }
+
+    public int getMaxStackSize() {
+        return maxStackSize;
     }
 
     public void addStackValue(int value) {

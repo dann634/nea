@@ -1,6 +1,9 @@
 package com.jackson.ui.hud;
 
+import com.jackson.game.Block;
 import com.jackson.game.ItemStack;
+import com.jackson.ui.Camera;
+import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -74,8 +77,10 @@ public class Inventory {
         setHideInventory(true); //Should be hidden by default
         selectSlot(0); //Start with slot 1 selected
 
-
-
+        ItemStack itemStack = new ItemStack("dirt");
+        itemStack.addStackValue(100);
+        this.itemArray[0][0] = itemStack;
+        this.inventoryArr[0][0].getChildren().addAll(itemStack.getNodes());
 
     }
 
@@ -89,9 +94,7 @@ public class Inventory {
             } else {
                 setHideInventory(false);
             }
-            ItemStack itemStack = new ItemStack("dirt");
-            this.itemArray[0][0] = itemStack;
-            this.inventoryArr[0][0].getChildren().addAll(itemStack.getNodes());
+
         });
 
         return pane;
@@ -126,5 +129,55 @@ public class Inventory {
         }
         this.hotBarSlots[index].setId("inventory-selected");
         this.selectedSlotIndex = index;
+    }
+
+    public boolean addItem(Block block) { //May have to change to item after swords and stuff added
+        ItemStack itemStack = doesItemExistAlready(block); //Does block already exist
+        int[] index;
+        if(itemStack == null) {
+            index = findNextFreeIndex(); //Is there a free slot
+            if(index[0] == -1) { //No free slot
+                return false;
+            }
+            //Is free slot and block doesnt already exist
+            ItemStack newItemStack = new ItemStack(block.getBlockName());
+            newItemStack.addStackValue(1);
+            this.itemArray[index[0]][index[1]] = newItemStack; //Update Backend
+            this.inventoryArr[index[0]][index[1]].getChildren().addAll(newItemStack.getNodes()); //Updates front end
+            return true;
+        }
+
+        itemStack.addStackValue(1);
+
+
+
+        return true;
+    }
+
+    private int[] findNextFreeIndex() {
+        for (int i = 0; i < INVENTORY_SIZE; i++) {
+            for (int j = 0; j < HOTBAR_SIZE; j++) {
+                if(this.itemArray[j][i] == null) {
+                    return new int[]{j, i};
+                }
+            }
+        }
+        return new int[]{-1, -1}; //Not found
+    }
+
+    private ItemStack doesItemExistAlready(Block block) {
+        for (int i = 0; i < this.itemArray.length; i++) {
+            for (int j = 0; j < this.itemArray[i].length; j++) {
+                if(this.itemArray[i][j] != null && this.itemArray[i][j].getItemName().equals(block.getBlockName())) {
+                    //Found
+                    if(this.itemArray[i][j].getStackSize() < this.itemArray[i][j].getMaxStackSize()) { //Full
+                        //Accept
+                        return this.itemArray[i][j];
+                    }
+
+                }
+            }
+        }
+        return null;
     }
 }

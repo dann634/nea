@@ -141,10 +141,12 @@ public class MovementFactory {
             boolean canStop = true;
             for(int i = 0; i < droppedBlocks.size(); i++) {
                 Block block = droppedBlocks.get(i);
-                if(targetYArr[i] >= block.getTranslateY()) {
-                    block.setTranslateY(block.getTranslateY() + 1);
-                    canStop = false;
-                }
+                try {
+                    if(targetYArr[i] >= block.getTranslateY()) {
+                        block.setTranslateY(block.getTranslateY() + 1);
+                        canStop = false;
+                    }
+                } catch (IndexOutOfBoundsException ignored) {} //If blocks break too fast this happens
             }
             if(canStop) {
                 fallingTimeline.stop();

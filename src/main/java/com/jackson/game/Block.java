@@ -31,6 +31,8 @@ public class Block extends VBox {
 
     private final Camera camera;
 
+    private boolean isDropped;
+
 
 
     private final ImageView imageView;
@@ -40,6 +42,7 @@ public class Block extends VBox {
         dir += this.blockName + ".png";
         this.imageView = new ImageView(new Image(dir));
         this.camera = camera;
+        this.isDropped = false;
 
 
 
@@ -49,6 +52,9 @@ public class Block extends VBox {
         this.yPos = yPos;
 
         setOnMouseEntered(e -> {
+            if(this.isDropped) {
+                return;
+            }
             setStyle("-fx-border-width: 2;" +
                     "-fx-border-color: black;");
             toFront();
@@ -60,21 +66,21 @@ public class Block extends VBox {
         });
 
         setOnMousePressed(e -> {
-            if(getOpacity() == 0 || this.blockName.equals("air")) {
+            if(getOpacity() == 0 || this.blockName.equals("air") || this.isDropped) {
                 return;
             }
             this.breakingTimeline = new Timeline();
             this.breakingTimeline.setCycleCount(4);
-            KeyFrame breakingFrame = new KeyFrame(Duration.millis(50), m -> {
+            KeyFrame breakingFrame = new KeyFrame(Duration.millis(1), m -> { //50
                setOpacity(getOpacity() - 0.25);
             });
-            KeyFrame waitFrame = new KeyFrame(Duration.millis(200));
+            KeyFrame waitFrame = new KeyFrame(Duration.millis(0)); //200
             this.breakingTimeline.getKeyFrames().addAll(breakingFrame, waitFrame);
             this.breakingTimeline.play();
         });
 
         setOnMouseReleased(e -> {
-            if(blockName.equals("air")) {
+            if(blockName.equals("air") || this.isDropped) {
                 return;
             }
             this.breakingTimeline.stop();
@@ -119,6 +125,7 @@ public class Block extends VBox {
         this.imageView.setRotate(new Random().nextDouble(360) + 1);
         this.setOpacity(1);
         this.camera.removeBlock(this);
+        this.isDropped = true;
     }
 
 
