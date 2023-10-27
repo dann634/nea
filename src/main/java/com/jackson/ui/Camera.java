@@ -2,6 +2,8 @@ package com.jackson.ui;
 
 import com.jackson.game.Block;
 import com.jackson.game.Character;
+import com.jackson.game.ItemStack;
+import com.jackson.ui.hud.Inventory;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
@@ -21,11 +23,12 @@ public class Camera {
     private boolean blockJustBroken;
     private final List<List<Block>> blocks;
     private final List<Block> droppedBlocks;
-    private GameController gameController;
+    private final GameController gameController;
+    private final Inventory inventory;
     private int xOffset;
     private int yOffset;
 
-    public Camera(Character character, String[][] map, AnchorPane root, GameController gameController) {
+    public Camera(Character character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory) {
         this.character = character;
         this.map = map;
         this.root = root;
@@ -35,14 +38,7 @@ public class Camera {
         this.droppedBlocks = new ArrayList<>();
         this.blockJustBroken = false;
         this.gameController = gameController;
-    }
-
-    public Camera() {
-        this.character = null;
-        this.droppedBlocks = new ArrayList<>();
-        this.blocks = new ArrayList<>();
-        this.map = new String[2][2];
-        this.root = new AnchorPane();
+        this.inventory = inventory;
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -50,7 +46,7 @@ public class Camera {
         int blockIndex = 0;
         List<Block> line = new ArrayList<>();
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
-            Block block = new Block(map[nextXIndex][i], nextXIndex, i, this); //takes a string for block type and X pos and Y pos
+            Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, this.inventory); //takes a string for block type and X pos and Y pos
 
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
             block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
@@ -86,12 +82,12 @@ public class Camera {
             }
             int xIndex = line.get(0).getXPos();
             String key;
-            if(newIndex > 300) {
+            if(newIndex >= 300) {
                 key = "3"; //Just bedrock below
             } else {
                 key = this.map[xIndex][newIndex];
             }
-            Block block = new Block(key, xIndex, newIndex, this);
+            Block block = new Block(GameController.lookupTable.get(key), xIndex, newIndex, this, this.inventory);
             block.setTranslateX(line.get(0).getTranslateX());
             block.setTranslateY(yTranslate);
             line.add((isUp) ? 0 : line.size(), block);
@@ -176,9 +172,10 @@ public class Camera {
         cleanupEntities();
     }
 
+    //For breaking blocks
     public void removeBlock(Block remBlock) { //Remove block and replaces with air block
         int[] index = new int[2];
-        Block newBlock = new Block("0", -1, -1, this);
+        Block newBlock = new Block("air", -1, -1, this, this.inventory);
         for(int j = 0; j < this.blocks.size(); j++) {
             List<Block> line = this.blocks.get(j);
             for(int i = 0; i < line.size(); i++) {
@@ -186,7 +183,7 @@ public class Camera {
                 if(block == remBlock) {
                     index[0] = j;
                     index[1] = i;
-                    newBlock = new Block("0", remBlock.getXPos(), remBlock.getYPos(), this); //Copy
+                    newBlock = new Block("air", remBlock.getXPos(), remBlock.getYPos(), this, this.inventory); //Copy
                     newBlock.setTranslateX(block.getTranslateX());
                     newBlock.setTranslateY(block.getTranslateY());
                     break;
@@ -200,12 +197,35 @@ public class Camera {
         this.map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
     }
 
+    //For Placing Blocks
+    public void placeBlock(Block block) {
+
+        int[] index = new int[2];
+        for (int i = 0; i < this.blocks.size(); i++) {
+            for (int j = 0; j < this.blocks.get(i).size(); j++) {
+                if(blocks.get(i).get(j) == block) {
+                    index = new int[]{i, j};
+                }
+            }
+        }
+        Block inventoryBlock = this.inventory.getSelectedItemStack().getBlock();
+        Block placedBlock = new Block(inventoryBlock.getBlockName(), inventoryBlock.getXPos(), inventoryBlock.getYPos(), this, this.inventory);
+        placedBlock.setTranslateX(block.getTranslateX());
+        placedBlock.setTranslateY(block.getTranslateY());
+        this.inventory.useBlockFromSelectedSlot();
+        this.root.getChildren().remove(block);
+        this.root.getChildren().add(placedBlock);
+        this.blocks.get(index[0]).set(index[1], placedBlock);
+    }
+
+    //For character movement
     public boolean isEntityTouchingGround(Character character) { //Can be optimised
         List<Block> blocks = getBlocksTouchingPlayer(character);
         blocks.removeIf(n -> n.getBlockName().equals("air"));
         return !blocks.isEmpty();
     }
 
+    //For collisions
     public boolean isEntityTouchingSide(Rectangle collision) {
         List<Block> blocks = getBlockTouchingSide(collision);
         blocks.removeIf(n -> n.getBlockName().equals("air"));
@@ -236,6 +256,7 @@ public class Camera {
         return blocks;
     }
 
+    //For Dropped blocks
     public double getBlockHeightUnderBlock(Block block) {
         for (int i = 0; i < this.blocks.size() - 1; i++) {
             if(this.blocks.get(i).get(0).getTranslateX() == block.getTranslateX()) { //If on same column
@@ -291,4 +312,6 @@ public class Camera {
             }
         }
     }
+
+
 }

@@ -11,14 +11,14 @@ import java.util.List;
 
 public class ItemStack {
     private ImageView icon;
-    private String itemName;
+    private Block block;
     private int durability;
     private SimpleIntegerProperty stackSize;
     private int maxStackSize;
     private Label stackSizeLabel;
 
-    public ItemStack(String itemName) {
-        this.itemName = itemName;
+    public ItemStack(Block block) {
+        this.block = block;
 
         initIcon();
         initStackSize();
@@ -27,7 +27,7 @@ public class ItemStack {
     }
 
     private void initIcon() {
-        this.icon = new ImageView(new Image("file:src/main/resources/images/" + this.itemName + ".png"));
+        this.icon = new ImageView(new Image("file:src/main/resources/images/" + this.block.getBlockName() + ".png"));
         this.icon.setFitHeight(16);
         this.icon.setFitWidth(16);
         this.icon.setTranslateX(((double) Inventory.getSlotSize() / 2) - this.icon.getFitWidth() / 2);
@@ -47,7 +47,7 @@ public class ItemStack {
 
 
     public String getItemName() {
-        return itemName;
+        return this.block.getBlockName();
     }
 
     public int getDurability() {
@@ -68,6 +68,10 @@ public class ItemStack {
 
     public List<Node> getNodes() {
         return List.of(this.icon, this.stackSizeLabel);
+    }
+
+    public Block getBlock() {
+        return this.block;
     }
 
 

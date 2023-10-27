@@ -2,10 +2,12 @@ package com.jackson.game;
 
 import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
+import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -29,28 +31,45 @@ public class Block extends VBox {
 
     private Timeline breakingTimeline;
 
-    private final Camera camera;
+    private  Camera camera;
+    private  Inventory inventory;
 
     private boolean isDropped;
 
+    private boolean isBreakable;
+    private  ImageView imageView;
 
 
-    private final ImageView imageView;
-    public Block(String key, int xPos, int yPos, Camera camera) {
-        String dir = "file:src/main/resources/images/";
-        this.blockName = lookupTable.get(key);
-        dir += this.blockName + ".png";
-        this.imageView = new ImageView(new Image(dir));
+
+    public Block(String blockName, int xPos, int yPos, Camera camera, Inventory inventory) {
+        initButtonPresses();
+        initFields(blockName, xPos, yPos, camera, inventory);
+
+    }
+
+    private void initFields(String blockName, int xPos, int yPos, Camera camera, Inventory inventory) {
+        this.blockName = blockName;
+        this.imageView = new ImageView(new Image("file:src/main/resources/images/" + this.blockName + ".png"));
         this.camera = camera;
+        this.inventory = inventory;
         this.isDropped = false;
 
-
+        this.isBreakable = true;
+        if(this.blockName.equals("air") || this.blockName.equals("bedrock")) {
+            this.isBreakable = false;
+        }
 
         getChildren().add(this.imageView);
 
         this.xPos = xPos;
         this.yPos = yPos;
 
+        this.imageView.setPreserveRatio(true);
+        this.imageView.setFitWidth(32);
+        this.imageView.setFitHeight(32);
+    }
+
+    private void initButtonPresses() {
         setOnMouseEntered(e -> {
             if(this.isDropped) {
                 return;
@@ -66,21 +85,30 @@ public class Block extends VBox {
         });
 
         setOnMousePressed(e -> {
-            if(getOpacity() == 0 || this.blockName.equals("air") || this.isDropped) {
+
+            if(this.blockName.equals("air") && this.inventory.getSelectedItemStack() != null) {
+                //Place block
+                this.camera.placeBlock(this);
                 return;
             }
+
+            if(getOpacity() == 0 || !this.isBreakable || this.isDropped) {
+                return;
+            }
+
+            //Break block
             this.breakingTimeline = new Timeline();
             this.breakingTimeline.setCycleCount(4);
-            KeyFrame breakingFrame = new KeyFrame(Duration.millis(1), m -> { //50
-               setOpacity(getOpacity() - 0.25);
+            KeyFrame breakingFrame = new KeyFrame(Duration.millis(50), m -> { //50
+                setOpacity(getOpacity() - 0.25);
             });
-            KeyFrame waitFrame = new KeyFrame(Duration.millis(0)); //200
+            KeyFrame waitFrame = new KeyFrame(Duration.millis(200)); //200
             this.breakingTimeline.getKeyFrames().addAll(breakingFrame, waitFrame);
             this.breakingTimeline.play();
         });
 
         setOnMouseReleased(e -> {
-            if(blockName.equals("air") || this.isDropped) {
+            if(!this.isBreakable || this.isDropped) {
                 return;
             }
             this.breakingTimeline.stop();
@@ -90,12 +118,6 @@ public class Block extends VBox {
                 drop();
             }
         });
-
-        this.imageView.setPreserveRatio(true);
-        this.imageView.setFitWidth(32);
-        this.imageView.setFitHeight(32);
-
-
     }
 
     public int getXPos() {
@@ -126,6 +148,14 @@ public class Block extends VBox {
         this.setOpacity(1);
         this.camera.removeBlock(this);
         this.isDropped = true;
+    }
+
+    public void setDefault() {
+        int blockHeight = 32;
+        this.imageView.setFitHeight(blockHeight);
+        this.imageView.setFitWidth(blockHeight);
+        this.imageView.setRotate(0);
+        this.isDropped = false;
     }
 
 

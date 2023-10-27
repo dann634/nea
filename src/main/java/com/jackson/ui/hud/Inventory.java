@@ -3,6 +3,7 @@ package com.jackson.ui.hud;
 import com.jackson.game.Block;
 import com.jackson.game.ItemStack;
 import com.jackson.ui.Camera;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -18,13 +19,8 @@ public class Inventory {
     private AnchorPane[][] inventoryArr;
     private ItemStack[][] itemArray;
     private VBox wholeInventoryVbox;
-
-    private int selectedSlotIndex;
-
-
+    private SimpleIntegerProperty selectedSlotIndex;
     private List<HBox> hboxRows;
-
-
     private static final int HOTBAR_SIZE = 5;
     private static final int INVENTORY_SIZE = 4;
     private static final int SLOT_SIZE = 40;
@@ -35,7 +31,7 @@ public class Inventory {
     }
 
     private void initHotBar() {
-        this.selectedSlotIndex = -1;
+        this.selectedSlotIndex = new SimpleIntegerProperty(0);
         this.isInventoryOpen = false;
 
         this.itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE];
@@ -76,11 +72,6 @@ public class Inventory {
 
         setHideInventory(true); //Should be hidden by default
         selectSlot(0); //Start with slot 1 selected
-
-        ItemStack itemStack = new ItemStack("dirt");
-        itemStack.addStackValue(100);
-        this.itemArray[0][0] = itemStack;
-        this.inventoryArr[0][0].getChildren().addAll(itemStack.getNodes());
 
     }
 
@@ -124,11 +115,11 @@ public class Inventory {
     }
 
     public void selectSlot(int index) {
-        if(this.selectedSlotIndex != -1) {
-            this.hotBarSlots[this.selectedSlotIndex].setId("inventory-unselected");
+        if(this.selectedSlotIndex.get() != -1) {
+            this.hotBarSlots[this.selectedSlotIndex.get()].setId("inventory-unselected");
         }
         this.hotBarSlots[index].setId("inventory-selected");
-        this.selectedSlotIndex = index;
+        this.selectedSlotIndex.set(index);
     }
 
     public boolean addItem(Block block) { //May have to change to item after swords and stuff added
@@ -140,7 +131,7 @@ public class Inventory {
                 return false;
             }
             //Is free slot and block doesnt already exist
-            ItemStack newItemStack = new ItemStack(block.getBlockName());
+            ItemStack newItemStack = new ItemStack(block);
             newItemStack.addStackValue(1);
             this.itemArray[index[0]][index[1]] = newItemStack; //Update Backend
             this.inventoryArr[index[0]][index[1]].getChildren().addAll(newItemStack.getNodes()); //Updates front end
@@ -148,9 +139,6 @@ public class Inventory {
         }
 
         itemStack.addStackValue(1);
-
-
-
         return true;
     }
 
@@ -180,4 +168,30 @@ public class Inventory {
         }
         return null;
     }
+
+    public SimpleIntegerProperty getSelectedSlotIndex() {
+        return this.selectedSlotIndex;
+    }
+
+    public String getBlockNameInHotbar(int index) {
+        if(this.itemArray[index][0] == null) {
+            return "air";
+        }
+        return this.itemArray[index][0].getItemName();
+    }
+
+    public ItemStack getSelectedItemStack() {
+        return this.itemArray[this.selectedSlotIndex.get()][0];
+    }
+
+    public void useBlockFromSelectedSlot() {
+        ItemStack itemStack = this.itemArray[this.selectedSlotIndex.get()][0];
+        itemStack.addStackValue(-1);
+        if(itemStack.getStackSize() == 0) {
+            //Remove from inventory
+            this.itemArray[this.selectedSlotIndex.get()][0] = null;
+            this.inventoryArr[this.selectedSlotIndex.get()][0].getChildren().clear();
+        }
+    }
+
 }

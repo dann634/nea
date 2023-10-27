@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -30,7 +31,9 @@ public class Character extends ImageView {
     private Rectangle headCollision;
     private Rectangle leftCollision;
     private Rectangle rightCollision;
+    private ImageView handImageView;
     private Label displayNameLabel;
+
 
     public Character() {
         setImage(new Image("file:src/main/resources/images/playerIdle.png"));
@@ -41,6 +44,7 @@ public class Character extends ImageView {
 
         initFeetCollision();
         initBodyCollision();
+        initHandRectangle();
         initDisplayNameLabel();
 
         this.health = new SimpleDoubleProperty(100);
@@ -48,6 +52,7 @@ public class Character extends ImageView {
         this.isModelFacingRight = new SimpleBooleanProperty(true);
         this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
+            updateHandPosition(newValue ? 9 : -25, newValue);
         });
     }
 
@@ -80,13 +85,29 @@ public class Character extends ImageView {
         this.rightCollision.setVisible(false);
     }
 
+    private void initHandRectangle() {
+        this.handImageView = new ImageView();
+        this.handImageView.yProperty().bind(this.yProperty().add(5));
+        this.handImageView.setScaleY(0.3);
+        this.handImageView.setScaleX(0.3);
+        updateHandPosition(9, true);
+    }
+
+    private void updateHandPosition(int xOffset, boolean isFacingRight) {
+        this.handImageView.xProperty().bind(this.xProperty().add(xOffset));
+        this.handImageView.setNodeOrientation(isFacingRight ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
+    }
+
     public void swapMovingImage() {
         if(getImage().getUrl().contains("1")) {
             setImage(new Image("file:src/main/resources/images/playerRun2.png"));
             return;
         }
         setImage(new Image("file:src/main/resources/images/playerRun1.png"));
+    }
 
+    public void updateBlockInHand(String blockName) {
+        this.handImageView.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
     }
 
     public void setIdleImage() {
@@ -127,6 +148,10 @@ public class Character extends ImageView {
 
     public List<Rectangle> getCollisions() {
         return List.of(this.feetCollision, this.leftCollision, this.rightCollision);
+    }
+
+    public ImageView getHandRectangle() {
+        return this.handImageView;
     }
 
     public Label getDisplayNameLabel() {
