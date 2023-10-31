@@ -5,12 +5,15 @@ import com.jackson.game.ItemStack;
 import com.jackson.ui.Camera;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.MissingResourceException;
 
 public class Inventory {
 
@@ -25,6 +28,8 @@ public class Inventory {
     private static final int INVENTORY_SIZE = 4;
     private static final int SLOT_SIZE = 40;
     private boolean isInventoryOpen;
+    private ImageView itemOnCursor;
+    private ItemStack itemStackOnCursor;
 
     public Inventory() {
         initHotBar();
@@ -39,6 +44,10 @@ public class Inventory {
         this.wholeInventoryVbox = new VBox(10); //Whole vbox
         this.wholeInventoryVbox.setStyle("-fx-padding: 10");
 
+        this.itemOnCursor = new ImageView();
+        this.itemOnCursor.setFitWidth(16);
+        this.itemOnCursor.setFitHeight(16);
+
         this.hboxRows = new ArrayList<>(); //Array of all hbox rows
 
         this.inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //Array of all vbox squares
@@ -48,7 +57,7 @@ public class Inventory {
         this.hboxRows.add(this.hotBarHBox);
 
         for (int i = 0; i < HOTBAR_SIZE ; i++) { //Hotbar
-            AnchorPane pane = getInventorySquare();
+            AnchorPane pane = getInventorySquare(0, i);
             this.hotBarSlots[i] = pane;
             this.hotBarHBox.getChildren().add(pane);
             this.inventoryArr[i][0] = pane;
@@ -59,7 +68,7 @@ public class Inventory {
             HBox hBox = new HBox(3);
             this.hboxRows.add(hBox);
             for (int j = 0; j < HOTBAR_SIZE; j++) {
-                var vbox = getInventorySquare();
+                var vbox = getInventorySquare(i, j);
                 hBox.getChildren().add(vbox);
                 this.inventoryArr[j][i] = vbox;
             }
@@ -75,16 +84,29 @@ public class Inventory {
 
     }
 
-    private AnchorPane getInventorySquare() {
+    private AnchorPane getInventorySquare(int col, int row) {
         AnchorPane pane = new AnchorPane();
         pane.setId("inventory-unselected");
 
         pane.setOnMouseClicked(e -> {
-            if(this.isInventoryOpen) {
-                setHideInventory(true);
-            } else {
-                setHideInventory(false);
+            if((this.itemStackOnCursor == null && this.itemArray[row][col] == null)
+            || (this.itemStackOnCursor != null && this.itemArray[row][col] != null)) {
+                return;
             }
+            if(this.itemStackOnCursor != null && this.itemArray[row][col] == null) { //Item on cursor and empty square
+                this.itemArray[row][col] = this.itemStackOnCursor;
+                this.itemStackOnCursor = null;
+                this.itemOnCursor.setVisible(false);
+                this.inventoryArr[row][col].getChildren().addAll(this.itemArray[row][col].getNodes());
+                return;
+            }
+
+            this.itemStackOnCursor = this.itemArray[row][col];
+            setItemOnCursor(this.itemStackOnCursor.getItemName());
+            this.inventoryArr[row][col].getChildren().clear();
+            this.itemOnCursor.setVisible(true);
+            this.itemArray[row][col] = null;
+
 
         });
 
@@ -192,6 +214,16 @@ public class Inventory {
             this.itemArray[this.selectedSlotIndex.get()][0] = null;
             this.inventoryArr[this.selectedSlotIndex.get()][0].getChildren().clear();
         }
+    }
+
+    public ImageView getItemOnCursor() {
+        return this.itemOnCursor;
+    }
+
+    private void setItemOnCursor(String blockName) {
+        try {
+            this.itemOnCursor.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
+        } catch (MissingResourceException ignored) {}
     }
 
 }

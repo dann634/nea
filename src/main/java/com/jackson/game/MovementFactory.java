@@ -110,8 +110,9 @@ public class MovementFactory {
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
-
-            this.camera.addLine(this.camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft);
+            long oldTime = System.nanoTime();
+            this.camera.addLine(this.camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft); // FIXME: 30/10/2023 optimise this shit
+            System.out.println((double) (System.nanoTime() - oldTime) / 1000000);
 
             this.camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
             this.character.addXPos(newXPos); //Updates x pos of character

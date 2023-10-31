@@ -15,6 +15,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
@@ -63,9 +64,8 @@ public class GameController extends Scene {
         //HUD
         this.inventory = new Inventory();
         spawnCharacter();
+        this.root.getChildren().add(this.inventory.getItemOnCursor());
         this.healthBar = new HealthBar(this.characters.get(0).healthProperty());
-
-
 
         this.root.getChildren().add(this.inventory.getInventoryVbox());
         this.root.getChildren().add(this.healthBar.getHealthHud());
@@ -101,6 +101,7 @@ public class GameController extends Scene {
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
+            this.inventory.getItemOnCursor().toFront();
             this.characters.get(0).toFront();
             this.characters.get(0).getHandRectangle().toFront();
             this.healthBar.getHealthHud().toFront();
@@ -199,6 +200,11 @@ public class GameController extends Scene {
                 case D -> this.isDPressed = false;
                 case W -> this.isWPressed = false;
             }
+        });
+
+        setOnMouseMoved(e -> {
+            this.inventory.getItemOnCursor().setTranslateX(e.getSceneX() - 16);
+            this.inventory.getItemOnCursor().setTranslateY(e.getSceneY() - 16);
         });
 
     }

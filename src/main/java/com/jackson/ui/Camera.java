@@ -4,6 +4,7 @@ import com.jackson.game.Block;
 import com.jackson.game.Character;
 import com.jackson.game.ItemStack;
 import com.jackson.ui.hud.Inventory;
+import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
@@ -47,12 +48,11 @@ public class Camera {
         List<Block> line = new ArrayList<>();
         for (int i = this.character.getYPos() - RENDER_HEIGHT; i < this.character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
             Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, this.inventory); //takes a string for block type and X pos and Y pos
-
             block.setTranslateX(512 + (xLocalOffset * 32) + this.xOffset);
             block.setTranslateY((blockIndex - 1) * 32 + this.yOffset);
+            block.setCache(true);
+            block.setCacheHint(CacheHint.SPEED);
             line.add(block);
-            this.root.getChildren().add(block);
-
             blockIndex++;
         }
 
@@ -67,6 +67,7 @@ public class Camera {
 
     public void drawHorizontalLine(boolean isUp) {
 
+        List<Block> newBlocks = new ArrayList<>();
         for (List<Block> line : this.blocks) {
             if(line.isEmpty()) {
                 continue;
@@ -91,8 +92,9 @@ public class Camera {
             block.setTranslateX(line.get(0).getTranslateX());
             block.setTranslateY(yTranslate);
             line.add((isUp) ? 0 : line.size(), block);
-            this.root.getChildren().add(block);
+            newBlocks.add(block);
         }
+        this.root.getChildren().addAll(newBlocks);
 
     }
 
@@ -134,17 +136,19 @@ public class Camera {
         }
     }
 
-    public void initWorld() {
+    public void initWorld() { // FIXME: 30/10/2023 issue on creating -> two lines are overlapping
         for (int i = -RENDER_WIDTH; i < RENDER_WIDTH; i++) { //Init world
             addLine(getVerticalLine(i));
         }
     }
 
     public void addLine(List<Block> line) {
+        this.root.getChildren().addAll(line);
         this.blocks.add(line);
     }
 
     public void addLine(List<Block> line, boolean isLeft) {
+        this.root.getChildren().addAll(line);
         if (isLeft) {
             this.blocks.add(0, line);
             return;
