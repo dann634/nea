@@ -6,6 +6,7 @@ import com.jackson.game.ItemStack;
 import com.jackson.ui.hud.Inventory;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
+import javafx.scene.control.SplitMenuButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
 
@@ -23,7 +24,7 @@ public class Camera {
     private final AnchorPane root;
     private boolean blockJustBroken;
     private final List<List<Block>> blocks;
-    private final List<Block> droppedBlocks;
+    private final List<ItemStack> droppedBlocks;
     private final GameController gameController;
     private final Inventory inventory;
     private int xOffset;
@@ -118,8 +119,8 @@ public class Camera {
                 block.setTranslateX(block.getTranslateX() + offset);
             }
         }
-        for(Block block : this.droppedBlocks) {
-            block.setTranslateX(block.getTranslateX() + offset);
+        for(ItemStack itemStack : this.droppedBlocks) {
+            itemStack.addPos(offset, 0);
         }
 
     }
@@ -131,8 +132,8 @@ public class Camera {
                 block.setTranslateY(block.getTranslateY() + offset);
             }
         }
-        for(Block block : this.droppedBlocks) {
-            block.setTranslateY(block.getTranslateY() + offset);
+        for(ItemStack itemStack : this.droppedBlocks) {
+            itemStack.addPos(0, offset);
         }
     }
 
@@ -178,6 +179,8 @@ public class Camera {
 
     //For breaking blocks
     public void removeBlock(Block remBlock) { //Remove block and replaces with air block
+        ItemStack itemStack = new ItemStack(remBlock.getBlockName(), remBlock.getTranslateX(), remBlock.getTranslateY());
+        itemStack.addStackValue(1);
         int[] index = new int[2];
         Block newBlock = new Block("air", -1, -1, this, this.inventory);
         for(int j = 0; j < this.blocks.size(); j++) {
@@ -188,21 +191,21 @@ public class Camera {
                     index[0] = j;
                     index[1] = i;
                     newBlock = new Block("air", remBlock.getXPos(), remBlock.getYPos(), this, this.inventory); //Copy
-                    newBlock.setTranslateX(block.getTranslateX());
-                    newBlock.setTranslateY(block.getTranslateY());
+                    itemStack.setPos(remBlock.getTranslateX(), remBlock.getTranslateY());
                     break;
                 }
             }
         }
-        this.droppedBlocks.add(remBlock); //Adds block to dropped blocks list
-        this.root.getChildren().add(newBlock); //Adds air block in place to pane
+        this.droppedBlocks.add(itemStack); //Adds block to dropped blocks list
+        this.root.getChildren().remove(remBlock); //Removes old block
+        this.root.getChildren().addAll(itemStack.getNodes()); //Adds air block in place to pane
         this.blocks.get(index[0]).set(index[1], newBlock); //Adds air block to blocks
         this.blockJustBroken = true; //Sets flag to true so blocks fall
         this.map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
     }
 
     //For Placing Blocks
-    public void placeBlock(Block block) {
+    public void placeBlock(Block block) { // TODO: 04/11/2023 doesnt update map file
 
         int[] index = new int[2];
         for (int i = 0; i < this.blocks.size(); i++) {
@@ -212,8 +215,7 @@ public class Camera {
                 }
             }
         }
-        Block inventoryBlock = this.inventory.getSelectedItemStack().getBlock();
-        Block placedBlock = new Block(inventoryBlock.getBlockName(), inventoryBlock.getXPos(), inventoryBlock.getYPos(), this, this.inventory);
+        Block placedBlock = new Block(block.getBlockName(), block.getXPos(), block.getYPos(), this, this.inventory);
         placedBlock.setTranslateX(block.getTranslateX());
         placedBlock.setTranslateY(block.getTranslateY());
         this.inventory.useBlockFromSelectedSlot();
@@ -261,12 +263,14 @@ public class Camera {
     }
 
     //For Dropped blocks
-    public double getBlockHeightUnderBlock(Block block) {
+    public double getBlockHeightUnderBlock(ItemStack itemStack) {
+
         for (int i = 0; i < this.blocks.size() - 1; i++) {
-            if(this.blocks.get(i).get(0).getTranslateX() == block.getTranslateX()) { //If on same column
+            if(this.blocks.get(i).get(0).getTranslateX() <= itemStack.getX() &&
+            this.blocks.get(i+1).get(0).getTranslateX() > itemStack.getX()) { //If on same column
                 for (int j = 0; j < this.blocks.get(i).size() - 1; j++) {
                     Block b = this.blocks.get(i).get(j);
-                    if(b.getTranslateY() > block.getTranslateY() && !b.getBlockName().equals("air")) {
+                    if(b.getTranslateY() > itemStack.getY() && !b.getBlockName().equals("air")) {
                         return b.getTranslateY();
                     }
                 }
@@ -275,7 +279,23 @@ public class Camera {
         return -1;
     }
 
-    public List<Block> getDroppedBlocks() {
+    public double getBlockHeightUnderBlock(double mouseX, double mouseY) {
+        for (int i = 0; i < this.blocks.size() - 1; i++) {
+            if(this.blocks.get(i).get(0).getTranslateX() < mouseX
+                    && this.blocks.get(i+1).get(0).getTranslateX() > mouseX) { //Is right column
+                for (int j = 0; j < this.blocks.get(i).size() - 1; j++) {
+
+                    if(mouseY > this.blocks.get(i).get(j).getTranslateY() && mouseY < this.blocks.get(i).get(j+1).getTranslateY()) {
+                        return this.blocks.get(i).get(j+1).getTranslateY();
+                    }
+                }
+            }
+        }
+        return -1;
+
+    }
+
+    public List<ItemStack> getDroppedBlocks() {
         return this.droppedBlocks;
     }
 
@@ -290,31 +310,38 @@ public class Camera {
     public void cleanupEntities() {
         //Despawn stuff off screen
         //If 200 pixels on X and 100 pixels on Y for despawn
-        Iterator<Block> droppedBlockIterator = this.droppedBlocks.listIterator();
+        Iterator<ItemStack> droppedBlockIterator = this.droppedBlocks.listIterator();
         while(droppedBlockIterator.hasNext()) {
-            Block block = droppedBlockIterator.next();
-            if(block.getTranslateX() < -200 || block.getTranslateX() > 1224
-                    || block.getTranslateY() < -100 || block.getTranslateY() > 644) {
-                this.root.getChildren().remove(block);
+            ItemStack itemStack = droppedBlockIterator.next();
+            if(itemStack.getX() < -200 || itemStack.getX() > 1224
+                    || itemStack.getY() < -100 || itemStack.getY() > 644) {
+                this.root.getChildren().removeAll(itemStack.getNodes());
                 droppedBlockIterator.remove();
             }
         }
     }
 
     public void checkBlockPickup() {
-        Iterator<Block> droppedBlocksIterator = this.droppedBlocks.listIterator();
+        Iterator<ItemStack> droppedBlocksIterator = this.droppedBlocks.listIterator();
         while(droppedBlocksIterator.hasNext()) {
-            Block block = droppedBlocksIterator.next();
-            if(this.character.intersects(block.getBoundsInParent())) {
+            ItemStack itemStack = droppedBlocksIterator.next();
+            if(this.character.intersects(itemStack.getIcon().getBoundsInParent())) {
                 //Touching
-                if(!this.gameController.getInventory().addItem(block)) {
+                if(!this.gameController.getInventory().addItem(itemStack)) {
                     continue;
                 }
+                this.root.getChildren().removeAll(itemStack.getNodes());
+                this.root.getChildren().remove(itemStack.getIcon());
+                System.out.println("pickup");
                 droppedBlocksIterator.remove();
-                this.root.getChildren().remove(block);
-
             }
         }
+    }
+
+    public void createDroppedBlock(ItemStack itemStack, double x, double y) {
+        itemStack.setPos(x, y);
+        this.droppedBlocks.add(itemStack);
+        this.root.getChildren().addAll(itemStack.getNodes());
     }
 
 

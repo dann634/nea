@@ -1,9 +1,7 @@
 package com.jackson.ui;
 
-import com.jackson.game.Block;
+import com.jackson.game.*;
 import com.jackson.game.Character;
-import com.jackson.game.MovementFactory;
-import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.HealthBar;
@@ -13,6 +11,8 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -31,17 +31,15 @@ public class GameController extends Scene {
 
     private static int spawnYCoords;
     private final AnchorPane root;
-
     private final List<Character> characters;
-
     public static HashMap<String, String> lookupTable;
-
     private final Inventory inventory;
     private final HealthBar healthBar;
     private final MovementFactory movementFactory;
-
+    private final Camera camera;
     private final Timeline gameTimeline;
-
+    private boolean blockDropped;
+    private double[] lastMousePos;
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
@@ -57,6 +55,7 @@ public class GameController extends Scene {
 
         //Initialises fields
         this.characters = new ArrayList<>();
+        this.lastMousePos = new double[2];
         String[][] map = loadMap();
         initLookupTable();
 
@@ -75,16 +74,18 @@ public class GameController extends Scene {
         this.isDPressed = false;
         this.isWPressed = false;
 
+        this.blockDropped = false;
 
-        Camera camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory);
-        camera.initWorld();
+
+        this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory);
+        this.camera.initWorld();
         this.characters.get(0).toFront();
 
         setRoot(this.root);
         this.root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        this.movementFactory = new MovementFactory(this.characters.get(0),  camera);
+        this.movementFactory = new MovementFactory(this.characters.get(0),  this.camera);
         this.gameTimeline = new Timeline();
         this.gameTimeline.setCycleCount(Animation.INDEFINITE);
         this.gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000 / 60), e -> {
@@ -92,11 +93,20 @@ public class GameController extends Scene {
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed); //Player X movement
             this.movementFactory.calculateYProperties(this.isWPressed); //Player y movement
 
-            if(camera.isBlockJustBroken()) { //Check to save cpu
+            if(this.camera.isBlockJustBroken() || this.blockDropped) { //Check to save cpu
                 this.movementFactory.calculateDroppedBlockGravity(); //Block dropping
+                this.blockDropped = false;
             }
 
-            camera.checkBlockPickup();
+            this.camera.checkBlockPickup();
+
+//            int x = 0;
+//            for(Node node : this.root.getChildren()) {
+//                if(node instanceof ImageView) {
+//                    x++;
+//                }
+//            }
+//            System.out.println(x);
 
 
             //Everything to front (maybe make a method for it)
@@ -205,6 +215,19 @@ public class GameController extends Scene {
         setOnMouseMoved(e -> {
             this.inventory.getItemOnCursor().setTranslateX(e.getSceneX() - 16);
             this.inventory.getItemOnCursor().setTranslateY(e.getSceneY() - 16);
+        });
+
+        setOnMouseClicked(e -> {
+            System.out.println(this.inventory.getItemStackOnCursor() + " " + !this.inventory.isCellHovered());
+            if(this.inventory.getItemStackOnCursor() != null
+            && !this.inventory.isCellHovered()) {
+                //Drop item
+                this.camera.createDroppedBlock(this.inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
+                this.inventory.clearCursor();
+                this.blockDropped = true;
+                this.lastMousePos = new double[]{e.getSceneX(), e.getSceneY()};
+            }
+
         });
 
     }

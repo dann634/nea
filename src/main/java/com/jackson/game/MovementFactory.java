@@ -110,10 +110,7 @@ public class MovementFactory {
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
-            long oldTime = System.nanoTime();
             this.camera.addLine(this.camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft); // FIXME: 30/10/2023 optimise this shit
-            System.out.println((double) (System.nanoTime() - oldTime) / 1000000);
-
             this.camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
             this.character.addXPos(newXPos); //Updates x pos of character
             this.camera.addXOffset(newXOffset); //Resets camera offset
@@ -130,7 +127,7 @@ public class MovementFactory {
 
     public void calculateDroppedBlockGravity() {
         this.camera.setBlockJustBroken(false);
-        List<Block> droppedBlocks = this.camera.getDroppedBlocks();
+        List<ItemStack> droppedBlocks = this.camera.getDroppedBlocks();
         double[] targetYArr = new double[droppedBlocks.size()];
         for (int i = 0; i < droppedBlocks.size(); i++) {
             targetYArr[i] = this.camera.getBlockHeightUnderBlock(droppedBlocks.get(i)) - 16;
@@ -141,10 +138,9 @@ public class MovementFactory {
         KeyFrame fallingKeyFrame = new KeyFrame(Duration.ONE, e -> {
             boolean canStop = true;
             for(int i = 0; i < droppedBlocks.size(); i++) {
-                Block block = droppedBlocks.get(i);
                 try {
-                    if(targetYArr[i] >= block.getTranslateY()) {
-                        block.setTranslateY(block.getTranslateY() + 1);
+                    if(targetYArr[i] >= droppedBlocks.get(i).getY()) {
+                        droppedBlocks.get(i).addPos(0, 1);
                         canStop = false;
                     }
                 } catch (IndexOutOfBoundsException ignored) {} //If blocks break too fast this happens
