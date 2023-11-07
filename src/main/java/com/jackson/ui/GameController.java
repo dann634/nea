@@ -2,6 +2,7 @@ package com.jackson.ui;
 
 import com.jackson.game.*;
 import com.jackson.game.Character;
+import com.jackson.game.items.Entity;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.HealthBar;
@@ -99,15 +100,6 @@ public class GameController extends Scene {
             }
 
             this.camera.checkBlockPickup();
-
-//            int x = 0;
-//            for(Node node : this.root.getChildren()) {
-//                if(node instanceof ImageView) {
-//                    x++;
-//                }
-//            }
-//            System.out.println(x);
-
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
@@ -218,7 +210,6 @@ public class GameController extends Scene {
         });
 
         setOnMouseClicked(e -> {
-            System.out.println(this.inventory.getItemStackOnCursor() + " " + !this.inventory.isCellHovered());
             if(this.inventory.getItemStackOnCursor() != null
             && !this.inventory.isCellHovered()) {
                 //Drop item

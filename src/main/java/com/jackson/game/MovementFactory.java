@@ -1,8 +1,7 @@
 package com.jackson.game;
 
-import com.jackson.io.TextIO;
+import com.jackson.game.items.ItemStack;
 import com.jackson.ui.Camera;
-import com.jackson.ui.GameController;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -10,7 +9,6 @@ import javafx.util.Duration;
 
 import java.util.List;
 
-import static com.jackson.ui.Camera.RENDER_HEIGHT;
 import static com.jackson.ui.Camera.RENDER_WIDTH;
 import static java.lang.Math.abs;
 import static java.lang.Math.divideExact;

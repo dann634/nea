@@ -1,11 +1,7 @@
 package com.jackson.ui.hud;
 
-import com.jackson.game.Block;
-import com.jackson.game.ItemStack;
-import com.jackson.ui.Camera;
+import com.jackson.game.items.ItemStack;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.geometry.Point3D;
-import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -108,7 +104,7 @@ public class Inventory {
                 this.itemArray[row][col] = this.itemStackOnCursor;
                 this.itemStackOnCursor = null;
                 this.itemOnCursor.setVisible(false);
-                this.inventoryArr[row][col].getChildren().addAll(this.itemArray[row][col].getNodes());
+                this.inventoryArr[row][col].getChildren().add(this.itemArray[row][col]);
                 return;
             }
             //Picks up stack
@@ -164,7 +160,9 @@ public class Inventory {
             }
             //Is free slot and block doesnt already exist
             this.itemArray[index[0]][index[1]] = itemStack; //Update Backend
-            this.inventoryArr[index[0]][index[1]].getChildren().addAll(itemStack.getNodes()); //Updates front end
+            itemStack.setPos((Inventory.SLOT_SIZE / 2) - (itemStack.getPrefWidth() / 2),(Inventory.SLOT_SIZE / 2) - (itemStack.getPrefHeight() / 2));
+            itemStack.resetRotation();
+            this.inventoryArr[index[0]][index[1]].getChildren().add(itemStack); //Updates front end
             return true;
         }
 
