@@ -9,13 +9,14 @@ import java.util.Random;
 
 public class Entity extends VBox {
 
-    protected ImageView imageView;
-    protected String itemName;
+    protected ImageView imageView; //Imageview can be accessed from same package
+    protected String itemName; //Item name can be accessed from same package
 
     public Entity(String itemName) {
         init(itemName);
     }
 
+    //Can initialise object with x and y positions
     public Entity(String itemName, double x, double y) {
         init(itemName);
 
@@ -29,10 +30,12 @@ public class Entity extends VBox {
         //Init icon
         this.itemName = itemName;
 
+        //Init imageview
         this.imageView = new ImageView(new Image("file:src/main/resources/images/" + this.itemName + ".png"));
         this.imageView.setPreserveRatio(true);
         setSize(16);
 
+        //Optimisation
         this.setCache(true);
         this.setCacheHint(CacheHint.SPEED);
 
