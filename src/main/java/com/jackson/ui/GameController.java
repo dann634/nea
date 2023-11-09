@@ -1,8 +1,8 @@
 package com.jackson.ui;
 
 import com.jackson.game.*;
-import com.jackson.game.Character;
-import com.jackson.game.items.Entity;
+import com.jackson.game.characters.Player;
+import com.jackson.game.characters.Zombie;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.HealthBar;
@@ -10,18 +10,10 @@ import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.Bounds;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -32,7 +24,7 @@ public class GameController extends Scene {
 
     private static int spawnYCoords;
     private final AnchorPane root;
-    private final List<Character> characters;
+    private final List<Player> characters;
     public static HashMap<String, String> lookupTable;
     private final Inventory inventory;
     private final HealthBar healthBar;
@@ -122,7 +114,7 @@ public class GameController extends Scene {
 
 
     private void spawnCharacter() {
-        Character character = new Character();
+        Player character = new Player();
         character.setXPos(500);
         character.setYPos(spawnYCoords);
 
@@ -130,10 +122,13 @@ public class GameController extends Scene {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
         });
 
+        Zombie zombie = new Zombie();
+        zombie.setX(500);
+        zombie.toFront();
+        this.root.getChildren().add(zombie);
 
-        root.getChildren().add(character);
+        root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
-        root.getChildren().addAll(character.getDisplayNameLabel(), character.getHandRectangle());
         character.toFront();
 
         this.characters.add(character);

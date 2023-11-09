@@ -1,5 +1,6 @@
 package com.jackson.game;
 
+import com.jackson.game.characters.Player;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.Camera;
 import javafx.animation.Animation;
@@ -15,7 +16,7 @@ import static java.lang.Math.divideExact;
 
 public class MovementFactory {
 
-    private final Character character;
+    private final Player character;
 
     private double jumpVelocity;
     private double jumpAcceleration;
@@ -24,7 +25,7 @@ public class MovementFactory {
 
     private double oldX;
 
-    public MovementFactory(Character character, Camera camera) {
+    public MovementFactory(Player character, Camera camera) {
         this.character = character;
         this.camera = camera;
     }

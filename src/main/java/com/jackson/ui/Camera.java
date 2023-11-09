@@ -1,7 +1,7 @@
 package com.jackson.ui;
 
 import com.jackson.game.items.Block;
-import com.jackson.game.Character;
+import com.jackson.game.characters.Player;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.hud.Inventory;
 import javafx.scene.layout.AnchorPane;
@@ -15,7 +15,7 @@ public class Camera {
 
     public static final int RENDER_WIDTH = 18;
     public static final int RENDER_HEIGHT = 10;
-    private final Character character;
+    private final Player character;
     private final String[][] map;
     private final AnchorPane root;
     private boolean blockJustBroken;
@@ -26,7 +26,7 @@ public class Camera {
     private int xOffset;
     private int yOffset;
 
-    public Camera(Character character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory) {
+    public Camera(Player character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory) {
         this.character = character;
         this.map = map;
         this.root = root;
@@ -81,7 +81,7 @@ public class Camera {
             String key;
             if(newIndex >= 300) {
                 key = "3"; //Just bedrock below
-            } else {
+            }  else {
                 key = this.map[xIndex][newIndex];
             }
             Block block = new Block(GameController.lookupTable.get(key), xIndex, newIndex, this, this.inventory);
@@ -221,7 +221,7 @@ public class Camera {
     }
 
     //For character movement
-    public boolean isEntityTouchingGround(Character character) { //Can be optimised
+    public boolean isEntityTouchingGround(Player character) { //Can be optimised
         List<Block> blocks = getBlocksTouchingPlayer(character);
         blocks.removeIf(n -> n.getItemName().equals("air"));
         return !blocks.isEmpty();
@@ -246,7 +246,7 @@ public class Camera {
         return blocks;
     }
 
-    public List<Block> getBlocksTouchingPlayer(Character character) {
+    public List<Block> getBlocksTouchingPlayer(Player character) {
         List<Block> blocks = new ArrayList<>();
         for (List<Block> block : this.blocks)
             for (Block value : block) {
