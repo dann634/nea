@@ -25,6 +25,7 @@ public class GameController extends Scene {
     private static int spawnYCoords;
     private final AnchorPane root;
     private final List<Player> characters;
+    private final List<Zombie> zombies;
     public static HashMap<String, String> lookupTable;
     private final Inventory inventory;
     private final HealthBar healthBar;
@@ -32,7 +33,6 @@ public class GameController extends Scene {
     private final Camera camera;
     private final Timeline gameTimeline;
     private boolean blockDropped;
-    private double[] lastMousePos;
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
@@ -48,7 +48,7 @@ public class GameController extends Scene {
 
         //Initialises fields
         this.characters = new ArrayList<>();
-        this.lastMousePos = new double[2];
+        this.zombies = new ArrayList<>();
         String[][] map = loadMap();
         initLookupTable();
 
@@ -70,7 +70,7 @@ public class GameController extends Scene {
         this.blockDropped = false;
 
 
-        this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory);
+        this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory, this.zombies);
         this.camera.initWorld();
         this.characters.get(0).toFront();
 
@@ -85,6 +85,7 @@ public class GameController extends Scene {
 
             this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed); //Player X movement
             this.movementFactory.calculateYProperties(this.isWPressed); //Player y movement
+            this.movementFactory.calculateZombieMovement(this.zombies);
 
             if(this.camera.isBlockJustBroken() || this.blockDropped) { //Check to save cpu
                 this.movementFactory.calculateDroppedBlockGravity(); //Block dropping
@@ -122,10 +123,8 @@ public class GameController extends Scene {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
         });
 
-        Zombie zombie = new Zombie();
-        zombie.setX(500);
-        zombie.toFront();
-        this.root.getChildren().add(zombie);
+        spawnZombie(800);
+//        spawnZombie(600);
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
@@ -211,7 +210,6 @@ public class GameController extends Scene {
                 this.camera.createDroppedBlock(this.inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
                 this.inventory.clearCursor();
                 this.blockDropped = true;
-                this.lastMousePos = new double[]{e.getSceneX(), e.getSceneY()};
             }
 
         });
@@ -260,6 +258,15 @@ public class GameController extends Scene {
 
     public Inventory getInventory() {
         return this.inventory;
+    }
+
+    private void spawnZombie(int x) {
+        Zombie zombie = new Zombie();
+        //setup zombie stuff
+        zombie.setTranslateX(x);
+        this.zombies.add(zombie);
+        this.root.getChildren().addAll(zombie.getNodes());
+
     }
 
 

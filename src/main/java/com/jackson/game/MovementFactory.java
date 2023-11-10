@@ -1,11 +1,13 @@
 package com.jackson.game;
 
 import com.jackson.game.characters.Player;
+import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.Camera;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.geometry.NodeOrientation;
 import javafx.util.Duration;
 
 import java.util.List;
@@ -152,6 +154,74 @@ public class MovementFactory {
         fallingTimeline.getKeyFrames().add(fallingKeyFrame);
         fallingTimeline.play();
     }
+
+    public void calculateZombieMovement(List<Zombie> zombies) {
+
+        for(Zombie zombie : zombies) {
+            calculateZombieX(zombie);
+            calculateZombieY(zombie);
+        }
+
+    }
+
+    private void calculateZombieX(Zombie zombie) { // TODO: 10/11/2023 ADD XOFFSET
+        //make zombie face player
+        double difference = this.character.getX() - zombie.getTranslateX();
+        boolean needsToMoveRight = difference > 0;
+        zombie.setNodeOrientation(needsToMoveRight ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
+
+
+        //Check collision
+        boolean canMoveLeft = !this.camera.isEntityTouchingSide(zombie.getLeftCollision());
+        boolean canMoveRight = !this.camera.isEntityTouchingSide(zombie.getRightCollision());
+        if(!canMoveRight && !canMoveLeft) { //Stuck
+            return;
+        }
+
+        //Move left or right
+        if((needsToMoveRight && canMoveRight) || (!needsToMoveRight && canMoveLeft)) {
+            zombie.addTranslateX((needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED);
+        }
+
+        if((needsToMoveRight && !canMoveRight)
+        || (!needsToMoveRight && !canMoveLeft) && zombie.getJumpAcceleration() >= 0) {
+            //Jump to get over block
+            zombie.setNeedsToJump(true);
+        }
+
+
+    }
+
+    private void calculateZombieY(Zombie zombie) {
+        boolean isZombieTouchingFloor = this.camera.isEntityTouchingGround(zombie);
+        if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) { //Not jumping and on floor
+            return;
+        }
+
+        if(zombie.getJumpAcceleration() < 0) { //In Mid air jumping
+            zombie.addJumpAcceleration(0.15);
+            if(zombie.getJumpVelocity() < 3 && zombie.getJumpVelocity() > -3) {
+                zombie.addJumpVelocity(zombie.getJumpAcceleration());
+            }
+            zombie.addTranslateY(zombie.getJumpVelocity());
+            return;
+        }
+
+        if(zombie.getJumpAcceleration() > 0) { //To fix floating point math
+            zombie.setJumpAcceleration(0);
+        }
+
+        System.out.println(isZombieTouchingFloor);
+        if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump
+            zombie.setJumpAcceleration(-2.5);
+            zombie.setNeedsToJump(false);
+            return;
+
+        }
+        zombie.addTranslateY(3); //Falling
+    }
+
+
 
 
 

@@ -1,7 +1,10 @@
 package com.jackson.ui;
 
+import com.jackson.game.characters.Character;
+import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
 import com.jackson.game.characters.Player;
+import com.jackson.game.items.Entity;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.hud.Inventory;
 import javafx.scene.layout.AnchorPane;
@@ -21,13 +24,15 @@ public class Camera {
     private boolean blockJustBroken;
     private final List<List<Block>> blocks;
     private final List<ItemStack> droppedBlocks;
+    private final List<Zombie> zombies;
     private final GameController gameController;
     private final Inventory inventory;
     private int xOffset;
     private int yOffset;
 
-    public Camera(Player character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory) {
+    public Camera(Player character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory, List<Zombie> zombies) {
         this.character = character;
+        this.zombies = zombies;
         this.map = map;
         this.root = root;
         this.blocks = new ArrayList<>();
@@ -93,7 +98,7 @@ public class Camera {
 
     }
 
-    public void deleteHorizontal(boolean isUp) { //It wouldnt delete a clear line (as invisible imageviews didnt exist?)
+    public void deleteHorizontal(boolean isUp) { //It wouldn't delete a clear line (as invisible imageviews didn't exist?)
 
         if (this.blocks.isEmpty() || this.blocks.get(0).isEmpty()) {
             return;
@@ -117,6 +122,10 @@ public class Camera {
             itemStack.addPos(offset, 0);
         }
 
+        for(Zombie zombie : this.zombies) {
+            zombie.addTranslateX(offset);
+        }
+
     }
 
     public void translateBlocksByY(int offset) {
@@ -128,6 +137,10 @@ public class Camera {
         }
         for(ItemStack itemStack : this.droppedBlocks) {
             itemStack.addPos(0, offset);
+        }
+
+        for(Zombie zombie : this.zombies) {
+            zombie.addTranslateY(offset);
         }
     }
 
@@ -221,13 +234,14 @@ public class Camera {
     }
 
     //For character movement
-    public boolean isEntityTouchingGround(Player character) { //Can be optimised
+    public boolean isEntityTouchingGround(Character character) { //Can be optimised
         List<Block> blocks = getBlocksTouchingPlayer(character);
         blocks.removeIf(n -> n.getItemName().equals("air"));
         return !blocks.isEmpty();
     }
 
     //For collisions
+    // TODO: 10/11/2023 could maybe optimise using xPos and yPos
     public boolean isEntityTouchingSide(Rectangle collision) {
         List<Block> blocks = getBlockTouchingSide(collision);
         blocks.removeIf(n -> n.getItemName().equals("air"));
@@ -246,7 +260,7 @@ public class Camera {
         return blocks;
     }
 
-    public List<Block> getBlocksTouchingPlayer(Player character) {
+    public List<Block> getBlocksTouchingPlayer(Character character) {
         List<Block> blocks = new ArrayList<>();
         for (List<Block> block : this.blocks)
             for (Block value : block) {

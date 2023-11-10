@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -45,7 +46,7 @@ public class Character extends ImageView {
     }
 
     private void initBodyCollision() {
-        this.leftCollision = getBodyCollision(-1);
+        this.leftCollision = getBodyCollision(0);
         this.rightCollision = getBodyCollision(30);
     }
 
