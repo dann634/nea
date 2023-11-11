@@ -211,7 +211,7 @@ public class MovementFactory {
             zombie.setJumpAcceleration(0);
         }
 
-        System.out.println(isZombieTouchingFloor);
+
         if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump
             zombie.setJumpAcceleration(-2.5);
             zombie.setNeedsToJump(false);

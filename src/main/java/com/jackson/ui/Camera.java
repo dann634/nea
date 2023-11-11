@@ -13,6 +13,7 @@ import javafx.scene.shape.Rectangle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Camera {
 
@@ -327,6 +328,17 @@ public class Camera {
                     || itemStack.getY() < -100 || itemStack.getY() > 644) {
                 this.root.getChildren().remove(itemStack);
                 droppedBlockIterator.remove();
+            }
+        }
+
+        //Zombie Despawn
+        Iterator<Zombie> zombieIterator = this.zombies.listIterator();
+        while(zombieIterator.hasNext()) {
+            Zombie zombie = zombieIterator.next();
+            if(zombie.getTranslateX() < - 200 || zombie.getTranslateX() > 1224 || zombie.getTranslateY() < -100 || zombie.getTranslateY() > 664) {
+                this.root.getChildren().removeAll(zombie.getNodes());
+                zombieIterator.remove();
+                System.out.println("removed");
             }
         }
     }

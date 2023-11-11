@@ -124,7 +124,7 @@ public class GameController extends Scene {
         });
 
         spawnZombie(800);
-//        spawnZombie(600);
+        spawnZombie(600);
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());

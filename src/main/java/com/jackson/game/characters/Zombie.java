@@ -1,28 +1,45 @@
 package com.jackson.game.characters;
 
 import javafx.scene.Node;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 
 import java.util.List;
 
 public class Zombie extends Character {
 
-    public static final int SPEED = 3;
+    public static final int SPEED = 1;
+    private int xCounter;
     private double jumpAcceleration;
     private double jumpVelocity;
     private boolean needsToJump;
+    private int attackCooldown; //Measured in cycles of main game loop
+    private final ProgressBar healthBar;
 
     public Zombie() {
         super();
         this.jumpAcceleration = 0;
         this.jumpVelocity = 0;
         this.needsToJump = false;
+        this.xCounter = 30;
+        this.attackCooldown = 100;
+        this.healthBar = initHealthBar();
     }
 
     @Override
     public void setIdleImage() {
         setImage(new Image("file:src/main/resources/images/zombieRun1.png"));
         rebindCollisions();
+    }
+
+    private ProgressBar initHealthBar() {
+        ProgressBar progressBar = new ProgressBar(1);
+        progressBar.setPrefWidth(34);
+        progressBar.setPrefHeight(8);
+        progressBar.translateXProperty().bind(this.translateXProperty().subtract(2));
+        progressBar.translateYProperty().bind(this.translateYProperty().subtract(10));
+        progressBar.progressProperty().bind(health.divide(100));
+        return progressBar;
     }
 
     private void rebindCollisions() {
@@ -37,6 +54,11 @@ public class Zombie extends Character {
 
     public void addTranslateX(int value) {
         this.setTranslateX(this.getTranslateX() + value);
+        this.xCounter -= 1;
+        if(xCounter <= 0) {
+            this.xCounter = 30;
+            this.swapMovingImage();
+        }
     }
 
     public void addTranslateY(double value) {
@@ -44,7 +66,7 @@ public class Zombie extends Character {
     }
 
     public List<Node> getNodes() { //More Optimised
-        return List.of(this, this.leftCollision, this.rightCollision, this.feetCollision);
+        return List.of(this, this.leftCollision, this.rightCollision, this.feetCollision, this.healthBar);
     }
 
     public double getJumpAcceleration() {
