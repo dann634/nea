@@ -42,6 +42,7 @@ public class Character extends ImageView {
         this.headCollision = new Rectangle(25, 6);
         this.headCollision.xProperty().bind(xProperty().add(3));
         this.headCollision.yProperty().bind(yProperty().subtract(3));
+        this.headCollision.setVisible(false);
     }
 
     private void initFeetCollision() {
@@ -71,6 +72,11 @@ public class Character extends ImageView {
 
     public void updateBlockInHand(String blockName) {
         this.handImageView.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
+        if(blockName.equals("fist")) {
+            this.handImageView.setVisible(false);
+            return;
+        }
+        this.handImageView.setVisible(true);
     }
 
     private Rectangle getBodyCollision(int offset) {

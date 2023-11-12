@@ -1,6 +1,7 @@
 package com.jackson.game.characters;
 
 import com.jackson.io.TextIO;
+import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.NodeOrientation;
@@ -8,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.List;
 
@@ -25,7 +27,24 @@ public class Player extends Character {
         setY(180);
 
         initDisplayNameLabel();
+        updateBlockInHand("fist");
+    }
 
+    public void moveHand(double x, double y) {
+        this.handImageView.setVisible(true);
+
+        int offset = 5;
+        Timeline timeline = new Timeline();
+        timeline.setAutoReverse(true);
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(200), e-> {
+            this.handImageView.setTranslateX(this.handImageView.getTranslateX() + (this.getX() > x ? -offset : offset));
+            this.handImageView.setTranslateY(this.handImageView.getTranslateY() + (this.getY() > y ? -offset : offset));
+            if(this.handImageView.getTranslateX() == (30 * (this.getX() > x ? -1 : 1)) && this.handImageView.getTranslateY() == 30 * (this.getY() > y ? -1 : 1)) {
+                timeline.stop();
+            }
+        }));
+        timeline.play();
     }
 
     private void initDisplayNameLabel() {
@@ -81,6 +100,11 @@ public class Player extends Character {
     }
 
     private double getDistance(double x, double y) {
+        double[] distance = getXYDistance(x, y);
+        return Math.hypot(distance[0], distance[1]);
+    }
+
+    private double[] getXYDistance(double x, double y) {
         double xDifference;
         if(x < this.getX()) {
             xDifference = this.getX() - x;
@@ -94,7 +118,7 @@ public class Player extends Character {
         } else {
             yDifference = y - this.getY();
         }
-        return Math.hypot(xDifference, yDifference);
+        return new double[]{xDifference, yDifference};
     }
 
 

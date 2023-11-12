@@ -19,6 +19,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class GameController extends Scene {
 
@@ -32,6 +33,7 @@ public class GameController extends Scene {
     private final MovementFactory movementFactory;
     private final Camera camera;
     private final Timeline gameTimeline;
+    private final AudioPlayer audioPlayer;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
@@ -51,6 +53,10 @@ public class GameController extends Scene {
         this.zombies = new ArrayList<>();
         String[][] map = loadMap();
         initLookupTable();
+
+        //Sound
+        this.audioPlayer = new AudioPlayer();
+        this.audioPlayer.play();
 
 
         //HUD
@@ -123,9 +129,6 @@ public class GameController extends Scene {
         this.inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
         });
-
-        spawnZombie(800);
-        spawnZombie(600);
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
@@ -205,6 +208,10 @@ public class GameController extends Scene {
         });
 
         setOnMouseClicked(e -> {
+
+            //Move hand towards cursor
+            this.characters.get(0).moveHand(e.getSceneX(), e.getSceneY());
+
             if(this.inventory.getItemStackOnCursor() != null
             && !this.inventory.isCellHovered()) {
                 //Drop item
@@ -236,6 +243,7 @@ public class GameController extends Scene {
                     "-fx-alignment: center;" +
                     "-fx-spacing: 12;");
             gameTimeline.pause();
+            audioPlayer.pause();
 
             getChildren().addAll(addResumeButton(), addSaveAndExitButton());
             toFront();
@@ -246,6 +254,7 @@ public class GameController extends Scene {
             button.setOnAction(e -> { //Resume game
                 root.getChildren().remove(this);
                 gameTimeline.play();
+                audioPlayer.play();
             });
             return button;
         }

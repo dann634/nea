@@ -2,10 +2,13 @@ package com.jackson.ui;
 
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -15,6 +18,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +26,7 @@ public class SettingsController extends Scene {
 
     private TextField displayNameTextField;
     private Button muteSoundEffectsButton;
-    private Button muteBackgroundButton;
+    private Slider backgroundSlider;
     private Label title;
 
 
@@ -55,10 +59,13 @@ public class SettingsController extends Scene {
             this.muteSoundEffectsButton.setText("Muted");
         }
 
-        if(settingsList.get(2).equals("true")) { //If true set to muted (unmuted by default)
-            this.muteBackgroundButton.setId("redBtn");
-            this.muteBackgroundButton.setText("Muted");
+        double volume;
+        try {
+            volume = Double.parseDouble(settingsList.get(2));
+        } catch (NumberFormatException e) {
+            volume = 100;
         }
+        this.backgroundSlider.setValue(volume);
 
 
 
@@ -109,10 +116,16 @@ public class SettingsController extends Scene {
     } //Adds option to mute sound effects
 
     private void addMuteBackground(VBox root) {
-        var muteBackgroundLabel = new Label("Mute Background Music:");
-        this.muteBackgroundButton = getToggleButton();
+        var muteBackgroundLabel = new Label("Background Music Volume:");
+        this.backgroundSlider = new Slider();
+        var valueLabel = new Label(String.valueOf(this.backgroundSlider.getValue()));
+        valueLabel.setId("value");
+        this.backgroundSlider.valueProperty().addListener((observableValue, number, t1) -> {
+            valueLabel.setText(new DecimalFormat("0.00").format(t1));
+        });
 
-        root.getChildren().add(createHBox(muteBackgroundLabel, this.muteBackgroundButton));
+
+        root.getChildren().add(createHBox(muteBackgroundLabel, valueLabel, this.backgroundSlider));
     } //Adds option to mute background music
 
     private void deleteSinglePlayerSave(VBox root) {
@@ -139,7 +152,7 @@ public class SettingsController extends Scene {
             //Gets new data from ui
             newSettings.add(displayName);
             newSettings.add(this.muteSoundEffectsButton.getText().equals("Muted") ? "true" : "false");
-            newSettings.add(this.muteBackgroundButton.getText().equals("Muted") ? "true" : "false");
+            newSettings.add(String.valueOf(this.backgroundSlider.getValue()));
 
             TextIO.updateFile("src/main/resources/settings/settings.txt", newSettings); //Updates text file with new settings
 

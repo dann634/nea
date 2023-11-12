@@ -89,7 +89,11 @@ public class Camera {
             if(newIndex >= 300) {
                 key = "3"; //Just bedrock below
             }  else {
-                key = this.map[xIndex][newIndex];
+                try {
+                    key = this.map[xIndex][newIndex];
+                } catch (IndexOutOfBoundsException e) {
+                    key = "0";
+                }
             }
             Block block = new Block(GameController.lookupTable.get(key), xIndex, newIndex, this, this.inventory);
             block.setPos(line.get(0).getX(), yTranslate);
