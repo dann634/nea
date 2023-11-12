@@ -227,6 +227,8 @@ public class Camera {
             }
         }
         Block placedBlock = new Block(inventory.getSelectedItemStack().getItemName() ,block.getXPos(), block.getYPos(), this, this.inventory);
+        System.out.println(GameController.lookupTable.get(placedBlock.getItemName()));
+        this.map[placedBlock.getXPos()][placedBlock.getYPos()] = GameController.lookupTable.get(placedBlock.getItemName());
         placedBlock.setTranslateX(block.getTranslateX());
         placedBlock.setTranslateY(block.getTranslateY());
         this.inventory.useBlockFromSelectedSlot();
@@ -323,7 +325,7 @@ public class Camera {
         Iterator<Zombie> zombieIterator = this.zombies.listIterator();
         while(zombieIterator.hasNext()) {
             Zombie zombie = zombieIterator.next();
-            if(zombie.getTranslateX() < - 200 || zombie.getTranslateX() > 1224 || zombie.getTranslateY() < -100 || zombie.getTranslateY() > 664) {
+            if(zombie.getTranslateX() < - 200 || zombie.getTranslateX() > 1224 || zombie.getTranslateY() < -200 || zombie.getTranslateY() > 764) {
                 this.root.getChildren().removeAll(zombie.getNodes());
                 zombieIterator.remove();
                 System.out.println("removed");
