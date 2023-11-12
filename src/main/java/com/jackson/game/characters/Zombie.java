@@ -24,6 +24,9 @@ public class Zombie extends Character {
         this.xCounter = 30;
         this.attackCooldown = 100;
         this.healthBar = initHealthBar();
+
+        this.feetCollision.xProperty().bind(translateXProperty().add(4));
+
     }
 
     @Override
@@ -50,6 +53,8 @@ public class Zombie extends Character {
         this.rightCollision.yProperty().bind((this.translateYProperty()));
         this.feetCollision.xProperty().bind(this.translateXProperty());
         this.feetCollision.yProperty().bind((this.translateYProperty().add(43)));
+        this.headCollision.xProperty().bind(this.translateXProperty().add(3));
+        this.headCollision.yProperty().bind(this.translateYProperty().add(-3));
     }
 
     public void addTranslateX(int value) {
@@ -66,7 +71,7 @@ public class Zombie extends Character {
     }
 
     public List<Node> getNodes() { //More Optimised
-        return List.of(this, this.leftCollision, this.rightCollision, this.feetCollision, this.healthBar);
+        return List.of(this, this.leftCollision, this.rightCollision, this.feetCollision, this.healthBar, this.headCollision);
     }
 
     public double getJumpAcceleration() {

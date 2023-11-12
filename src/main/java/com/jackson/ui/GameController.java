@@ -93,6 +93,7 @@ public class GameController extends Scene {
             }
 
             this.camera.checkBlockPickup();
+            this.camera.checkBlockBorder();
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
@@ -211,7 +212,6 @@ public class GameController extends Scene {
                 this.inventory.clearCursor();
                 this.blockDropped = true;
             }
-
         });
 
     }

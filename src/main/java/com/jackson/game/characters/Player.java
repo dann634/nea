@@ -16,7 +16,8 @@ public class Player extends Character {
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
-
+    private final double ATTACK_RANGE = 300;
+    private final double INTERACT_RANGE = 600;
 
     public Player() {
         super();
@@ -69,6 +70,31 @@ public class Player extends Character {
 
     public void setIsModelFacingRight(boolean isModelFacingRight) {
         this.isModelFacingRight.set(isModelFacingRight);
+    }
+
+    public boolean isWithinAttackRange(double x, double y) {
+        return getDistance(x, y) < ATTACK_RANGE;
+    }
+
+    public boolean isWithinInteractRange(double x, double y) {
+        return getDistance(x, y) < INTERACT_RANGE;
+    }
+
+    private double getDistance(double x, double y) {
+        double xDifference;
+        if(x < this.getX()) {
+            xDifference = this.getX() - x;
+        } else {
+            xDifference = x - this.getX();
+        }
+
+        double yDifference;
+        if(y < this.getY()) {
+            yDifference = this.getY() - y;
+        } else {
+            yDifference = y - this.getY();
+        }
+        return Math.hypot(xDifference, yDifference);
     }
 
 

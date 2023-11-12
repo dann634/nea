@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.List;
@@ -29,6 +28,7 @@ public class Character extends ImageView {
         initFeetCollision();
         initBodyCollision();
         initHandRectangle();
+        initHeadCollision();
         setIdleImage();
 
         this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
@@ -38,9 +38,15 @@ public class Character extends ImageView {
 
     }
 
+    private void initHeadCollision() {
+        this.headCollision = new Rectangle(25, 6);
+        this.headCollision.xProperty().bind(xProperty().add(3));
+        this.headCollision.yProperty().bind(yProperty().subtract(3));
+    }
+
     private void initFeetCollision() {
         this.feetCollision = new Rectangle(25, 6);
-        this.feetCollision.xProperty().bind(xProperty().add(4));
+        this.feetCollision.xProperty().bind(xProperty().add(3));
         this.feetCollision.yProperty().bind(yProperty().add(42));
         this.feetCollision.setVisible(false);
     }
@@ -88,19 +94,20 @@ public class Character extends ImageView {
 
 
     public List<Rectangle> getCollisions() {
-        return List.of(this.feetCollision, this.leftCollision, this.rightCollision);
+        return List.of(this.feetCollision, this.leftCollision, this.rightCollision, this.headCollision);
     }
 
     public Rectangle getFeetCollision() {
         return this.feetCollision;
     }
-
     public Rectangle getLeftCollision() {
         return leftCollision;
     }
-
     public Rectangle getRightCollision() {
         return rightCollision;
+    }
+    public Rectangle getHeadCollision() {
+        return headCollision;
     }
 
     public SimpleDoubleProperty healthProperty() {

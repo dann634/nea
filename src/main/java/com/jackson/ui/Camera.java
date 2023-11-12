@@ -28,6 +28,7 @@ public class Camera {
     private final List<Zombie> zombies;
     private final GameController gameController;
     private final Inventory inventory;
+    private Block blockUnderCursor;
     private int xOffset;
     private int yOffset;
 
@@ -235,10 +236,8 @@ public class Camera {
     }
 
     //For character movement
-    public boolean isEntityTouchingGround(Character character) { //Can be optimised
-        List<Block> blocks = getBlocksTouchingPlayer(character);
-        blocks.removeIf(n -> n.getItemName().equals("air"));
-        return !blocks.isEmpty();
+    public boolean isEntityTouchingBlock(Rectangle collision) { //Can be optimised
+        return !getBlockTouchingSide(collision).isEmpty();
     }
 
     //For collisions
@@ -258,18 +257,7 @@ public class Camera {
                 }
             }
         }
-        return blocks;
-    }
-
-    public List<Block> getBlocksTouchingPlayer(Character character) {
-        List<Block> blocks = new ArrayList<>();
-        for (List<Block> block : this.blocks)
-            for (Block value : block) {
-                if (character.getFeetCollision().intersects(value.getBoundsInParent())) {
-                    blocks.add(value);
-                }
-            }
-
+        blocks.removeIf(n -> n.getItemName().equals("air"));
         return blocks;
     }
 
@@ -364,5 +352,12 @@ public class Camera {
         this.root.getChildren().add(itemStack);
     }
 
+    public void checkBlockBorder() {
+        //If walk out of range
 
+    }
+
+    public void setBlockUnderCursor(Block blockUnderCursor) {
+        this.blockUnderCursor = blockUnderCursor;
+    }
 }

@@ -49,6 +49,8 @@ public class Block extends Entity {
             this.isBreakable = false;
         }
 
+        getStyleClass().add("block");
+
         this.xPos = xPos;
         this.yPos = yPos;
 
@@ -57,22 +59,18 @@ public class Block extends Entity {
 
     private void initButtonPresses() {
         setOnMouseEntered(e -> {
+            this.camera.setBlockUnderCursor(this);
             if(this.isDropped) {
                 return;
             }
-            setStyle("-fx-border-width: 2;" +
-                    "-fx-border-color: black;");
             toFront();
 
         });
 
-        setOnMouseExited(e -> {
-            setStyle("-fx-border-width: 0");
-        });
 
         setOnMousePressed(e -> {
 
-            if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null) {
+            if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null && this.inventory.getItemStackOnCursor() == null) {
                 //Place block
                 this.camera.placeBlock(this);
                 return;
@@ -109,21 +107,12 @@ public class Block extends Entity {
     public int getXPos() {
         return xPos;
     }
-
-    public void setXPos(int xPos) {
-        this.xPos = xPos;
-    }
-
     public int getYPos() {
         return yPos;
     }
 
-    public void setYPos(int yPos) {
-        this.yPos = yPos;
-    }
 
-
-    public void drop() {
+    private void drop() {
         int blockHeight = 16;
         this.imageView.setFitHeight(blockHeight);
         this.imageView.setFitWidth(blockHeight);

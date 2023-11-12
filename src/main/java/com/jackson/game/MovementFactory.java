@@ -33,7 +33,7 @@ public class MovementFactory {
     }
 
     public void calculateYProperties(boolean isWPressed) {
-        boolean isCharacterTouchingFloor = this.camera.isEntityTouchingGround(this.character);
+        boolean isCharacterTouchingFloor = this.camera.isEntityTouchingBlock(this.character.getFeetCollision()); //Is character touching floor
         if(isCharacterTouchingFloor && !isWPressed && this.jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
@@ -42,7 +42,12 @@ public class MovementFactory {
             if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
                 this.jumpVelocity += this.jumpAcceleration;
             }
-            doYOffsetStuff((int) -this.jumpVelocity, false);
+            if(this.camera.isEntityTouchingBlock(this.character.getHeadCollision())) { //Get head collision
+                this.jumpAcceleration = 0;
+                this.jumpVelocity = 0;
+            } else {
+                doYOffsetStuff((int) -this.jumpVelocity, false);
+            }
             return;
         }
 
@@ -193,7 +198,7 @@ public class MovementFactory {
     }
 
     private void calculateZombieY(Zombie zombie) {
-        boolean isZombieTouchingFloor = this.camera.isEntityTouchingGround(zombie);
+        boolean isZombieTouchingFloor = this.camera.isEntityTouchingBlock(zombie.getFeetCollision());
         if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) { //Not jumping and on floor
             return;
         }
@@ -203,7 +208,12 @@ public class MovementFactory {
             if(zombie.getJumpVelocity() < 3 && zombie.getJumpVelocity() > -3) {
                 zombie.addJumpVelocity(zombie.getJumpAcceleration());
             }
-            zombie.addTranslateY(zombie.getJumpVelocity());
+            if(this.camera.isEntityTouchingBlock(zombie.getHeadCollision())) {
+                zombie.setJumpAcceleration(0);
+                zombie.setJumpVelocity(0);
+            } else {
+                zombie.addTranslateY(zombie.getJumpVelocity());
+            }
             return;
         }
 
