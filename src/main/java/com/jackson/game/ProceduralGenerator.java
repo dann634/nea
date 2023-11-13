@@ -66,6 +66,7 @@ public class ProceduralGenerator {
 
     }
 
+
     private static List<Integer> getHeightMapChunk() {
         /*
         It works in integers for block height
