@@ -128,6 +128,7 @@ public class GameController extends Scene {
 
         this.inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
+
         });
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());

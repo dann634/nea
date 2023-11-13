@@ -1,5 +1,6 @@
 package com.jackson.game.characters;
 
+import com.jackson.game.items.Entity;
 import com.jackson.io.TextIO;
 import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,6 +19,8 @@ public class Player extends Character {
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
+
+
     private final double ATTACK_RANGE = 300;
     private final double INTERACT_RANGE = 600;
 
@@ -27,24 +30,11 @@ public class Player extends Character {
         setY(180);
 
         initDisplayNameLabel();
-        updateBlockInHand("fist");
+        updateBlockInHand("wood_sword");
     }
 
     public void moveHand(double x, double y) {
         this.handImageView.setVisible(true);
-
-        int offset = 5;
-        Timeline timeline = new Timeline();
-        timeline.setAutoReverse(true);
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.getKeyFrames().add(new KeyFrame(Duration.millis(200), e-> {
-            this.handImageView.setTranslateX(this.handImageView.getTranslateX() + (this.getX() > x ? -offset : offset));
-            this.handImageView.setTranslateY(this.handImageView.getTranslateY() + (this.getY() > y ? -offset : offset));
-            if(this.handImageView.getTranslateX() == (30 * (this.getX() > x ? -1 : 1)) && this.handImageView.getTranslateY() == 30 * (this.getY() > y ? -1 : 1)) {
-                timeline.stop();
-            }
-        }));
-        timeline.play();
     }
 
     private void initDisplayNameLabel() {

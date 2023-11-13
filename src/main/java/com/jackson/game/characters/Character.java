@@ -1,5 +1,8 @@
 package com.jackson.game.characters;
 
+import com.jackson.game.items.Block;
+import com.jackson.game.items.Entity;
+import com.jackson.io.TextIO;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.NodeOrientation;
@@ -7,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Character extends ImageView {
@@ -18,12 +22,15 @@ public class Character extends ImageView {
     protected Rectangle leftCollision;
     protected Rectangle rightCollision;
     protected ImageView handImageView;
+    private int[] currentItemOffsets;
 
     public Character() {
         setPreserveRatio(true);
         setFitWidth(32);
         this.health = new SimpleDoubleProperty(100);
         this.isModelFacingRight = new SimpleBooleanProperty(true);
+        this.currentItemOffsets = new int[]{0, 0, 0};
+
 
         initFeetCollision();
         initBodyCollision();
@@ -31,9 +38,12 @@ public class Character extends ImageView {
         initHeadCollision();
         setIdleImage();
 
+
         this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
-            updateHandPosition(newValue ? 9 : -25, newValue);
+
+            this.handImageView.setTranslateX(newValue ? this.currentItemOffsets[1] : this.currentItemOffsets[0]);
+            this.handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
         });
 
     }
@@ -60,23 +70,23 @@ public class Character extends ImageView {
     protected void initHandRectangle() {
         this.handImageView = new ImageView();
         this.handImageView.yProperty().bind(this.yProperty().add(5));
+        this.handImageView.xProperty().bind(this.xProperty());
         this.handImageView.setScaleY(0.3);
         this.handImageView.setScaleX(0.3);
-        updateHandPosition(9, true);
+        this.handImageView.setTranslateX(this.currentItemOffsets[1]);
+        this.handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
     }
 
-    protected void updateHandPosition(int xOffset, boolean isFacingRight) {
-        this.handImageView.xProperty().bind(this.xProperty().add(xOffset));
-        this.handImageView.setNodeOrientation(isFacingRight ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
-    }
+    public void updateBlockInHand(String itemName) {
 
-    public void updateBlockInHand(String blockName) {
-        this.handImageView.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
-        if(blockName.equals("fist")) {
-            this.handImageView.setVisible(false);
-            return;
-        }
+        this.handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
         this.handImageView.setVisible(true);
+        //Offsets
+
+        this.currentItemOffsets = getOffsets(itemName);
+        System.out.println(Arrays.toString(this.currentItemOffsets));
+        this.handImageView.setTranslateY(this.currentItemOffsets[2]);
+        this.handImageView.setTranslateX(this.isModelFacingRight.get() ? this.currentItemOffsets[1] : this.currentItemOffsets[0]);
     }
 
     private Rectangle getBodyCollision(int offset) {
@@ -131,6 +141,22 @@ public class Character extends ImageView {
         }
         setImage(new Image("file:src/main/resources/images/" + getClass().getSimpleName() + "Run1.png"));
     }
+
+    private int[] getOffsets(String itemName) {
+        List<String> file = TextIO.readFile("src/main/resources/settings/offsets.txt");
+        for(String str : file) {
+            if(str.contains(itemName)) {
+                String[] splitLine = str.split(" ");
+                try {
+                    return new int[]{Integer.parseInt(splitLine[1]), Integer.parseInt(splitLine[2]), Integer.parseInt(splitLine[3])};
+                } catch (NumberFormatException e) {
+                    System.err.println("Error: Offsets failed to convert");
+                }
+            }
+        }
+        return new int[]{0, 0, 0};
+    }
+
 
 
 }

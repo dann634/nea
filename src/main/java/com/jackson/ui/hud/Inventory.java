@@ -1,5 +1,7 @@
 package com.jackson.ui.hud;
 
+import com.jackson.game.items.Block;
+import com.jackson.game.items.Entity;
 import com.jackson.game.items.ItemStack;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.image.Image;
