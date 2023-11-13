@@ -230,10 +230,12 @@ public class GameController extends Scene {
         lookupTable.put("1", "dirt");
         lookupTable.put("2", "grass");
         lookupTable.put("3", "bedrock");
+        lookupTable.put("4", "stone");
         lookupTable.put("air", "0");
         lookupTable.put("dirt", "1");
         lookupTable.put("grass", "2");
         lookupTable.put("bedrock", "3");
+        lookupTable.put("stone", "4");
     }
 
     private class PauseMenuController extends VBox {

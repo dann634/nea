@@ -25,9 +25,11 @@ public class ProceduralGenerator {
     1 - Dirt
     2 - Grass
     3 - Bedrock
+    4 - Stone
      */
 
     //Creates the 2D array of numbers to indicate block type
+    // FIXME: 13/11/2023 make so never touches bottom or sky
     public static void createMapFile(boolean isSingleplayer)  {
         List<Integer> fullHeightMap = new ArrayList<>();
         while (fullHeightMap.size() < WIDTH) { // Loops until map is 1000 blocks wide
@@ -36,6 +38,8 @@ public class ProceduralGenerator {
         int[][] heightMapArray = new int[WIDTH][HEIGHT];
         for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
             try {
+                System.out.println(fullHeightMap.get(i));
+
                 //Air blocks
                 for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
 
@@ -43,7 +47,10 @@ public class ProceduralGenerator {
                 heightMapArray[i][fullHeightMap.get(i)] = 2;
 
                 //Dirt Layer
-                for (int j = fullHeightMap.get(i)+1; j <= HEIGHT - 2; j++) heightMapArray[i][j] = 1;
+                for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = 1;
+
+                //Stone layer
+                for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = 4;
 
                 //Bedrock layer
                 heightMapArray[i][HEIGHT-1] = 3;

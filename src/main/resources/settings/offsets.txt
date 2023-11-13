@@ -1,4 +1,5 @@
-wood_sword -55 -8 -35
 air -25 9 0
 dirt -25 9 0
 grass -25 9 0
+stone -25 9 0
+wood_sword -55 -8 -35
