@@ -16,9 +16,10 @@ public class ProceduralGenerator {
     private static final int CHUNK_SIZE = 100;
     private static boolean isPositive;
     private static int START_Y = 150;
-    private static final int RANGE = 100;
+    private static final int RANGE = 30;
     private static final int WIDTH = 1000; //Map Width
     private static final int HEIGHT = 300; //Map Height
+    private static final double TREE_SPAWN_CHANCE = 0.15; //On any grass block
 
     /*
     0 - Air
@@ -26,10 +27,11 @@ public class ProceduralGenerator {
     2 - Grass
     3 - Bedrock
     4 - Stone
+    5 - Wood
+    6 - Leaves
      */
 
     //Creates the 2D array of numbers to indicate block type
-    // FIXME: 13/11/2023 make so never touches bottom or sky
     public static void createMapFile(boolean isSingleplayer)  {
         List<Integer> fullHeightMap = new ArrayList<>();
         while (fullHeightMap.size() < WIDTH) { // Loops until map is 1000 blocks wide
@@ -38,8 +40,6 @@ public class ProceduralGenerator {
         int[][] heightMapArray = new int[WIDTH][HEIGHT];
         for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
             try {
-                System.out.println(fullHeightMap.get(i));
-
                 //Air blocks
                 for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
 
@@ -55,10 +55,14 @@ public class ProceduralGenerator {
                 //Bedrock layer
                 heightMapArray[i][HEIGHT-1] = 3;
 
+
             } catch (IndexOutOfBoundsException e) { //Catches any errors
                 System.err.println("Error: Map File Creation Failed");
             }
         }
+
+        spawnTrees(fullHeightMap, heightMapArray);
+
 
         //Add to file
         String dir = "src/main/resources/saves/";
@@ -134,6 +138,39 @@ public class ProceduralGenerator {
             }
         }
         return true;
+    }
+
+    private static void spawnTrees(List<Integer> heightMap, int[][] map) {
+        Random rand = new Random();
+        boolean treeProximityFlag = false; //Flag
+        for (int i = 0; i < WIDTH; i++) { //Runs entire length of map
+            if(rand.nextDouble() < TREE_SPAWN_CHANCE && !treeProximityFlag) {
+                //Does random number fall within range and is there no tree next to this
+                treeProximityFlag = true; //Set true for next block
+                //Spawn tree
+                //Wood
+                //Goes to top of grass and then gets a random truncated number from the normal distribution
+                int topOfTree = heightMap.get(i) - 1 - (int) rand.nextGaussian(5, 1);
+                for (int j = heightMap.get(i)-1; j > topOfTree; j--) { //Creates trunk
+                    map[i][j] = 5; //5 is code for wood
+                }
+
+                //Leaves (Pyramid Pattern)
+                int length = 5;
+                for (int j = topOfTree; j > topOfTree - 3; j--) {
+                    for (int k = i - (length / 2); k < i + (length / 2) + 1; k++) {
+                        try{
+                            map[k][j] = 6; //6 is code for leaves
+                        } catch (ArrayIndexOutOfBoundsException ignored) {
+                        }
+                    }
+                    length--; //Must decrement for cone shape
+                }
+
+                continue;
+            }
+            treeProximityFlag = false;
+        }
     }
 
     public static int getWidth() {

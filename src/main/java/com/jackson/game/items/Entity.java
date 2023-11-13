@@ -23,7 +23,6 @@ public class Entity extends VBox {
         //Init Pos
         this.setTranslateX(x);
         this.setTranslateY(y);
-
     }
 
     private void init(String itemName) {

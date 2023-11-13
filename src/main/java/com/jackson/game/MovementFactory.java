@@ -3,6 +3,7 @@ package com.jackson.game;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.ItemStack;
+import com.jackson.ui.AudioPlayer;
 import com.jackson.ui.Camera;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -83,11 +84,14 @@ public class MovementFactory {
 
 
 
-    public void calculateXProperties(boolean isAPressed, boolean isDPressed) {
+    public void calculateXProperties(boolean isAPressed, boolean isDPressed, AudioPlayer walkingEffects) {
 
         if(!isAPressed && !isDPressed) { //For optimization
             return;
         }
+
+//        walkingEffects.play();
+
         boolean canMoveLeft = !this.camera.isEntityTouchingSide(character.getLeftCollision());
         boolean canMoveRight = !this.camera.isEntityTouchingSide(character.getRightCollision());
 

@@ -84,7 +84,6 @@ public class Character extends ImageView {
         //Offsets
 
         this.currentItemOffsets = getOffsets(itemName);
-        System.out.println(Arrays.toString(this.currentItemOffsets));
         this.handImageView.setTranslateY(this.currentItemOffsets[2]);
         this.handImageView.setTranslateX(this.isModelFacingRight.get() ? this.currentItemOffsets[1] : this.currentItemOffsets[0]);
     }

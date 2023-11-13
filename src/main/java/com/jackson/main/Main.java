@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.util.Random;
+
 public class Main extends Application {
 
     private static Stage stage;
@@ -22,6 +24,7 @@ public class Main extends Application {
         stage.setScene(new MainMenuController()); //Opens Main Menu
 //        stage.setResizable(false); //Window cannot be resized
         stage.show(); //Show GUI
+
     }
 
     public static void setScene(Scene scene) {

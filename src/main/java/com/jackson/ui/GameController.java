@@ -34,12 +34,14 @@ public class GameController extends Scene {
     private final Camera camera;
     private final Timeline gameTimeline;
     private final AudioPlayer audioPlayer;
+    private final AudioPlayer walkingEffects;
+    private final AudioPlayer jumpingEffects;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
 
-    // TODO: 24/10/2023 Add autosave feature -> no close and save
+    // TODO: 24/10/2023 Add autosave feature -> on close and save
 
     public GameController() {
         super(new VBox());
@@ -55,9 +57,14 @@ public class GameController extends Scene {
         initLookupTable();
 
         //Sound
-        this.audioPlayer = new AudioPlayer();
-        this.audioPlayer.play();
+        this.audioPlayer = new AudioPlayer("background");
+//        this.audioPlayer.play();
 
+        this.walkingEffects = new AudioPlayer("walking");
+        this.walkingEffects.setCycleCount(1);
+        this.walkingEffects.play();
+
+        this.jumpingEffects = new AudioPlayer("jump");
 
         //HUD
         this.inventory = new Inventory();
@@ -89,7 +96,7 @@ public class GameController extends Scene {
         this.gameTimeline.setCycleCount(Animation.INDEFINITE);
         this.gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000 / 60), e -> {
 
-            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed); //Player X movement
+            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed, this.walkingEffects); //Player X movement
             this.movementFactory.calculateYProperties(this.isWPressed); //Player y movement
             this.movementFactory.calculateZombieMovement(this.zombies);
 
@@ -131,6 +138,11 @@ public class GameController extends Scene {
 
         });
 
+//        Random rand = new Random();
+//        for (int i = 0; i < 30; i++) {
+//            spawnZombie(rand.nextInt(1000));
+//        }
+
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
         character.toFront();
@@ -166,6 +178,7 @@ public class GameController extends Scene {
                     case W -> {
                         this.isWPressed = true;
                         this.characters.get(0).setIdleImage();
+                        this.jumpingEffects.play();
                     }
 
                     case I -> {
@@ -231,11 +244,15 @@ public class GameController extends Scene {
         lookupTable.put("2", "grass");
         lookupTable.put("3", "bedrock");
         lookupTable.put("4", "stone");
+        lookupTable.put("5", "wood");
+        lookupTable.put("6", "leaves");
         lookupTable.put("air", "0");
         lookupTable.put("dirt", "1");
         lookupTable.put("grass", "2");
         lookupTable.put("bedrock", "3");
         lookupTable.put("stone", "4");
+        lookupTable.put("wood", "5");
+        lookupTable.put("leaves", "6");
     }
 
     private class PauseMenuController extends VBox {

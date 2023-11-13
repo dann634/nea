@@ -17,8 +17,8 @@ https://creativecommons.org/licenses/by/4.0/
 
      */
 
-    public AudioPlayer() {
-        this.media = new Media(getClass().getResource("/sound/background.mp3").toExternalForm());
+    public AudioPlayer(String sound) {
+        this.media = new Media(getClass().getResource("/sound/" + sound + ".mp3").toExternalForm());
         this.mediaPlayer = new MediaPlayer(media);
         this.mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         setVolume(Double.parseDouble(TextIO.readFile("src/main/resources/settings/settings.txt").get(2)) / 100);
@@ -34,5 +34,13 @@ https://creativecommons.org/licenses/by/4.0/
 
     public void setVolume(double volume) {
         this.mediaPlayer.setVolume(volume);
+    }
+
+    public void setCycleCount(int value) {
+        this.mediaPlayer.setCycleCount(value);
+    }
+
+    public boolean isPlaying() {
+        return this.mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
     }
 }

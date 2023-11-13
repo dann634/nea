@@ -31,6 +31,7 @@ public class Camera {
     private Block blockUnderCursor;
     private int xOffset;
     private int yOffset;
+    private List<String> backgroundBlocks; //Blocks the player can walk through
 
     public Camera(Player character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory, List<Zombie> zombies) {
         this.character = character;
@@ -44,6 +45,7 @@ public class Camera {
         this.blockJustBroken = false;
         this.gameController = gameController;
         this.inventory = inventory;
+        this.backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -250,7 +252,7 @@ public class Camera {
     // TODO: 10/11/2023 could maybe optimise using xPos and yPos
     public boolean isEntityTouchingSide(Rectangle collision) {
         List<Block> blocks = getBlockTouchingSide(collision);
-        blocks.removeIf(n -> n.getItemName().equals("air"));
+        blocks.removeIf(n -> this.backgroundBlocks.contains(n.getItemName()));
         return !blocks.isEmpty();
     }
 
@@ -263,7 +265,7 @@ public class Camera {
                 }
             }
         }
-        blocks.removeIf(n -> n.getItemName().equals("air"));
+        blocks.removeIf(n -> this.backgroundBlocks.contains(n.getItemName()));
         return blocks;
     }
 
