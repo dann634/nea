@@ -60,7 +60,9 @@ public class CreateWorldController extends Scene {
         var generateWorldButton = new Button("Generate World");
         generateWorldButton.setId("generateWorldButton");
         generateWorldButton.setOnAction(e -> {
-            ProceduralGenerator.createMapFile(true);
+            for (int i = 0; i < 100; i++) {
+                ProceduralGenerator.createMapFile(true);
+            }
             Main.setScene(new GameController());
         });
 

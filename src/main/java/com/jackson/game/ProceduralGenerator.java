@@ -37,43 +37,50 @@ public class ProceduralGenerator {
         while (fullHeightMap.size() < WIDTH) { // Loops until map is 1000 blocks wide
             fullHeightMap.addAll(getHeightMapChunk()); //Adds chunks to height map until its 1000 in size
         }
-        int[][] heightMapArray = new int[WIDTH][HEIGHT];
-        for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
-            try {
-                //Air blocks
-                for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
-
-                //Grass layer
-                heightMapArray[i][fullHeightMap.get(i)] = 2;
-
-                //Dirt Layer
-                for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = 1;
-
-                //Stone layer
-                for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = 4;
-
-                //Bedrock layer
-                heightMapArray[i][HEIGHT-1] = 3;
-
-
-            } catch (IndexOutOfBoundsException e) { //Catches any errors
-                System.err.println("Error: Map File Creation Failed");
+        int counter = 0;
+        for(int i : fullHeightMap) {
+            if(i < 20 || i > 300) {
+                counter++;
             }
         }
+        System.out.println(counter);
+//        int[][] heightMapArray = new int[WIDTH][HEIGHT];
+//        for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
+//            try {
+//                //Air blocks
+//                for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
+//
+//                //Grass layer
+//                heightMapArray[i][fullHeightMap.get(i)] = 2;
+//
+//                //Dirt Layer
+//                for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = 1;
+//
+//                //Stone layer
+//                for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = 4;
+//
+//                //Bedrock layer
+//                heightMapArray[i][HEIGHT-1] = 3;
+//
+//
+//            } catch (IndexOutOfBoundsException e) { //Catches any errors
+//                System.err.println("Error: Map File Creation Failed");
+//            }
+//        }
 
-        spawnTrees(fullHeightMap, heightMapArray);
+//        spawnTrees(fullHeightMap, heightMapArray);
 
 
-        //Add to file
-        String dir = "src/main/resources/saves/";
-        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt"; //Adds correct file name
-        try {
-            new File(dir).createNewFile(); //Creates file
-        } catch (IOException e) {
-            System.err.println("Map file could not be created");
-        }
-
-        TextIO.writeMap(heightMapArray, dir); //Writes 2D array to file
+//        //Add to file
+//        String dir = "src/main/resources/saves/";
+//        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt"; //Adds correct file name
+//        try {
+//            new File(dir).createNewFile(); //Creates file
+//        } catch (IOException e) {
+//            System.err.println("Map file could not be created");
+//        }
+//
+//        TextIO.writeMap(heightMapArray, dir); //Writes 2D array to file
 
     }
 

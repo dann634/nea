@@ -8,6 +8,12 @@ import java.util.List;
 
 public class Zombie extends Character {
 
+    /*
+    Have chance to spawn pack
+    use normal distribution again
+    change mean on difficulty
+     */
+
     public static final int SPEED = 1;
     private int xCounter;
     private double jumpAcceleration;
