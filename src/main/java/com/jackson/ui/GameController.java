@@ -178,7 +178,7 @@ public class GameController extends Scene {
                     case W -> {
                         this.isWPressed = true;
                         this.characters.get(0).setIdleImage();
-                        this.jumpingEffects.play();
+                        this.jumpingEffects.playFromBeginning();
                     }
 
                     case I -> {
@@ -212,7 +212,11 @@ public class GameController extends Scene {
             switch (e.getCode()) {
                 case A -> this.isAPressed = false;
                 case D -> this.isDPressed = false;
-                case W -> this.isWPressed = false;
+                case W -> {
+                    this.isWPressed = false;
+                    this.jumpingEffects.pause();
+                }
+
             }
         });
 

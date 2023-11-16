@@ -3,6 +3,7 @@ package com.jackson.ui;
 import com.jackson.io.TextIO;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 public class AudioPlayer {
 
@@ -42,5 +43,10 @@ https://creativecommons.org/licenses/by/4.0/
 
     public boolean isPlaying() {
         return this.mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
+    }
+
+    public void playFromBeginning() {
+        this.mediaPlayer.seek(Duration.millis(0));
+        this.mediaPlayer.play();
     }
 }
