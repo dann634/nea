@@ -242,31 +242,21 @@ public class Camera {
         this.root.getChildren().add(placedBlock);
         this.blocks.get(index[0]).set(index[1], placedBlock);
     }
-
-    //For character movement
-    public boolean isEntityTouchingBlock(Rectangle collision) { //Can be optimised
-        return !getBlockTouchingSide(collision).isEmpty();
-    }
-
     //For collisions
     // TODO: 10/11/2023 could maybe optimise using xPos and yPos
-    public boolean isEntityTouchingSide(Rectangle collision) {
-        List<Block> blocks = getBlockTouchingSide(collision);
-        blocks.removeIf(n -> this.backgroundBlocks.contains(n.getItemName()));
-        return !blocks.isEmpty();
-    }
-
-    public List<Block> getBlockTouchingSide(Rectangle collision) {
+    public boolean isEntityTouchingBlock(Rectangle collision) {
         List<Block> blocks = new ArrayList<>();
-        for(List<Block> blockArr : this.blocks) {
+        for(List<Block> blockArr : this.blocks) { //Loops through all blocks on screen
             for(Block block : blockArr) {
-                if(collision.intersects(block.getBoundsInParent())) {
+                if(collision.intersects(block.getBoundsInParent()) &&
+                        !this.backgroundBlocks.contains(block.getItemName())) {
+                    //If rectangle is touching block its added to list
+                    //If player cannot pass through the block
                     blocks.add(block);
                 }
             }
         }
-        blocks.removeIf(n -> this.backgroundBlocks.contains(n.getItemName()));
-        return blocks;
+        return !blocks.isEmpty();
     }
 
     //For Dropped blocks

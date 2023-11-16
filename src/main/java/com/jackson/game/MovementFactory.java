@@ -92,8 +92,8 @@ public class MovementFactory {
 
 //        walkingEffects.play();
 
-        boolean canMoveLeft = !this.camera.isEntityTouchingSide(character.getLeftCollision());
-        boolean canMoveRight = !this.camera.isEntityTouchingSide(character.getRightCollision());
+        boolean canMoveLeft = !this.camera.isEntityTouchingBlock(character.getLeftCollision());
+        boolean canMoveRight = !this.camera.isEntityTouchingBlock(character.getRightCollision());
 
         int offset = 0;
         boolean isCharacterMovingLeft = false;
@@ -181,8 +181,8 @@ public class MovementFactory {
 
 
         //Check collision
-        boolean canMoveLeft = !this.camera.isEntityTouchingSide(zombie.getLeftCollision());
-        boolean canMoveRight = !this.camera.isEntityTouchingSide(zombie.getRightCollision());
+        boolean canMoveLeft = !this.camera.isEntityTouchingBlock(zombie.getLeftCollision());
+        boolean canMoveRight = !this.camera.isEntityTouchingBlock(zombie.getRightCollision());
         if(!canMoveRight && !canMoveLeft) { //Stuck
             return;
         }

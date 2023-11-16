@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 import java.util.Arrays;
@@ -49,10 +50,10 @@ public class Character extends ImageView {
     }
 
     private void initHeadCollision() {
-        this.headCollision = new Rectangle(25, 6);
-        this.headCollision.xProperty().bind(xProperty().add(3));
-        this.headCollision.yProperty().bind(yProperty().subtract(3));
-        this.headCollision.setVisible(false);
+        this.headCollision = new Rectangle(25, 6); //Width of 25, Height of 6
+        this.headCollision.xProperty().bind(xProperty().add(3)); //Binds x to player
+        this.headCollision.yProperty().bind(yProperty().subtract(3)); //Binds y to player
+        this.headCollision.setVisible(false); //Hides the rectangle
     }
 
     private void initFeetCollision() {

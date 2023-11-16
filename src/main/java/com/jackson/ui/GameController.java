@@ -58,12 +58,12 @@ public class GameController extends Scene {
 
         //Sound
         this.audioPlayer = new AudioPlayer("background");
-//        this.audioPlayer.play();
-
+        this.audioPlayer.play();
+//
         this.walkingEffects = new AudioPlayer("walking");
-        this.walkingEffects.setCycleCount(1);
-        this.walkingEffects.play();
-
+//        this.walkingEffects.setCycleCount(1);
+//        this.walkingEffects.play();
+//
         this.jumpingEffects = new AudioPlayer("jump");
 
         //HUD
@@ -139,7 +139,7 @@ public class GameController extends Scene {
         });
 
 //        Random rand = new Random();
-//        for (int i = 0; i < 30; i++) {
+//        for (int i = 0; i < 15; i++) {
 //            spawnZombie(rand.nextInt(1000));
 //        }
 
@@ -299,7 +299,6 @@ public class GameController extends Scene {
         zombie.setTranslateX(x);
         this.zombies.add(zombie);
         this.root.getChildren().addAll(zombie.getNodes());
-
     }
 
 
