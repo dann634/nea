@@ -33,8 +33,6 @@ public class Player extends Character {
         this.camera = camera;
 
         initDisplayNameLabel();
-        updateBlockInHand("wood_sword");
-
     }
 
     public void moveHand(double x, double y) {
@@ -120,7 +118,5 @@ public class Player extends Character {
         if(item != null && item.isUsable()) {
             this.attackTranslate.play();
         }
-        this.attackTranslate.play();
-
     }
 }

@@ -11,5 +11,6 @@ public class Item extends Entity {
 
     public Item(String itemName, double x, double y) {
         super(itemName, x, y);
+        this.isUsable = true;
     }
 }

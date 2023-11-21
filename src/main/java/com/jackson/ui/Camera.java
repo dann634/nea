@@ -53,6 +53,8 @@ public class Camera {
         this.inventory = inventory;
         this.backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
+
+        spawnItem("wood_sword", 1, 400, 200);
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {

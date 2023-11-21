@@ -24,7 +24,7 @@ import java.util.Random;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.01;
+    private final double ZOMBIE_SPAWN_RATE = 0.001;
     private static int spawnYCoords;
     private final AnchorPane root;
     private final List<Player> characters;
@@ -203,24 +203,12 @@ public class GameController extends Scene {
                         this.jumpingEffects.playFromBeginning();
                     }
 
-                    case I -> {
-                        this.inventory.toggleInventory();
-                    }
-                    case DIGIT1 -> {
-                        this.inventory.selectSlot(0);
-                    }
-                    case DIGIT2 -> {
-                        this.inventory.selectSlot(1);
-                    }
-                    case DIGIT3 -> {
-                        this.inventory.selectSlot(2);
-                    }
-                    case DIGIT4 -> {
-                        this.inventory.selectSlot(3);
-                    }
-                    case DIGIT5 -> {
-                        this.inventory.selectSlot(4);
-                    }
+                    case I -> this.inventory.toggleInventory();
+                    case DIGIT1 -> this.inventory.selectSlot(0);
+                    case DIGIT2 -> this.inventory.selectSlot(1);
+                    case DIGIT3 -> this.inventory.selectSlot(2);
+                    case DIGIT4 -> this.inventory.selectSlot(3);
+                    case DIGIT5 -> this.inventory.selectSlot(4);
 
                     case ESCAPE -> {
                         if(this.gameTimeline.getStatus() != Animation.Status.PAUSED) {
