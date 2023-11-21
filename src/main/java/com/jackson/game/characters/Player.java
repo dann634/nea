@@ -2,6 +2,7 @@ package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
 import com.jackson.io.TextIO;
+import com.jackson.ui.Camera;
 import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -13,24 +14,27 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 public class Player extends Character {
 
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
-
-
+    private Camera camera;
     private final double ATTACK_RANGE = 300;
     private final double INTERACT_RANGE = 600;
 
-    public Player() {
+    public Player(Camera camera) {
         super();
         setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
         setY(180);
 
+        this.camera = camera;
+
         initDisplayNameLabel();
         updateBlockInHand("wood_sword");
+
     }
 
     public void moveHand(double x, double y) {
@@ -111,5 +115,12 @@ public class Player extends Character {
         return new double[]{xDifference, yDifference};
     }
 
+    @Override
+    public void attack(Entity item) {
+        if(item != null && item.isUsable()) {
+            this.attackTranslate.play();
+        }
+        this.attackTranslate.play();
 
+    }
 }

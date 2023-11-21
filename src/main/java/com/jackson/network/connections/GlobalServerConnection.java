@@ -21,11 +21,11 @@ public class GlobalServerConnection {
 
     private static final int PORT = 4234;
     private static final String LAPTOP_IP = "192.168.0.36";
-
+    private static final String SERVER_IP = "192.168.50.98";
 
 
     private static void connectToServer() throws IOException {
-        socket = new Socket("localhost", PORT); //initialises socket (localhost for testing only)
+        socket = new Socket(SERVER_IP, PORT); //initialises socket (localhost for testing only)
         outStream = new ObjectOutputStream(socket.getOutputStream()); //initialises the outstream
         inStream = new ObjectInputStream(socket.getInputStream()); //initialises the instream
     }

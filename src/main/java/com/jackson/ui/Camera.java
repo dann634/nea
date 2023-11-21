@@ -5,10 +5,16 @@ import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
 import com.jackson.game.characters.Player;
 import com.jackson.game.items.Entity;
+import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.hud.Inventory;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,6 +52,7 @@ public class Camera {
         this.gameController = gameController;
         this.inventory = inventory;
         this.backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
+        checkAttackIntersect();
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -105,6 +112,7 @@ public class Camera {
         this.root.getChildren().addAll(newBlocks);
 
     }
+
 
     public void deleteHorizontal(boolean isUp) { //It wouldn't delete a clear line (as invisible imageviews didn't exist?)
 
@@ -192,10 +200,28 @@ public class Camera {
         cleanupEntities();
     }
 
+    private void spawnItem(String itemName, int amount, double x, double y) {
+        // TODO: 19/11/2023 get from database in future
+        Entity item;
+        if(GameController.lookupTable.containsKey(itemName)) {
+            item = new Block(itemName, character.getXPos(), character.getYPos(), this, this.inventory);
+        } else {
+            item = new Item(itemName, character.getTranslateX(), character.getTranslateY());
+        }
+        item.setTranslateX(x);
+        item.setTranslateY(y);
+
+        ItemStack itemStack = new ItemStack(item);
+        itemStack.randomRotation();
+        itemStack.addStackValue(amount);
+        this.droppedBlocks.add(itemStack);
+        this.root.getChildren().add(itemStack);
+    }
+
     //For breaking blocks
     public void removeBlock(Block remBlock) { //Remove block and replaces with air block
-        ItemStack itemStack = new ItemStack(remBlock.getItemName(), remBlock.getTranslateX(), remBlock.getTranslateY());
-        itemStack.addStackValue(1);
+//        ItemStack itemStack = new ItemStack(remBlock);
+//        itemStack.addStackValue(1);
         int[] index = new int[2];
         Block newBlock = new Block("air", -1, -1, this, this.inventory);
         for(int j = 0; j < this.blocks.size(); j++) {
@@ -211,11 +237,9 @@ public class Camera {
                 }
             }
         }
-        itemStack.setPos(remBlock.getTranslateX(), remBlock.getTranslateY());
-        itemStack.randomRotation();
-        this.droppedBlocks.add(itemStack); //Adds block to dropped blocks list
+        spawnItem(remBlock.getItemName(), 1, remBlock.getTranslateX(), remBlock.getTranslateY());
         this.root.getChildren().remove(remBlock); //Removes old block
-        this.root.getChildren().addAll(itemStack, newBlock); //Adds air block in place to pane
+        this.root.getChildren().addAll(newBlock); //Adds air block in place to pane
         this.blocks.get(index[0]).set(index[1], newBlock); //Adds air block to blocks
         this.blockJustBroken = true; //Sets flag to true so blocks fall
         this.map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
@@ -241,6 +265,27 @@ public class Camera {
         this.root.getChildren().add(placedBlock);
         this.blocks.get(index[0]).set(index[1], placedBlock);
     }
+
+    public void checkAttackIntersect() {
+        this.character.getAttackTranslate().currentTimeProperty().addListener((observableValue, duration, t1) -> {
+            if(t1.equals(Duration.millis(400))) {
+                List<Zombie> deadZombies = new ArrayList<>();
+                List<Node> zombieNodes = new ArrayList<>();
+                for(Zombie zombie : zombies) {
+                    if(this.character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY() + 36, 54, 72)) { // FIXME: 21/11/2023 could make this bound more precise
+                        //Zombie touching weapon
+                        if(zombie.takeDamage(40)) {
+                            deadZombies.add(zombie);
+                            zombieNodes.addAll(zombie.getNodes());
+                        }
+                    }
+                }
+                this.root.getChildren().removeAll(zombieNodes);
+                this.zombies.removeAll(deadZombies);
+            }
+        });
+    }
+
     //For collisions
     // TODO: 10/11/2023 could maybe optimise using xPos and yPos
     public boolean isEntityTouchingBlock(Rectangle collision) {
@@ -273,22 +318,6 @@ public class Camera {
             }
         }
         return -1;
-    }
-
-    public double getBlockHeightUnderBlock(double mouseX, double mouseY) {
-        for (int i = 0; i < this.blocks.size() - 1; i++) {
-            if(this.blocks.get(i).get(0).getTranslateX() < mouseX
-                    && this.blocks.get(i+1).get(0).getTranslateX() > mouseX) { //Is right column
-                for (int j = 0; j < this.blocks.get(i).size() - 1; j++) {
-
-                    if(mouseY > this.blocks.get(i).get(j).getTranslateY() && mouseY < this.blocks.get(i).get(j+1).getTranslateY()) {
-                        return this.blocks.get(i).get(j+1).getTranslateY();
-                    }
-                }
-            }
-        }
-        return -1;
-
     }
 
     public List<ItemStack> getDroppedBlocks() {
@@ -351,6 +380,17 @@ public class Camera {
     public void checkBlockBorder() {
         //If walk out of range
 
+    }
+
+
+
+    public double getBlockTranslateY(int xPos) {
+        for(Block block : this.blocks.get(xPos)) {
+            if(block.getItemName().equals("grass")) {
+                return block.getTranslateY();
+            }
+        }
+        return 0;
     }
 
     public void setBlockUnderCursor(Block blockUnderCursor) {

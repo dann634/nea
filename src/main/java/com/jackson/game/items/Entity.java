@@ -11,6 +11,7 @@ public class Entity extends VBox {
 
     protected ImageView imageView; //Imageview can be accessed from same package
     protected String itemName; //Item name can be accessed from same package
+    protected boolean isUsable; //Tools + Weapons
 
     public Entity(String itemName) {
         init(itemName);
@@ -80,5 +81,7 @@ public class Entity extends VBox {
         this.imageView.setRotate(new Random().nextDouble(360));
     }
 
-
+    public boolean isUsable() {
+        return isUsable;
+    }
 }

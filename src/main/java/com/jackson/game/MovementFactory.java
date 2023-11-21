@@ -20,12 +20,9 @@ import static java.lang.Math.divideExact;
 public class MovementFactory {
 
     private final Player character;
-
     private double jumpVelocity;
     private double jumpAcceleration;
-
     private final Camera camera;
-
     private double oldX;
 
     public MovementFactory(Player character, Camera camera) {

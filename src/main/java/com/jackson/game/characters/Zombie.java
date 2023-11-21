@@ -1,5 +1,6 @@
 package com.jackson.game.characters;
 
+import com.jackson.game.items.Entity;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
@@ -70,6 +71,11 @@ public class Zombie extends Character {
             this.xCounter = 30;
             this.swapMovingImage();
         }
+    }
+
+    @Override
+    public void attack(Entity item) {
+
     }
 
     public void addTranslateY(double value) {

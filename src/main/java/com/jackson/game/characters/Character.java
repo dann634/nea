@@ -3,18 +3,23 @@ package com.jackson.game.characters;
 import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
 import com.jackson.io.TextIO;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.transform.Translate;
+import javafx.util.Duration;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Character extends ImageView {
+public abstract class Character extends ImageView {
 
     protected SimpleBooleanProperty isModelFacingRight;
     protected SimpleDoubleProperty health;
@@ -23,6 +28,9 @@ public class Character extends ImageView {
     protected Rectangle leftCollision;
     protected Rectangle rightCollision;
     protected ImageView handImageView;
+    protected TranslateTransition attackTranslate;
+    protected boolean isAttacking;
+    protected int attackOffsets;
     private int[] currentItemOffsets;
 
     public Character() {
@@ -31,7 +39,6 @@ public class Character extends ImageView {
         this.health = new SimpleDoubleProperty(100);
         this.isModelFacingRight = new SimpleBooleanProperty(true);
         this.currentItemOffsets = new int[]{0, 0, 0};
-
 
         initFeetCollision();
         initBodyCollision();
@@ -42,9 +49,11 @@ public class Character extends ImageView {
 
         this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
-
+            this.attackTranslate.stop(); //Fixes Attack and Turn Bug
+            this.attackTranslate.setToX((newValue) ? 10 : -73);
             this.handImageView.setTranslateX(newValue ? this.currentItemOffsets[1] : this.currentItemOffsets[0]);
             this.handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
+            this.handImageView.setRotate((newValue) ? 45 : -45);
         });
 
     }
@@ -72,10 +81,19 @@ public class Character extends ImageView {
         this.handImageView = new ImageView();
         this.handImageView.yProperty().bind(this.yProperty().add(5));
         this.handImageView.xProperty().bind(this.xProperty());
+        this.handImageView.setRotate(45);
         this.handImageView.setScaleY(0.3);
         this.handImageView.setScaleX(0.3);
         this.handImageView.setTranslateX(this.currentItemOffsets[1]);
         this.handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+        this.attackTranslate = new TranslateTransition();
+        this.attackTranslate.setNode(this.handImageView);
+        this.attackTranslate.setCycleCount(2);
+        this.attackTranslate.setAutoReverse(true);
+        this.attackTranslate.setRate(4);
+        this.attackTranslate.setToX(10);
+
     }
 
     public void updateBlockInHand(String itemName) {
@@ -157,6 +175,23 @@ public class Character extends ImageView {
         return new int[]{0, 0, 0};
     }
 
+    public abstract void attack(Entity item);
 
+    public boolean takeDamage(int amount) { //Returns true if dead
+        this.health.set(this.health.get() - amount);
+        if(this.health.get() <= 0) {
+            //Die
+            return true;
+        }
+        return false;
+    }
+
+    public TranslateTransition getAttackTranslate() {
+        return attackTranslate;
+    }
+
+    public boolean isIsModelFacingRight() {
+        return isModelFacingRight.get();
+    }
 
 }

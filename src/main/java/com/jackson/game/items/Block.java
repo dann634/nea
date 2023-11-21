@@ -37,6 +37,7 @@ public class Block extends Entity {
         super(blockName);
         initButtonPresses();
         initFields(xPos, yPos, camera, inventory);
+        this.isUsable = false;
     }
 
     private void initFields(int xPos, int yPos, Camera camera, Inventory inventory) {

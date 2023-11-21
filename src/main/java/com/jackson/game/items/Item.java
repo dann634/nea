@@ -6,6 +6,7 @@ public class Item extends Entity {
 
     public Item(String itemName) {
         super(itemName);
+        this.isUsable = true;
     }
 
     public Item(String itemName, double x, double y) {

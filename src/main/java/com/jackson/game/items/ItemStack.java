@@ -11,9 +11,11 @@ public class ItemStack extends Entity { //Child of Entity
     private Label stackSizeLabel;
 
 
-    public ItemStack(String itemName, double x, double y) {
-        super(itemName, x, y); //Parent constructor
+    public ItemStack(Entity item) {
+        super(item.getItemName(), item.getTranslateX(), item.getTranslateY()); //Parent constructor
         this.setMouseTransparent(true); //Needs to not block mouse events
+
+        this.isUsable = item.isUsable;
 
         initStackSize(); //Inits Label
         this.maxStackSize = 100; //Sets default max size to 100

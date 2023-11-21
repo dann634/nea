@@ -10,6 +10,7 @@ import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
@@ -23,6 +24,7 @@ import java.util.Random;
 
 public class GameController extends Scene {
 
+    private final double ZOMBIE_SPAWN_RATE = 0.01;
     private static int spawnYCoords;
     private final AnchorPane root;
     private final List<Player> characters;
@@ -36,10 +38,12 @@ public class GameController extends Scene {
     private final AudioPlayer audioPlayer;
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
+    private final Random rand;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
+    private boolean isSpacePressed;
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
@@ -53,6 +57,7 @@ public class GameController extends Scene {
         //Initialises fields
         this.characters = new ArrayList<>();
         this.zombies = new ArrayList<>();
+        this.rand = new Random();
         String[][] map = loadMap();
         initLookupTable();
 
@@ -61,14 +66,12 @@ public class GameController extends Scene {
         this.audioPlayer.play();
 //
         this.walkingEffects = new AudioPlayer("walking");
-//        this.walkingEffects.setCycleCount(1);
-//        this.walkingEffects.play();
-//
         this.jumpingEffects = new AudioPlayer("jump");
 
         //HUD
         this.inventory = new Inventory();
         spawnCharacter();
+        this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory, this.zombies);
         this.root.getChildren().add(this.inventory.getItemOnCursor());
         this.healthBar = new HealthBar(this.characters.get(0).healthProperty());
 
@@ -79,11 +82,10 @@ public class GameController extends Scene {
         this.isAPressed = false;
         this.isDPressed = false;
         this.isWPressed = false;
+        this.isSpacePressed = false;
 
         this.blockDropped = false;
 
-
-        this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory, this.zombies);
         this.camera.initWorld();
         this.characters.get(0).toFront();
 
@@ -107,6 +109,7 @@ public class GameController extends Scene {
 
             this.camera.checkBlockPickup();
             this.camera.checkBlockBorder();
+            spawnZombiePack();
 
             //Everything to front (maybe make a method for it)
             this.inventory.getInventoryVbox().toFront();
@@ -121,6 +124,30 @@ public class GameController extends Scene {
 
     }
 
+    private void spawnZombiePack() {
+        //Do check first
+        if(this.rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
+            return; //No spawn
+        }
+        //Spawn
+        int packSize = (int) this.rand.nextGaussian(3, 1);
+        System.out.println(packSize);
+        int spawnTile = this.rand.nextInt(32) + 1;
+
+        List<Zombie> pack = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
+        for (int i = 0; i < packSize; i++) {
+            var zombie = new Zombie();
+            zombie.setTranslateX(spawnTile * 32 + this.rand.nextDouble(25));
+            zombie.setTranslateY(this.camera.getBlockTranslateY(spawnTile) - 48);
+            pack.add(zombie);
+            nodes.addAll(zombie.getNodes());
+        }
+        this.root.getChildren().addAll(nodes);
+        this.zombies.addAll(pack);
+    }
+
+
     private String[][] loadMap() {
         String[][] map = TextIO.readMapFile(true);
         spawnYCoords = findStartingY(map);
@@ -129,7 +156,7 @@ public class GameController extends Scene {
 
 
     private void spawnCharacter() {
-        Player character = new Player();
+        Player character = new Player(this.camera);
         character.setXPos(500);
         character.setYPos(spawnYCoords);
 
@@ -137,11 +164,6 @@ public class GameController extends Scene {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
 
         });
-
-//        Random rand = new Random();
-//        for (int i = 0; i < 15; i++) {
-//            spawnZombie(rand.nextInt(1000));
-//        }
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
@@ -205,6 +227,11 @@ public class GameController extends Scene {
                             this.root.getChildren().add(new PauseMenuController());
                         }
                     }
+                    case SPACE -> {
+                        //Attack
+                        this.isSpacePressed = true;
+                        this.characters.get(0).attack(this.inventory.getSelectedItemStack());
+                    }
                 }
             });
 
@@ -216,6 +243,7 @@ public class GameController extends Scene {
                     this.isWPressed = false;
                     this.jumpingEffects.pause();
                 }
+                case SPACE -> this.isSpacePressed = false;
 
             }
         });
@@ -297,13 +325,7 @@ public class GameController extends Scene {
         return this.inventory;
     }
 
-    private void spawnZombie(int x) {
-        Zombie zombie = new Zombie();
-        //setup zombie stuff
-        zombie.setTranslateX(x);
-        this.zombies.add(zombie);
-        this.root.getChildren().addAll(zombie.getNodes());
-    }
+
 
 
 
