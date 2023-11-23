@@ -31,15 +31,41 @@
     -fx-background-radius: 10;
 }
 
-.outline.label .text {
-    -fx-stroke: black;
-    -fx-stroke-width: .5px;
+.title {
+    -fx-font-size: 32;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
 }
+
+.itemStack {
+    -fx-font-weight: normal;
+    -fx-font-size: 12;
+    -fx-text-fill: white;
+}
+
+.statNumbers {
+    -fx-font-size: 24;
+    -fx-text-fill: white;
+}
+
+.xpBar {
+    -fx-min-width: 75;
+    -fx-min-height: 24;
+    -fx-padding: 5;
+    -fx-background-radius: 30;
+}
+
 
 .progress-bar > .bar {
     -fx-background-insets: 1 1 2 1;
     -fx-padding: 0.20em;
     -fx-accent: red;
+}
+
+.xpBar > .bar {
+    -fx-background-insets: 1 1 2 1;
+    -fx-padding: 0.20em;
+    -fx-accent: #27d92a
 }
 
 .block:hover{
@@ -49,5 +75,21 @@
 
 .block {
     -fx-border-width: 0;
+}
+
+#statMenu {
+    -fx-background-color: rgba(0, 0, 0, .65);
+    -fx-pref-height: 180;
+    -fx-pref-width: 300;
+    -fx-translate-x: 1324;
+    -fx-translate-y: 55;
+    -fx-padding: 12;
+    -fx-alignment: top-center;
+    -fx-background-radius: 10;
+}
+
+.stat {
+    -fx-spacing: 8;
+    -fx-alignment: center;
 }
 

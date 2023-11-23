@@ -38,10 +38,7 @@ public class ItemStack extends Entity { //Child of Entity
         //If value is stack size is 1 label is invisible
         this.stackSizeLabel.opacityProperty().bind(this.stackSize.subtract(1));
         //Styling
-        this.stackSizeLabel.getStyleClass().add("outline");
-        this.stackSizeLabel.setStyle("-fx-text-fill: white;" +
-                "-fx-font-weight: bold;" +
-                "-fx-alignment: center-right;");
+        this.stackSizeLabel.getStyleClass().addAll("outline", "itemStack");
     }
 
 

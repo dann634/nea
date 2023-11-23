@@ -6,6 +6,7 @@ import com.jackson.ui.Camera;
 import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -21,18 +22,30 @@ public class Player extends Character {
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
-    private Camera camera;
     private final double ATTACK_RANGE = 300;
     private final double INTERACT_RANGE = 600;
 
-    public Player(Camera camera) {
+    private SimpleIntegerProperty agilityLevel;
+    private SimpleIntegerProperty strengthLevel;
+    private SimpleIntegerProperty defenceLevel;
+    private SimpleIntegerProperty agilityXP;
+    private SimpleIntegerProperty strengthXP;
+    private SimpleIntegerProperty defenceXP;
+
+    public Player() {
         super();
         setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
         setY(180);
 
-        this.camera = camera;
-
         initDisplayNameLabel();
+
+        this.agilityLevel = new SimpleIntegerProperty(1);
+        this.strengthLevel = new SimpleIntegerProperty(1);
+        this.defenceLevel = new SimpleIntegerProperty(1);
+
+        this.agilityXP = new SimpleIntegerProperty(0);
+        this.strengthXP = new SimpleIntegerProperty(0);
+        this.defenceXP = new SimpleIntegerProperty(0);
     }
 
     public void moveHand(double x, double y) {
@@ -118,5 +131,77 @@ public class Player extends Character {
         if(item != null && item.isUsable()) {
             this.attackTranslate.play();
         }
+    }
+
+    public int getAgilityLevel() {
+        return agilityLevel.get();
+    }
+
+    public SimpleIntegerProperty agilityLevelProperty() {
+        return agilityLevel;
+    }
+
+    public void setAgilityLevel(int agilityLevel) {
+        this.agilityLevel.set(agilityLevel);
+    }
+
+    public int getStrengthLevel() {
+        return strengthLevel.get();
+    }
+
+    public SimpleIntegerProperty strengthLevelProperty() {
+        return strengthLevel;
+    }
+
+    public void setStrengthLevel(int strengthLevel) {
+        this.strengthLevel.set(strengthLevel);
+    }
+
+    public int getDefenceLevel() {
+        return defenceLevel.get();
+    }
+
+    public SimpleIntegerProperty defenceLevelProperty() {
+        return defenceLevel;
+    }
+
+    public void setDefenceLevel(int defenceLevel) {
+        this.defenceLevel.set(defenceLevel);
+    }
+
+    public int getAgilityXP() {
+        return agilityXP.get();
+    }
+
+    public SimpleIntegerProperty agilityXPProperty() {
+        return agilityXP;
+    }
+
+    public void setAgilityXP(int agilityXP) {
+        this.agilityXP.set(agilityXP);
+    }
+
+    public int getStrengthXP() {
+        return strengthXP.get();
+    }
+
+    public SimpleIntegerProperty strengthXPProperty() {
+        return strengthXP;
+    }
+
+    public void setStrengthXP(int strengthXP) {
+        this.strengthXP.set(strengthXP);
+    }
+
+    public int getDefenceXP() {
+        return defenceXP.get();
+    }
+
+    public SimpleIntegerProperty defenceXPProperty() {
+        return defenceXP;
+    }
+
+    public void setDefenceXP(int defenceXP) {
+        this.defenceXP.set(defenceXP);
     }
 }

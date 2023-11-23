@@ -7,6 +7,7 @@ import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.HealthBar;
 import com.jackson.ui.hud.Inventory;
+import com.jackson.ui.hud.StatMenu;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -24,7 +25,7 @@ import java.util.Random;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.001;
+    private final double ZOMBIE_SPAWN_RATE = 0.0001;
     private static int spawnYCoords;
     private final AnchorPane root;
     private final List<Player> characters;
@@ -32,6 +33,7 @@ public class GameController extends Scene {
     public static HashMap<String, String> lookupTable;
     private final Inventory inventory;
     private final HealthBar healthBar;
+    private final StatMenu statMenu;
     private final MovementFactory movementFactory;
     private final Camera camera;
     private final Timeline gameTimeline;
@@ -64,7 +66,7 @@ public class GameController extends Scene {
         //Sound
         this.audioPlayer = new AudioPlayer("background");
         this.audioPlayer.play();
-//
+
         this.walkingEffects = new AudioPlayer("walking");
         this.jumpingEffects = new AudioPlayer("jump");
 
@@ -72,11 +74,11 @@ public class GameController extends Scene {
         this.inventory = new Inventory();
         spawnCharacter();
         this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory, this.zombies);
-        this.root.getChildren().add(this.inventory.getItemOnCursor());
         this.healthBar = new HealthBar(this.characters.get(0).healthProperty());
+        this.statMenu = new StatMenu(this.characters.get(0));
 
-        this.root.getChildren().add(this.inventory.getInventoryVbox());
-        this.root.getChildren().add(this.healthBar.getHealthHud());
+        this.root.getChildren().addAll(this.inventory.getInventoryVbox(), this.healthBar.getHealthHud(),
+                statMenu, this.inventory.getItemOnCursor());
 
         //Movement
         this.isAPressed = false;
@@ -117,6 +119,7 @@ public class GameController extends Scene {
             this.characters.get(0).toFront();
             this.characters.get(0).getHandRectangle().toFront();
             this.healthBar.getHealthHud().toFront();
+            statMenu.toFront();
 
         }));
         this.gameTimeline.play();
@@ -131,7 +134,6 @@ public class GameController extends Scene {
         }
         //Spawn
         int packSize = (int) this.rand.nextGaussian(3, 1);
-        System.out.println(packSize);
         int spawnTile = this.rand.nextInt(32) + 1;
 
         List<Zombie> pack = new ArrayList<>();
@@ -156,14 +158,16 @@ public class GameController extends Scene {
 
 
     private void spawnCharacter() {
-        Player character = new Player(this.camera);
+        Player character = new Player();
         character.setXPos(500);
         character.setYPos(spawnYCoords);
 
         this.inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
-
         });
+
+        //Stat menu
+
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
@@ -209,6 +213,7 @@ public class GameController extends Scene {
                     case DIGIT3 -> this.inventory.selectSlot(2);
                     case DIGIT4 -> this.inventory.selectSlot(3);
                     case DIGIT5 -> this.inventory.selectSlot(4);
+                    case K -> this.statMenu.toggleShown();
 
                     case ESCAPE -> {
                         if(this.gameTimeline.getStatus() != Animation.Status.PAUSED) {
@@ -244,7 +249,7 @@ public class GameController extends Scene {
         setOnMouseClicked(e -> {
 
             //Move hand towards cursor
-            this.characters.get(0).moveHand(e.getSceneX(), e.getSceneY());
+//            this.characters.get(0).moveHand(e.getSceneX(), e.getSceneY());
 
             if(this.inventory.getItemStackOnCursor() != null
             && !this.inventory.isCellHovered()) {
@@ -252,6 +257,13 @@ public class GameController extends Scene {
                 this.camera.createDroppedBlock(this.inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
                 this.inventory.clearCursor();
                 this.blockDropped = true;
+                String blockInHand;
+                try {
+                    blockInHand = this.inventory.getSelectedItemStack().getItemName();
+                } catch (NullPointerException error) {
+                    blockInHand = "air";
+                }
+                this.characters.get(0).updateBlockInHand(blockInHand);
             }
         });
 

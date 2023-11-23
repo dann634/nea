@@ -31,9 +31,9 @@ public class HealthBar {
                 "-fx-alignment: center;" +
                 "-fx-background-color: rgba(0,0,0,.65);" +
                 "-fx-padding: 5;" +
-                "-fx-background-radius: 5;" +
-                "-fx-min-width: 270;" +
-                "-fx-max-width: 270;");
+                "-fx-background-radius: 8;" +
+                "-fx-min-width: 300;" +
+                "-fx-max-width: 300;");
         this.healthLabel.setStyle("-fx-font-weight: bold;" +
                 "-fx-font-size: 20;" +
                 "-fx-text-fill: white;" +

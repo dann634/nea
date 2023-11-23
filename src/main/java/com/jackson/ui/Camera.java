@@ -54,7 +54,7 @@ public class Camera {
         this.backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
 
-        spawnItem("wood_sword", 1, 400, 200);
+        spawnItem("wood_sword", 5, 400, 200);
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -266,6 +266,10 @@ public class Camera {
         this.root.getChildren().remove(block);
         this.root.getChildren().add(placedBlock);
         this.blocks.get(index[0]).set(index[1], placedBlock);
+
+        if(this.inventory.getSelectedItemStack() == null) {
+            this.character.updateBlockInHand("air");
+        }
     }
 
     public void checkAttackIntersect() {
@@ -369,6 +373,9 @@ public class Camera {
                 }
                 this.root.getChildren().remove(itemStack);
                 droppedBlocksIterator.remove();
+
+                //Check hand
+                this.character.updateBlockInHand(this.inventory.getSelectedItemStack().getItemName());
             }
         }
     }
@@ -377,6 +384,7 @@ public class Camera {
         itemStack.setPos(x, y);
         this.droppedBlocks.add(itemStack);
         this.root.getChildren().add(itemStack);
+        this.character.updateBlockInHand(itemStack.getItemName());
     }
 
     public void checkBlockBorder() {

@@ -98,6 +98,9 @@ public abstract class Character extends ImageView {
 
     public void updateBlockInHand(String itemName) {
 
+        if(itemName == null) {
+            itemName = "air";
+        }
         this.handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
         this.handImageView.setVisible(true);
         //Offsets

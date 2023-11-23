@@ -1,5 +1,6 @@
 package com.jackson.ui.hud;
 
+import com.jackson.game.characters.Player;
 import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
 import com.jackson.game.items.ItemStack;
