@@ -29,7 +29,7 @@ public class Camera {
     private final String[][] map;
     private final AnchorPane root;
     private boolean blockJustBroken;
-    private final List<List<Block>> blocks;
+    private List<List<Block>> blocks;
     private final List<ItemStack> droppedBlocks;
     private final List<Zombie> zombies;
     private final GameController gameController;
@@ -44,7 +44,6 @@ public class Camera {
         this.zombies = zombies;
         this.map = map;
         this.root = root;
-        this.blocks = new ArrayList<>();
         this.xOffset = 0;
         this.yOffset = 0;
         this.droppedBlocks = new ArrayList<>();
@@ -163,9 +162,16 @@ public class Camera {
     }
 
     public void initWorld() { // FIXME: 30/10/2023 issue on creating -> two lines are overlapping
+        List<List<Block>> blocks = new ArrayList<>();
         for (int i = -RENDER_WIDTH; i < RENDER_WIDTH; i++) { //Init world
-            addLine(getVerticalLine(i));
+            blocks.add(getVerticalLine(i));
         }
+        this.blocks = blocks;
+        List<Block> nodes = new ArrayList<>();
+        for(List<Block> nodeList : blocks) {
+            nodes.addAll(nodeList);
+        }
+        this.root.getChildren().addAll(nodes);
     }
 
     public void addLine(List<Block> line) {
@@ -280,9 +286,11 @@ public class Camera {
                 for(Zombie zombie : zombies) {
                     if(this.character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY() + 36, 54, 72)) { // FIXME: 21/11/2023 could make this bound more precise
                         //Zombie touching weapon
-                        if(zombie.takeDamage(40)) {
+                        if(zombie.takeDamage(40)) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
+                            spawnZombieDrop();
+                            character.addStrengthXP(0.25);
                         }
                     }
                 }
@@ -290,6 +298,10 @@ public class Camera {
                 this.zombies.removeAll(deadZombies);
             }
         });
+    }
+
+    private void spawnZombieDrop() {
+        //Random Chance
     }
 
     //For collisions

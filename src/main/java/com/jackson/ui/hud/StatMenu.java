@@ -5,6 +5,7 @@ import javafx.animation.Interpolator;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
@@ -41,7 +42,7 @@ public class StatMenu extends VBox {
         this.translate.setOnFinished(e -> isVisible = !isVisible);
     }
 
-    private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleIntegerProperty currentXP) {
+    private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleDoubleProperty currentXP) {
         Label statNameLabel = new Label(statName + ":");
         statNameLabel.getStyleClass().add("statNumbers");
 
@@ -58,11 +59,10 @@ public class StatMenu extends VBox {
 
         ProgressBar xpBar = new ProgressBar();
         xpBar.getStyleClass().add("xpBar");
-        xpBar.progressProperty().bind(currentXP);
-        currentXP.set(50);
+        xpBar.progressProperty().bind((currentXP.subtract(Math.sqrt(0.25 * stat.get()))).divide(Math.sqrt(0.25 * (stat.get() + 1))));
 
         HBox hBox = new HBox();
-        hBox.getChildren().addAll(statNameLabel, spacer, currentLevel, xpBar, nextLevel);
+        hBox.getChildren().addAll(statNameLabel, spacer, currentLevel, xpBar);
         hBox.getStyleClass().add("stat");
         return hBox;
     }

@@ -26,7 +26,7 @@ public class HealthBar {
         this.healthBar.progressProperty().bind(healthProperty.divide(100));
         this.healthLabel.textProperty().bind(Bindings.format(new Locale("en", "uk"), "%.0f", healthProperty));
 
-        this.root.setStyle("-fx-translate-x: 755;" +
+        this.root.setStyle("-fx-translate-x: 714;" +
                 "-fx-translate-y: 10;" +
                 "-fx-alignment: center;" +
                 "-fx-background-color: rgba(0,0,0,.65);" +
@@ -40,7 +40,7 @@ public class HealthBar {
                 "-fx-min-width: 30;" +
                 "-fx-alignment: center");
         this.healthBar.setStyle("-fx-accent: red;" +
-                "-fx-min-width: 200;" +
+                "-fx-min-width: 230;" +
                 "-fx-min-height: 30;");
 
         this.root.getChildren().addAll(healthLabel, healthBar);

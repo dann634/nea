@@ -25,7 +25,7 @@ import java.util.Random;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.0001;
+    private final double ZOMBIE_SPAWN_RATE = 0.01;
     private static int spawnYCoords;
     private final AnchorPane root;
     private final List<Player> characters;
@@ -165,9 +165,6 @@ public class GameController extends Scene {
         this.inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
             character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
         });
-
-        //Stat menu
-
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());

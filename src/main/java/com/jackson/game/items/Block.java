@@ -71,7 +71,8 @@ public class Block extends Entity {
 
         setOnMousePressed(e -> {
 
-            if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null && this.inventory.getItemStackOnCursor() == null) {
+            if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null
+                    && this.inventory.getItemStackOnCursor() == null && !this.inventory.getSelectedItemStack().isUsable()) {
                 //Place block
                 this.camera.placeBlock(this);
                 return;
