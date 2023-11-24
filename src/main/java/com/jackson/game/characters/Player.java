@@ -24,12 +24,15 @@ public class Player extends Character {
     private Label displayNameLabel;
     private final double ATTACK_RANGE = 300;
     private final double INTERACT_RANGE = 600;
+
+    private final double LEVEL_CONSTANT = 1.1;
+
     private SimpleIntegerProperty agilityLevel;
     private SimpleIntegerProperty strengthLevel;
     private SimpleIntegerProperty defenceLevel;
-    private SimpleDoubleProperty agilityXP;
-    private SimpleDoubleProperty strengthXP;
-    private SimpleDoubleProperty defenceXP;
+    private SimpleIntegerProperty agilityXP;
+    private final SimpleIntegerProperty strengthXP;
+    private SimpleIntegerProperty defenceXP;
 
     public Player() {
         super();
@@ -42,9 +45,9 @@ public class Player extends Character {
         this.strengthLevel = new SimpleIntegerProperty(1);
         this.defenceLevel = new SimpleIntegerProperty(1);
 
-        this.agilityXP = new SimpleDoubleProperty(0);
-        this.strengthXP = new SimpleDoubleProperty(0);
-        this.defenceXP = new SimpleDoubleProperty(0);
+        this.agilityXP = new SimpleIntegerProperty(0);
+        this.strengthXP = new SimpleIntegerProperty(0);
+        this.defenceXP = new SimpleIntegerProperty(0);
     }
 
     public void moveHand(double x, double y) {
@@ -132,43 +135,82 @@ public class Player extends Character {
         }
     }
 
-    public void addStrengthXP(double amount) {
+    public void addStrengthXP(int amount) {
         this.strengthXP.set(this.strengthXP.get() + amount);
-        if(this.strengthXP.get() > Math.sqrt(0.25 * (this.strengthLevel.get() + 1))) { //Is total xp more than required for next level
-            this.strengthLevel.set(this.strengthLevel.get() + 1); //Level up
+        if((100 * Math.pow(this.strengthLevel.get(), 1.1) < this.strengthXP.get())) {
+            this.strengthLevel.set(this.strengthLevel.get() + 1);
         }
     }
 
+    public int getAgilityLevel() {
+        return agilityLevel.get();
+    }
 
     public SimpleIntegerProperty agilityLevelProperty() {
         return agilityLevel;
+    }
+
+    public void setAgilityLevel(int agilityLevel) {
+        this.agilityLevel.set(agilityLevel);
+    }
+
+    public int getStrengthLevel() {
+        return strengthLevel.get();
     }
 
     public SimpleIntegerProperty strengthLevelProperty() {
         return strengthLevel;
     }
 
+    public void setStrengthLevel(int strengthLevel) {
+        this.strengthLevel.set(strengthLevel);
+    }
+
+    public int getDefenceLevel() {
+        return defenceLevel.get();
+    }
 
     public SimpleIntegerProperty defenceLevelProperty() {
         return defenceLevel;
     }
 
+    public void setDefenceLevel(int defenceLevel) {
+        this.defenceLevel.set(defenceLevel);
+    }
 
+    public int getAgilityXP() {
+        return agilityXP.get();
+    }
 
-    public SimpleDoubleProperty agilityXPProperty() {
+    public SimpleIntegerProperty agilityXPProperty() {
         return agilityXP;
     }
 
+    public void setAgilityXP(int agilityXP) {
+        this.agilityXP.set(agilityXP);
+    }
 
+    public int getStrengthXP() {
+        return strengthXP.get();
+    }
 
-    public SimpleDoubleProperty strengthXPProperty() {
+    public SimpleIntegerProperty strengthXPProperty() {
         return strengthXP;
     }
 
+    public void setStrengthXP(int strengthXP) {
+        this.strengthXP.set(strengthXP);
+    }
 
+    public int getDefenceXP() {
+        return defenceXP.get();
+    }
 
-    public SimpleDoubleProperty defenceXPProperty() {
+    public SimpleIntegerProperty defenceXPProperty() {
         return defenceXP;
     }
 
+    public void setDefenceXP(int defenceXP) {
+        this.defenceXP.set(defenceXP);
+    }
 }

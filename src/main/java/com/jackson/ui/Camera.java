@@ -290,7 +290,7 @@ public class Camera {
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop();
-                            character.addStrengthXP(0.25);
+                            character.addStrengthXP(10);
                         }
                     }
                 }

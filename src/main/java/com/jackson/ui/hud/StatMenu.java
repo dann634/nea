@@ -7,6 +7,8 @@ import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
@@ -21,6 +23,8 @@ public class StatMenu extends VBox {
     private HBox strengthHBox;
     private HBox agilityHBox;
     private HBox defenceHBox;
+    private final double STARTING_XP = 100;
+
     private final TranslateTransition translate;
     private boolean isVisible;
 
@@ -42,7 +46,7 @@ public class StatMenu extends VBox {
         this.translate.setOnFinished(e -> isVisible = !isVisible);
     }
 
-    private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleDoubleProperty currentXP) {
+    private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleIntegerProperty currentXP) {
         Label statNameLabel = new Label(statName + ":");
         statNameLabel.getStyleClass().add("statNumbers");
 
@@ -59,7 +63,14 @@ public class StatMenu extends VBox {
 
         ProgressBar xpBar = new ProgressBar();
         xpBar.getStyleClass().add("xpBar");
-        xpBar.progressProperty().bind((currentXP.subtract(Math.sqrt(0.25 * stat.get()))).divide(Math.sqrt(0.25 * (stat.get() + 1))));
+        currentXP.addListener((observableValue, number, t1) -> {
+            double currentexp = t1.doubleValue() + 100;
+            System.out.println(currentexp);
+            double lastLevelReq = STARTING_XP * Math.pow(stat.get(), 1.1);
+            double nextLevelReq = STARTING_XP * Math.pow(stat.get() + 1, 1.1);
+//            System.out.println((currentexp - lastLevelReq) / nextLevelReq);
+            xpBar.setProgress((currentexp - lastLevelReq) / nextLevelReq);
+        });
 
         HBox hBox = new HBox();
         hBox.getChildren().addAll(statNameLabel, spacer, currentLevel, xpBar);
