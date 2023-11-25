@@ -41,25 +41,21 @@ public class Player extends Character {
 
         initDisplayNameLabel();
 
-        this.agilityLevel = new SimpleIntegerProperty(1);
-        this.strengthLevel = new SimpleIntegerProperty(1);
-        this.defenceLevel = new SimpleIntegerProperty(1);
+        agilityLevel = new SimpleIntegerProperty(1);
+        strengthLevel = new SimpleIntegerProperty(1);
+        defenceLevel = new SimpleIntegerProperty(1);
 
-        this.agilityXP = new SimpleIntegerProperty(0);
-        this.strengthXP = new SimpleIntegerProperty(0);
-        this.defenceXP = new SimpleIntegerProperty(0);
-    }
-
-    public void moveHand(double x, double y) {
-        this.handImageView.setVisible(true);
+        agilityXP = new SimpleIntegerProperty(0);
+        strengthXP = new SimpleIntegerProperty(0);
+        defenceXP = new SimpleIntegerProperty(0);
     }
 
     private void initDisplayNameLabel() {
-        this.displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
-        this.displayNameLabel.translateXProperty().bind(xProperty().subtract(this.displayNameLabel.getWidth() / 2));
-        this.displayNameLabel.translateYProperty().bind(yProperty().subtract(15));
-        this.displayNameLabel.setStyle("-fx-font-weight: bold");
-        this.displayNameLabel.setVisible(false); // not for singleplayer
+        displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
+        displayNameLabel.translateXProperty().bind(xProperty().subtract(displayNameLabel.getWidth() / 2));
+        displayNameLabel.translateYProperty().bind(yProperty().subtract(15));
+        displayNameLabel.setStyle("-fx-font-weight: bold");
+        displayNameLabel.setVisible(false); // not for singleplayer
     }
 
     public int getXPos() {
@@ -79,27 +75,23 @@ public class Player extends Character {
     }
 
     public void addXPos(int value) {
-        this.xPos += value;
+        xPos += value;
     }
 
     public void addYPos(int value) {
-        this.yPos += value;
+        yPos += value;
     }
 
     public ImageView getHandRectangle() {
-        return this.handImageView;
+        return handImageView;
     }
 
     public Label getDisplayNameLabel() {
-        return this.displayNameLabel;
+        return displayNameLabel;
     }
 
     public void setIsModelFacingRight(boolean isModelFacingRight) {
         this.isModelFacingRight.set(isModelFacingRight);
-    }
-
-    public boolean isWithinAttackRange(double x, double y) {
-        return getDistance(x, y) < ATTACK_RANGE;
     }
 
     public boolean isWithinInteractRange(double x, double y) {
@@ -133,25 +125,25 @@ public class Player extends Character {
         if(item != null && !item.isUsable()) {
             return;
         }
-        this.attackTranslate.play();
+        attackTranslate.play();
     }
 
     @Override
     public double getAttackDamage() {
-        return super.getAttackDamage() + this.strengthLevel.get();
+        return super.getAttackDamage() + strengthLevel.get();
     }
 
     public void addStrengthXP(int amount) {
-        this.strengthXP.set(this.strengthXP.get() + amount);
-        if((50 * Math.pow(this.strengthLevel.get(), 1.5) + 1 < this.strengthXP.get())) {
-            this.strengthLevel.set(this.strengthLevel.get() + 1);
+        strengthXP.set(strengthXP.get() + amount);
+        if((50 * Math.pow(strengthLevel.get(), 1.5) + 1 < strengthXP.get())) {
+            strengthLevel.set(strengthLevel.get() + 1);
         }
     }
 
     public void addAgilityXP(int amount) {
-        this.agilityXP.set(this.agilityXP.get() + amount);
-        if((50 * Math.pow(this.agilityLevel.get(), 1.5) + 1 < this.agilityXP.get())) {
-            this.agilityLevel.set(this.agilityLevel.get() + 1);
+        agilityXP.set(agilityXP.get() + amount);
+        if((50 * Math.pow(agilityLevel.get(), 1.5) + 1 < agilityXP.get())) {
+            agilityLevel.set(agilityLevel.get() + 1);
         }
     }
 
@@ -163,10 +155,6 @@ public class Player extends Character {
         return agilityLevel;
     }
 
-    public void setAgilityLevel(int agilityLevel) {
-        this.agilityLevel.set(agilityLevel);
-    }
-
     public int getStrengthLevel() {
         return strengthLevel.get();
     }
@@ -175,9 +163,6 @@ public class Player extends Character {
         return strengthLevel;
     }
 
-    public void setStrengthLevel(int strengthLevel) {
-        this.strengthLevel.set(strengthLevel);
-    }
 
     public int getDefenceLevel() {
         return defenceLevel.get();
@@ -187,9 +172,7 @@ public class Player extends Character {
         return defenceLevel;
     }
 
-    public void setDefenceLevel(int defenceLevel) {
-        this.defenceLevel.set(defenceLevel);
-    }
+
 
     public int getAgilityXP() {
         return agilityXP.get();
@@ -197,10 +180,6 @@ public class Player extends Character {
 
     public SimpleIntegerProperty agilityXPProperty() {
         return agilityXP;
-    }
-
-    public void setAgilityXP(int agilityXP) {
-        this.agilityXP.set(agilityXP);
     }
 
     public int getStrengthXP() {
@@ -211,9 +190,7 @@ public class Player extends Character {
         return strengthXP;
     }
 
-    public void setStrengthXP(int strengthXP) {
-        this.strengthXP.set(strengthXP);
-    }
+
 
     public int getDefenceXP() {
         return defenceXP.get();
@@ -223,7 +200,4 @@ public class Player extends Character {
         return defenceXP;
     }
 
-    public void setDefenceXP(int defenceXP) {
-        this.defenceXP.set(defenceXP);
-    }
 }

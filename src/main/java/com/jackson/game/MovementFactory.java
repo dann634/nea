@@ -32,30 +32,30 @@ public class MovementFactory {
     }
 
     public void calculateYProperties(boolean isWPressed) {
-        boolean isCharacterTouchingFloor = this.camera.isEntityTouchingBlock(this.character.getFeetCollision()); //Is character touching floor
-        if(isCharacterTouchingFloor && !isWPressed && this.jumpAcceleration >= 0) { //Not jumping and on floor
+        boolean isCharacterTouchingFloor = camera.isEntityTouchingBlock(character.getFeetCollision()); //Is character touching floor
+        if(isCharacterTouchingFloor && !isWPressed && jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
-        if(this.jumpAcceleration < 0) { //In Mid air jumping
-            this.jumpAcceleration += 0.15;
-            if(this.jumpVelocity < 3 && this.jumpVelocity > -3) {
-                this.jumpVelocity += this.jumpAcceleration;
+        if(jumpAcceleration < 0) { //In Mid air jumping
+            jumpAcceleration += 0.15;
+            if(jumpVelocity < 3 && jumpVelocity > -3) {
+                jumpVelocity += jumpAcceleration;
             }
-            if(this.camera.isEntityTouchingBlock(this.character.getHeadCollision())) { //Get head collision
-                this.jumpAcceleration = 0;
-                this.jumpVelocity = 0;
+            if(camera.isEntityTouchingBlock(character.getHeadCollision())) { //Get head collision
+                jumpAcceleration = 0;
+                jumpVelocity = 0;
             } else {
-                doYOffsetStuff((int) -this.jumpVelocity, false);
+                doYOffsetStuff((int) -jumpVelocity, false);
             }
             return;
         }
 
-        if(this.jumpAcceleration > 0) { //To fix floating point math
-            this.jumpAcceleration = 0;
+        if(jumpAcceleration > 0) { //To fix floating point math
+            jumpAcceleration = 0;
         }
 
         if(isCharacterTouchingFloor && isWPressed) { //Start jump
-            this.jumpAcceleration = -2.5;
+            jumpAcceleration = -2.5;
             return;
         }
         doYOffsetStuff(-4, true);
@@ -63,20 +63,20 @@ public class MovementFactory {
     }
 
     private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) {
-        boolean condition = isCharacterMovingDown ? this.camera.getyOffset() < -32 : this.camera.getyOffset() > 32; // FIXME: 22/10/2023 problem
+        boolean condition = isCharacterMovingDown ? camera.getyOffset() < -32 : camera.getyOffset() > 32; // FIXME: 22/10/2023 problem
         if (condition) {
 
             int newYPos = isCharacterMovingDown ? 1 : -1;
             int newYOffset = isCharacterMovingDown ? 32 : -32;
 
-            this.camera.drawHorizontalLine(!isCharacterMovingDown);
-            this.camera.deleteHorizontal(isCharacterMovingDown);
-            this.character.addYPos(newYPos);
-            this.camera.addYOffset(newYOffset);
+            camera.drawHorizontalLine(!isCharacterMovingDown);
+            camera.deleteHorizontal(isCharacterMovingDown);
+            character.addYPos(newYPos);
+            camera.addYOffset(newYOffset);
         }
 
 
-        this.camera.translateBlocksByY(offset);
+        camera.translateBlocksByY(offset);
         return condition;
     }
 
@@ -90,8 +90,8 @@ public class MovementFactory {
 
 //        walkingEffects.play();
 
-        boolean canMoveLeft = !this.camera.isEntityTouchingBlock(character.getLeftCollision());
-        boolean canMoveRight = !this.camera.isEntityTouchingBlock(character.getRightCollision());
+        boolean canMoveLeft = !camera.isEntityTouchingBlock(character.getLeftCollision());
+        boolean canMoveRight = !camera.isEntityTouchingBlock(character.getRightCollision());
 
         int offset = 0;
         boolean isCharacterMovingLeft = false;
@@ -112,10 +112,10 @@ public class MovementFactory {
         }
 
 
-        this.camera.translateBlocksByX(offset);
+        camera.translateBlocksByX(offset);
 
 
-        boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
+        boolean condition = isCharacterMovingLeft ? camera.getxOffset() > 32 : camera.getxOffset() < -32;
 
         if (condition) {
             player.addAgilityXP(1);
@@ -126,27 +126,27 @@ public class MovementFactory {
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
-            this.camera.addLine(this.camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft); // FIXME: 30/10/2023 optimise this shit
-            this.camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
-            this.character.addXPos(newXPos); //Updates x pos of character
-            this.camera.addXOffset(newXOffset); //Resets camera offset
+            camera.addLine(camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft); // FIXME: 30/10/2023 optimise this shit
+            camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
+            character.addXPos(newXPos); //Updates x pos of character
+            camera.addXOffset(newXOffset); //Resets camera offset
         }
 
         //for walking animation (change this later)
-        if(abs(this.oldX - this.camera.getxOffset()) > 31) {
-            this.character.swapMovingImage();
-            this.oldX = this.character.getX();
-        } else if(oldX == this.character.getX()) {
-            this.character.setIdleImage();
+        if(abs(oldX - camera.getxOffset()) > 31) {
+            character.swapMovingImage();
+            oldX = character.getX();
+        } else if(oldX == character.getX()) {
+            character.setIdleImage();
         }
     }
 
     public void calculateDroppedBlockGravity() {
-        this.camera.setBlockJustBroken(false);
-        List<ItemStack> droppedBlocks = this.camera.getDroppedBlocks();
+        camera.setBlockJustBroken(false);
+        List<ItemStack> droppedBlocks = camera.getDroppedBlocks();
         double[] targetYArr = new double[droppedBlocks.size()];
         for (int i = 0; i < droppedBlocks.size(); i++) {
-            targetYArr[i] = this.camera.getBlockHeightUnderBlock(droppedBlocks.get(i)) - 16;
+            targetYArr[i] = camera.getBlockHeightUnderBlock(droppedBlocks.get(i)) - 16;
         }
 
 
@@ -181,14 +181,14 @@ public class MovementFactory {
 
     private void calculateZombieX(Zombie zombie) { // TODO: 10/11/2023 ADD XOFFSET
         //make zombie face player
-        double difference = this.character.getX() - zombie.getTranslateX();
+        double difference = character.getX() - zombie.getTranslateX();
         boolean needsToMoveRight = difference > 0;
         zombie.setNodeOrientation(needsToMoveRight ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
 
 
         //Check collision
-        boolean canMoveLeft = !this.camera.isEntityTouchingBlock(zombie.getLeftCollision());
-        boolean canMoveRight = !this.camera.isEntityTouchingBlock(zombie.getRightCollision());
+        boolean canMoveLeft = !camera.isEntityTouchingBlock(zombie.getLeftCollision());
+        boolean canMoveRight = !camera.isEntityTouchingBlock(zombie.getRightCollision());
         if(!canMoveRight && !canMoveLeft) { //Stuck
             return;
         }
@@ -208,7 +208,7 @@ public class MovementFactory {
     }
 
     private void calculateZombieY(Zombie zombie) {
-        boolean isZombieTouchingFloor = this.camera.isEntityTouchingBlock(zombie.getFeetCollision());
+        boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(zombie.getFeetCollision());
         if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) { //Not jumping and on floor
             return;
         }
@@ -218,7 +218,7 @@ public class MovementFactory {
             if(zombie.getJumpVelocity() < 3 && zombie.getJumpVelocity() > -3) {
                 zombie.addJumpVelocity(zombie.getJumpAcceleration());
             }
-            if(this.camera.isEntityTouchingBlock(zombie.getHeadCollision())) {
+            if(camera.isEntityTouchingBlock(zombie.getHeadCollision())) {
                 zombie.setJumpAcceleration(0);
                 zombie.setJumpVelocity(0);
             } else {

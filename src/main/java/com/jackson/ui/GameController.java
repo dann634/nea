@@ -12,6 +12,10 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.binding.NumberBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -29,7 +33,7 @@ public class GameController extends Scene {
     private final double ZOMBIE_SPAWN_RATE = 0.01;
     private static int spawnYCoords;
     private final AnchorPane root;
-    private final List<Player> characters;
+    private Player character;
     private final List<Zombie> zombies;
     public static HashMap<String, String> lookupTable;
     private final Inventory inventory;
@@ -38,7 +42,7 @@ public class GameController extends Scene {
     private final MovementFactory movementFactory;
     private final Camera camera;
     private final Timeline gameTimeline;
-    private final AudioPlayer audioPlayer;
+    private final AudioPlayer audioplayer;
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
     private final Random rand;
@@ -53,99 +57,105 @@ public class GameController extends Scene {
         super(new VBox());
 
         //Root
-        this.root = new AnchorPane();
-        Main.applyWindowSize(this.root);
+        root = new AnchorPane();
+        Main.applyWindowSize(root);
 
         //Initialises fields
-        this.characters = new ArrayList<>();
-        this.zombies = new ArrayList<>();
-        this.rand = new Random();
+        zombies = new ArrayList<>();
+        rand = new Random();
         String[][] map = loadMap();
         initLookupTable();
 
         //Sound
-        this.audioPlayer = new AudioPlayer("background");
-        this.audioPlayer.play();
+        audioplayer = new AudioPlayer("background");
+        audioplayer.play();
 
-        this.walkingEffects = new AudioPlayer("walking");
-        this.jumpingEffects = new AudioPlayer("jump");
+        walkingEffects = new AudioPlayer("walking");
+        jumpingEffects = new AudioPlayer("jump");
 
         //HUD
-        this.inventory = new Inventory();
+        inventory = new Inventory();
         spawnCharacter();
-        this.camera = new Camera(this.characters.get(0), map, this.root, this, this.inventory, this.zombies);
-        this.healthBar = new HealthBar(this.characters.get(0).healthProperty());
-        this.statMenu = new StatMenu(this.characters.get(0));
+        camera = new Camera(character, map, root, this, inventory, zombies);
+        healthBar = new HealthBar(character.healthProperty());
+        statMenu = new StatMenu(character);
 
-        this.root.getChildren().addAll(this.inventory.getInventoryVbox(), this.healthBar.getHealthHud(),
-                statMenu, this.inventory.getItemOnCursor(), new EventMessage(this.characters.get(0)));
+        root.getChildren().addAll(inventory.getInventoryVbox(), healthBar.getHealthHud(),
+                statMenu, inventory.getItemOnCursor(), new EventMessage(character));
 
         //Movement
-        this.isAPressed = false;
-        this.isDPressed = false;
-        this.isWPressed = false;
+        isAPressed = false;
+        isDPressed = false;
+        isWPressed = false;
 
-        this.blockDropped = false;
+        blockDropped = false;
 
-        this.camera.initWorld();
-        this.characters.get(0).toFront();
+        camera.initWorld();
+        character.toFront();
 
-        setRoot(this.root);
-        this.root.setId("root");
+        setRoot(root);
+        root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        this.movementFactory = new MovementFactory(this.characters.get(0),  this.camera);
-        this.gameTimeline = new Timeline();
-        this.gameTimeline.setCycleCount(Animation.INDEFINITE);
-        this.gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
+        movementFactory = new MovementFactory(character,  camera);
+        gameTimeline = new Timeline();
+        gameTimeline.setCycleCount(Animation.INDEFINITE);
+        gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
 
-            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed, this.characters.get(0)); //Player X movement
-            this.movementFactory.calculateYProperties(this.isWPressed); //Player y movement
-            this.movementFactory.calculateZombieMovement(this.zombies);
+            movementFactory.calculateXProperties(isAPressed, isDPressed, character); //character X movement
+            movementFactory.calculateYProperties(isWPressed); //character y movement
+            movementFactory.calculateZombieMovement(zombies);
 
-            if(this.camera.isBlockJustBroken() || this.blockDropped) { //Check to save cpu
-                this.movementFactory.calculateDroppedBlockGravity(); //Block dropping
-                this.blockDropped = false;
+            if(camera.isBlockJustBroken() || blockDropped) { //Check to save cpu
+                movementFactory.calculateDroppedBlockGravity(); //Block dropping
+                blockDropped = false;
             }
 
-            this.camera.checkBlockPickup();
-            this.camera.checkBlockBorder();
+            camera.checkBlockPickup();
+            camera.checkBlockBorder();
             spawnZombiePack();
 
             //Everything to front (maybe make a method for it)
-            this.inventory.getInventoryVbox().toFront();
-            this.inventory.getItemOnCursor().toFront();
-            this.characters.get(0).toFront();
-            this.characters.get(0).getHandRectangle().toFront();
-            this.healthBar.getHealthHud().toFront();
+            inventory.getInventoryVbox().toFront();
+            inventory.getItemOnCursor().toFront();
+            character.toFront();
+            character.getHandRectangle().toFront();
+            healthBar.getHealthHud().toFront();
             statMenu.toFront();
 
         }));
-        this.gameTimeline.play();
+        gameTimeline.play();
 
 
     }
 
     private void spawnZombiePack() {
         //Do check first
-        if(this.rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
+        if(rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
             return; //No spawn
         }
         //Spawn
-        int packSize = (int) this.rand.nextGaussian(3, 1);
-        int spawnTile = this.rand.nextInt(32) + 1;
+        int packSize = (int) rand.nextGaussian(3, 1);
+        int spawnTile = rand.nextInt(32) + 1;
 
         List<Zombie> pack = new ArrayList<>();
         List<Node> nodes = new ArrayList<>();
         for (int i = 0; i < packSize; i++) {
             var zombie = new Zombie();
-            zombie.setTranslateX(spawnTile * 32 + this.rand.nextDouble(25));
-            zombie.setTranslateY(this.camera.getBlockTranslateY(spawnTile) - 48);
+            zombie.setTranslateX(spawnTile * 32 + rand.nextDouble(25));
+            zombie.setTranslateY(camera.getBlockTranslateY(spawnTile) - 48);
+            NumberBinding bind = Bindings.add(zombie.translateXProperty(), zombie.translateYProperty());
+            bind.addListener((observableValue, number, t1) -> {
+                if(character.intersects(zombie.getTranslateX(), zombie.getTranslateY(), 20, 40) && zombie.canAttack()) {
+                    character.takeDamage(5);
+                }
+            });
+
             pack.add(zombie);
             nodes.addAll(zombie.getNodes());
         }
-        this.root.getChildren().addAll(nodes);
-        this.zombies.addAll(pack);
+        root.getChildren().addAll(nodes);
+        zombies.addAll(pack);
     }
 
 
@@ -157,19 +167,19 @@ public class GameController extends Scene {
 
 
     private void spawnCharacter() {
-        Player character = new Player();
+        character = new Player();
         character.setXPos(500);
         character.setYPos(spawnYCoords);
 
-        this.inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
-            character.updateBlockInHand(this.inventory.getSelectedItemStack());
+
+        inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
+            character.updateBlockInHand(inventory.getSelectedItemStack());
         });
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
         root.getChildren().addAll(character.getCollisions());
         character.toFront();
 
-        this.characters.add(character);
         initOnKeyPressed();
     }
 
@@ -189,69 +199,68 @@ public class GameController extends Scene {
             setOnKeyPressed(e -> {
                 switch (e.getCode()) {
                     case A -> {
-                        this.isAPressed = true;
-                        this.characters.get(0).setIsModelFacingRight(false);
+                        isAPressed = true;
+                        character.setIsModelFacingRight(false);
                     }
                     case D -> {
-                        this.isDPressed = true;
-                        this.characters.get(0).setIsModelFacingRight(true);
+                        isDPressed = true;
+                        character.setIsModelFacingRight(true);
                     }
 
                     case W -> {
-                        this.isWPressed = true;
-                        this.characters.get(0).setIdleImage();
-                        this.jumpingEffects.playFromBeginning();
+                        isWPressed = true;
+                        character.setIdleImage();
+                        jumpingEffects.playFromBeginning();
                     }
 
-                    case I -> this.inventory.toggleInventory();
-                    case DIGIT1 -> this.inventory.selectSlot(0);
-                    case DIGIT2 -> this.inventory.selectSlot(1);
-                    case DIGIT3 -> this.inventory.selectSlot(2);
-                    case DIGIT4 -> this.inventory.selectSlot(3);
-                    case DIGIT5 -> this.inventory.selectSlot(4);
-                    case K -> this.statMenu.toggleShown();
+                    case I -> inventory.toggleInventory();
+                    case DIGIT1 -> inventory.selectSlot(0);
+                    case DIGIT2 -> inventory.selectSlot(1);
+                    case DIGIT3 -> inventory.selectSlot(2);
+                    case DIGIT4 -> inventory.selectSlot(3);
+                    case DIGIT5 -> inventory.selectSlot(4);
+                    case K -> statMenu.toggleShown();
 
                     case ESCAPE -> {
-                        if(this.gameTimeline.getStatus() != Animation.Status.PAUSED) {
-                            this.root.getChildren().add(new PauseMenuController());
+                        if(gameTimeline.getStatus() != Animation.Status.PAUSED) {
+                            root.getChildren().add(new PauseMenuController());
                         }
                     }
                     case SPACE -> {
                         //Attack
-                        this.characters.get(0).attack(this.inventory.getSelectedItemStack());
+                        character.attack(inventory.getSelectedItemStack());
                     }
                 }
             });
 
         setOnKeyReleased(e -> {
             switch (e.getCode()) {
-                case A -> this.isAPressed = false;
-                case D -> this.isDPressed = false;
+                case A -> isAPressed = false;
+                case D -> isDPressed = false;
                 case W -> {
-                    this.isWPressed = false;
-                    this.jumpingEffects.pause();
+                    isWPressed = false;
+                    jumpingEffects.pause();
                 }
 
             }
         });
 
         setOnMouseMoved(e -> {
-            this.inventory.getItemOnCursor().setTranslateX(e.getSceneX() - 16);
-            this.inventory.getItemOnCursor().setTranslateY(e.getSceneY() - 16);
+            inventory.getItemOnCursor().setTranslateX(e.getSceneX() - 16);
+            inventory.getItemOnCursor().setTranslateY(e.getSceneY() - 16);
         });
 
         setOnMouseClicked(e -> {
 
             //Move hand towards cursor
-//            this.characters.get(0).moveHand(e.getSceneX(), e.getSceneY());
 
-            if(this.inventory.getItemStackOnCursor() != null
-            && !this.inventory.isCellHovered()) {
+            if(inventory.getItemStackOnCursor() != null
+            && !inventory.isCellHovered()) {
                 //Drop item
-                this.camera.createDroppedBlock(this.inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
-                this.inventory.clearCursor();
-                this.blockDropped = true;
-                this.characters.get(0).updateBlockInHand(this.inventory.getSelectedItemStack());
+                camera.createDroppedBlock(inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
+                inventory.clearCursor();
+                blockDropped = true;
+                character.updateBlockInHand(inventory.getSelectedItemStack());
             }
         });
 
@@ -276,7 +285,7 @@ public class GameController extends Scene {
     }
 
     public Inventory getInventory() {
-        return this.inventory;
+        return inventory;
     }
 
     private class PauseMenuController extends VBox {
@@ -287,7 +296,7 @@ public class GameController extends Scene {
                     "-fx-alignment: center;" +
                     "-fx-spacing: 12;");
             gameTimeline.pause();
-            audioPlayer.pause();
+            audioplayer.pause();
 
             getChildren().addAll(addResumeButton(), addSaveAndExitButton());
             toFront();
@@ -298,7 +307,7 @@ public class GameController extends Scene {
             button.setOnAction(e -> { //Resume game
                 root.getChildren().remove(this);
                 gameTimeline.play();
-                audioPlayer.play();
+                audioplayer.play();
             });
             return button;
         }
@@ -317,24 +326,24 @@ public class GameController extends Scene {
 
         private final PauseTransition timer;
 
-        public EventMessage(Player player) {
-            this.timer = new PauseTransition();
+        public EventMessage(Player character) {
+            timer = new PauseTransition();
             timer.setDuration(Duration.millis(2000));
             timer.setOnFinished(e -> setVisible(false));
             setId("eventMessage");
-            player.strengthLevelProperty().addListener((observableValue, number, t1) -> {
+            character.strengthLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);
                 setText("Strength Level Up!!");
                 timer.play();
             });
 
-            player.agilityLevelProperty().addListener((observableValue, number, t1) -> {
+            character.agilityLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);
                 setText("Agility Level Up!!");
                 timer.play();
             });
 
-            player.defenceLevelProperty().addListener((observableValue, number, t1) -> {
+            character.defenceLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);
                 setText("Defence Level Up!!");
                 timer.play();

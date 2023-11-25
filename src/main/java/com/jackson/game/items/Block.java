@@ -60,7 +60,6 @@ public class Block extends Entity {
 
     private void initButtonPresses() {
         setOnMouseEntered(e -> {
-            this.camera.setBlockUnderCursor(this);
             if(this.isDropped) {
                 return;
             }

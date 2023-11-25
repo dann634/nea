@@ -32,6 +32,8 @@ public class Zombie extends Character {
         this.attackCooldown = 100;
         this.healthBar = initHealthBar();
 
+        this.attackCooldown = 100;
+
         this.feetCollision.xProperty().bind(translateXProperty().add(4));
 
     }
@@ -116,5 +118,15 @@ public class Zombie extends Character {
 
     public void setNeedsToJump(boolean needsToJump) {
         this.needsToJump = needsToJump;
+    }
+
+    public boolean canAttack() {
+        System.out.println(attackCooldown);
+        if(attackCooldown == 0) {
+            attackCooldown = 100;
+            return true;
+        }
+        attackCooldown--;
+        return false;
     }
 }

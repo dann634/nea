@@ -28,9 +28,9 @@ public abstract class Character extends ImageView {
     public Character() {
         setPreserveRatio(true);
         setFitWidth(32);
-        this.health = new SimpleDoubleProperty(100);
-        this.isModelFacingRight = new SimpleBooleanProperty(true);
-        this.currentItemOffsets = new int[]{0, 0, 0};
+        health = new SimpleDoubleProperty(100);
+        isModelFacingRight = new SimpleBooleanProperty(true);
+        currentItemOffsets = new int[]{0, 0, 0};
 
         initFeetCollision();
         initBodyCollision();
@@ -39,52 +39,52 @@ public abstract class Character extends ImageView {
         setIdleImage();
 
 
-        this.isModelFacingRight.addListener((observable, oldValue, newValue) -> {
+        isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
-            this.attackTranslate.stop(); //Fixes Attack and Turn Bug
-            this.attackTranslate.setByX((newValue) ? 20 : -20);
-            this.handImageView.setTranslateX(newValue ? this.currentItemOffsets[1] : this.currentItemOffsets[0]);
-            this.handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
-            this.handImageView.setRotate((newValue) ? 45 : -45);
+            attackTranslate.stop(); //Fixes Attack and Turn Bug
+            attackTranslate.setByX((newValue) ? 20 : -20);
+            handImageView.setTranslateX(newValue ? currentItemOffsets[1] : currentItemOffsets[0]);
+            handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
+            handImageView.setRotate((newValue) ? 45 : -45);
         });
 
     }
 
     private void initHeadCollision() {
-        this.headCollision = new Rectangle(25, 6); //Width of 25, Height of 6
-        this.headCollision.xProperty().bind(xProperty().add(3)); //Binds x to player
-        this.headCollision.yProperty().bind(yProperty().subtract(3)); //Binds y to player
-        this.headCollision.setVisible(false); //Hides the rectangle
+        headCollision = new Rectangle(25, 6); //Width of 25, Height of 6
+        headCollision.xProperty().bind(xProperty().add(3)); //Binds x to player
+        headCollision.yProperty().bind(yProperty().subtract(3)); //Binds y to player
+        headCollision.setVisible(false); //Hides the rectangle
     }
 
     private void initFeetCollision() {
-        this.feetCollision = new Rectangle(25, 6);
-        this.feetCollision.xProperty().bind(xProperty().add(3));
-        this.feetCollision.yProperty().bind(yProperty().add(42));
-        this.feetCollision.setVisible(false);
+        feetCollision = new Rectangle(25, 6);
+        feetCollision.xProperty().bind(xProperty().add(3));
+        feetCollision.yProperty().bind(yProperty().add(42));
+        feetCollision.setVisible(false);
     }
 
     private void initBodyCollision() {
-        this.leftCollision = getBodyCollision(0);
-        this.rightCollision = getBodyCollision(30);
+        leftCollision = getBodyCollision(0);
+        rightCollision = getBodyCollision(30);
     }
 
     protected void initHandRectangle() {
-        this.handImageView = new ImageView();
-        this.handImageView.yProperty().bind(this.yProperty().add(5));
-        this.handImageView.xProperty().bind(this.xProperty());
-        this.handImageView.setRotate(45);
-        this.handImageView.setScaleY(0.3);
-        this.handImageView.setScaleX(0.3);
-        this.handImageView.setTranslateX(this.currentItemOffsets[1]);
-        this.handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+        handImageView = new ImageView();
+        handImageView.yProperty().bind(yProperty().add(5));
+        handImageView.xProperty().bind(xProperty());
+        handImageView.setRotate(45);
+        handImageView.setScaleY(0.3);
+        handImageView.setScaleX(0.3);
+        handImageView.setTranslateX(currentItemOffsets[1]);
+        handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
 
-        this.attackTranslate = new TranslateTransition();
-        this.attackTranslate.setNode(this.handImageView);
-        this.attackTranslate.setCycleCount(2);
-        this.attackTranslate.setAutoReverse(true);
-        this.attackTranslate.setRate(4);
-        this.attackTranslate.setByX(20);
+        attackTranslate = new TranslateTransition();
+        attackTranslate.setNode(handImageView);
+        attackTranslate.setCycleCount(2);
+        attackTranslate.setAutoReverse(true);
+        attackTranslate.setRate(4);
+        attackTranslate.setByX(20);
 
     }
 
@@ -95,13 +95,13 @@ public abstract class Character extends ImageView {
         } else {
             itemName = item.getItemName();
         }
-        this.handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
-        this.handImageView.setVisible(true);
+        handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
+        handImageView.setVisible(true);
         //Offsets
 
-        this.currentItemOffsets = getOffsets(itemName);
-        this.handImageView.setTranslateY(this.currentItemOffsets[2]);
-        this.handImageView.setTranslateX(this.isModelFacingRight.get() ? this.currentItemOffsets[1] : this.currentItemOffsets[0]);
+        currentItemOffsets = getOffsets(itemName);
+        handImageView.setTranslateY(currentItemOffsets[2]);
+        handImageView.setTranslateX(isModelFacingRight.get() ? currentItemOffsets[1] : currentItemOffsets[0]);
     }
 
     private Rectangle getBodyCollision(int offset) {
@@ -117,19 +117,19 @@ public abstract class Character extends ImageView {
     }
 
     public void addHealth(int value) {
-        if(this.health.get() + value > 100 || this.health.get() + value < 0) {
+        if(health.get() + value > 100 || health.get() + value < 0) {
             return;
         }
-        this.health.set(this.health.get() + value);
+        health.set(health.get() + value);
     }
 
 
     public List<Rectangle> getCollisions() {
-        return List.of(this.feetCollision, this.leftCollision, this.rightCollision, this.headCollision);
+        return List.of(feetCollision, leftCollision, rightCollision, headCollision);
     }
 
     public Rectangle getFeetCollision() {
-        return this.feetCollision;
+        return feetCollision;
     }
     public Rectangle getLeftCollision() {
         return leftCollision;
@@ -175,8 +175,8 @@ public abstract class Character extends ImageView {
     public abstract void attack(Entity item);
 
     public boolean takeDamage(double amount) { //Returns true if dead
-        this.health.set(this.health.get() - amount);
-        if(this.health.get() <= 0) {
+        health.set(health.get() - amount);
+        if(health.get() <= 0) {
             //Die
             return true;
         }

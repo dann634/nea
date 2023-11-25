@@ -36,18 +36,18 @@ public class Inventory {
 
     public Inventory() {
         //Initialises all fields
-        this.isCellHovered = false;
-        this.isInventoryOpen = false;
-        this.itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE]; //2D array of all items
-        this.inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //2D Array of all anchor pane squares
-        this.selectedSlotIndex = new SimpleIntegerProperty(0);
+        isCellHovered = false;
+        isInventoryOpen = false;
+        itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE]; //2D array of all items
+        inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //2D Array of all anchor pane squares
+        selectedSlotIndex = new SimpleIntegerProperty(0);
 
         initInventory(); //Initialises all inventory squares
 
         //Item on cursor
-        this.itemOnCursor = new ImageView();
-        this.itemOnCursor.setFitWidth(16);
-        this.itemOnCursor.setFitHeight(16);
+        itemOnCursor = new ImageView();
+        itemOnCursor.setFitWidth(16);
+        itemOnCursor.setFitHeight(16);
 
         //Default appearance
         setHideInventory(true); //Should be hidden by default
@@ -58,11 +58,11 @@ public class Inventory {
     private void initInventory() {
 
         //Parent of whole inventory
-        this.wholeInventoryVbox = new VBox(10); //Whole vbox
-        this.wholeInventoryVbox.setStyle("-fx-padding: 10");
-        this.wholeInventoryVbox.setMouseTransparent(false);
-        this.wholeInventoryVbox.setOnMouseEntered(e -> this.isCellHovered = true);
-        this.wholeInventoryVbox.setOnMouseExited(e -> this.isCellHovered = false);
+        wholeInventoryVbox = new VBox(10); //Whole vbox
+        wholeInventoryVbox.setStyle("-fx-padding: 10");
+        wholeInventoryVbox.setMouseTransparent(false);
+        wholeInventoryVbox.setOnMouseEntered(e -> isCellHovered = true);
+        wholeInventoryVbox.setOnMouseExited(e -> isCellHovered = false);
 
         HBox hotBarHBox = new HBox(3); //First row
         List<HBox> tempHboxList = new ArrayList<>();
@@ -70,7 +70,7 @@ public class Inventory {
 
         for (int i = 0; i < HOTBAR_SIZE ; i++) { //Hotbar
             AnchorPane pane = getInventorySquare(0, i);
-            this.inventoryArr[i][0] = pane;
+            inventoryArr[i][0] = pane;
             hotBarHBox.getChildren().add(pane);
         }
 
@@ -81,12 +81,12 @@ public class Inventory {
             for (int j = 0; j < HOTBAR_SIZE; j++) {
                 var vbox = getInventorySquare(i, j);
                 hBox.getChildren().add(vbox);
-                this.inventoryArr[j][i] = vbox;
+                inventoryArr[j][i] = vbox;
             }
         }
 
         //Adds hbox to vbox
-        this.wholeInventoryVbox.getChildren().addAll(tempHboxList);
+        wholeInventoryVbox.getChildren().addAll(tempHboxList);
     }
 
     //Returns an inventory square
@@ -97,26 +97,26 @@ public class Inventory {
         //On Click Listener
         pane.setOnMouseClicked(e -> {
 
-            if((this.itemStackOnCursor == null && this.itemArray[row][col] == null)
-            || (this.itemStackOnCursor != null && this.itemArray[row][col] != null)) {
+            if((itemStackOnCursor == null && itemArray[row][col] == null)
+            || (itemStackOnCursor != null && itemArray[row][col] != null)) {
                 //If no item in square and nothing on cursor
                 //If item in square and item on cursor
                 return;
             }
             //Item on cursor and empty square (puts block down)
-            if(this.itemStackOnCursor != null && this.itemArray[row][col] == null) {
-                this.itemArray[row][col] = this.itemStackOnCursor;
-                this.itemStackOnCursor = null;
-                this.itemOnCursor.setVisible(false);
-                this.inventoryArr[row][col].getChildren().add(this.itemArray[row][col]);
+            if(itemStackOnCursor != null && itemArray[row][col] == null) {
+                itemArray[row][col] = itemStackOnCursor;
+                itemStackOnCursor = null;
+                itemOnCursor.setVisible(false);
+                inventoryArr[row][col].getChildren().add(itemArray[row][col]);
                 return;
             }
             //Picks up stack (takes block and puts on cursor)
-            this.itemStackOnCursor = this.itemArray[row][col];
-            setItemOnCursor(this.itemStackOnCursor.getItemName());
-            this.inventoryArr[row][col].getChildren().clear();
-            this.itemOnCursor.setVisible(true);
-            this.itemArray[row][col] = null;
+            itemStackOnCursor = itemArray[row][col];
+            setItemOnCursor(itemStackOnCursor.getItemName());
+            inventoryArr[row][col].getChildren().clear();
+            itemOnCursor.setVisible(true);
+            itemArray[row][col] = null;
 
 
         });
@@ -124,7 +124,7 @@ public class Inventory {
     }
 
     public void toggleInventory() { //Toggles between inventory hidden and shown
-        if(this.isInventoryOpen) {
+        if(isInventoryOpen) {
             setHideInventory(true);
             return;
         }
@@ -133,16 +133,16 @@ public class Inventory {
 
     //Hides bottom 4 rows
     private void setHideInventory(boolean isHidden) {
-        this.isInventoryOpen = !isHidden;
+        isInventoryOpen = !isHidden;
         for (int i = 1; i < INVENTORY_SIZE; i++) {
             for (int j = 0; j < HOTBAR_SIZE; j++) {
-                this.inventoryArr[j][i].setVisible(!isHidden);
+                inventoryArr[j][i].setVisible(!isHidden);
             }
         }
     }
 
     public VBox getInventoryVbox() {
-        return this.wholeInventoryVbox;
+        return wholeInventoryVbox;
     }
 
     public static int getSlotSize() {
@@ -150,11 +150,11 @@ public class Inventory {
     }
 
     public void selectSlot(int index) {
-        if(this.selectedSlotIndex.get() != -1) {
-            this.inventoryArr[this.selectedSlotIndex.get()][0].setId("inventory-unselected");
+        if(selectedSlotIndex.get() != -1) {
+            inventoryArr[selectedSlotIndex.get()][0].setId("inventory-unselected");
         }
-        this.inventoryArr[index][0].setId("inventory-selected");
-        this.selectedSlotIndex.set(index);
+        inventoryArr[index][0].setId("inventory-selected");
+        selectedSlotIndex.set(index);
     }
 
     public boolean addItem(ItemStack itemStack) {
@@ -166,12 +166,12 @@ public class Inventory {
                 return false;
             }
             //Is free slot and block doesnt already exist
-            this.itemArray[index[0]][index[1]] = itemStack; //Update Backend
+            itemArray[index[0]][index[1]] = itemStack; //Update Backend
             //Resets itemstack for inventory
             itemStack.setPos((Inventory.SLOT_SIZE / 2) - (itemStack.getPrefWidth() / 2),
                     (Inventory.SLOT_SIZE / 2) - (itemStack.getPrefHeight() / 2));
             itemStack.resetRotation();
-            this.inventoryArr[index[0]][index[1]].getChildren().add(itemStack); //Updates front end
+            inventoryArr[index[0]][index[1]].getChildren().add(itemStack); //Updates front end
             return true;
         }
         //Item already exists
@@ -184,7 +184,7 @@ public class Inventory {
     private int[] findNextFreeIndex() {
         for (int i = 0; i < INVENTORY_SIZE; i++) {
             for (int j = 0; j < HOTBAR_SIZE; j++) {
-                if(this.itemArray[j][i] == null) {
+                if(itemArray[j][i] == null) {
                     return new int[]{j, i};
                 }
             }
@@ -194,13 +194,13 @@ public class Inventory {
 
     //Returns itemstack if item is found else returns null
     private ItemStack doesItemExistAlready(ItemStack itemStack) {
-        for (int i = 0; i < this.itemArray.length; i++) {
-            for (int j = 0; j < this.itemArray[i].length; j++) {
-                if(this.itemArray[i][j] != null && this.itemArray[i][j].getItemName().equals(itemStack.getItemName())) {
+        for (int i = 0; i < itemArray.length; i++) {
+            for (int j = 0; j < itemArray[i].length; j++) {
+                if(itemArray[i][j] != null && itemArray[i][j].getItemName().equals(itemStack.getItemName())) {
                     //Found
-                    if(this.itemArray[i][j].getStackSize() < this.itemArray[i][j].getMaxStackSize()) { //Full
+                    if(itemArray[i][j].getStackSize() < itemArray[i][j].getMaxStackSize()) { //Full
                         //Accept
-                        return this.itemArray[i][j];
+                        return itemArray[i][j];
                     }
 
                 }
@@ -210,55 +210,55 @@ public class Inventory {
     }
 
     public SimpleIntegerProperty getSelectedSlotIndex() {
-        return this.selectedSlotIndex;
+        return selectedSlotIndex;
     }
 
     //Returns String Item Name for the character to hold
     public String getBlockNameInHotbar(int index) {
-        if(this.itemArray[index][0] == null) {
+        if(itemArray[index][0] == null) {
             return "air";
         }
-        return this.itemArray[index][0].getItemName();
+        return itemArray[index][0].getItemName();
     }
 
     public ItemStack getSelectedItemStack() {
-        return this.itemArray[this.selectedSlotIndex.get()][0];
+        return itemArray[selectedSlotIndex.get()][0];
     }
 
     public String getSelectedItemStackName() {
-        return this.itemArray[this.selectedSlotIndex.get()][0] == null ? "air" : this.itemArray[this.selectedSlotIndex.get()][0].getItemName();
+        return itemArray[selectedSlotIndex.get()][0] == null ? "air" : itemArray[selectedSlotIndex.get()][0].getItemName();
     }
 
     //Decrements item and removes if necessary
     public void useBlockFromSelectedSlot() {
-        ItemStack itemStack = this.itemArray[this.selectedSlotIndex.get()][0];
+        ItemStack itemStack = itemArray[selectedSlotIndex.get()][0];
         itemStack.addStackValue(-1);
         if(itemStack.getStackSize() == 0) {
             //Remove from inventory
-            this.itemArray[this.selectedSlotIndex.get()][0] = null;
-            this.inventoryArr[this.selectedSlotIndex.get()][0].getChildren().clear();
+            itemArray[selectedSlotIndex.get()][0] = null;
+            inventoryArr[selectedSlotIndex.get()][0].getChildren().clear();
         }
 
     }
 
     public ImageView getItemOnCursor() {
-        return this.itemOnCursor;
+        return itemOnCursor;
     }
 
     //Sets item on cursor to new item
     private void setItemOnCursor(String blockName) {
         try {
-            this.itemOnCursor.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
+            itemOnCursor.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
         } catch (MissingResourceException ignored) {}
     }
 
     public ItemStack getItemStackOnCursor() {
-        return this.itemStackOnCursor;
+        return itemStackOnCursor;
     }
 
     public void clearCursor() { //Removes item from cursor
-        this.itemStackOnCursor = null;
-        this.itemOnCursor.setVisible(false);
+        itemStackOnCursor = null;
+        itemOnCursor.setVisible(false);
     }
 
     public boolean isCellHovered() {
