@@ -4,3 +4,4 @@ grass -25 9 0
 stone -25 9 0
 wood -25 9 0
 wood_sword -62 -3 -25
+fist -25 9 0

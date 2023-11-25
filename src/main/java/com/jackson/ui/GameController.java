@@ -10,18 +10,19 @@ import com.jackson.ui.hud.Inventory;
 import com.jackson.ui.hud.StatMenu;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
+import javafx.animation.PauseTransition;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class GameController extends Scene {
 
@@ -45,7 +46,6 @@ public class GameController extends Scene {
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
-    private boolean isSpacePressed;
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
@@ -78,13 +78,12 @@ public class GameController extends Scene {
         this.statMenu = new StatMenu(this.characters.get(0));
 
         this.root.getChildren().addAll(this.inventory.getInventoryVbox(), this.healthBar.getHealthHud(),
-                statMenu, this.inventory.getItemOnCursor());
+                statMenu, this.inventory.getItemOnCursor(), new EventMessage(this.characters.get(0)));
 
         //Movement
         this.isAPressed = false;
         this.isDPressed = false;
         this.isWPressed = false;
-        this.isSpacePressed = false;
 
         this.blockDropped = false;
 
@@ -98,9 +97,9 @@ public class GameController extends Scene {
         this.movementFactory = new MovementFactory(this.characters.get(0),  this.camera);
         this.gameTimeline = new Timeline();
         this.gameTimeline.setCycleCount(Animation.INDEFINITE);
-        this.gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(1000 / 60), e -> {
+        this.gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
 
-            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed, this.walkingEffects); //Player X movement
+            this.movementFactory.calculateXProperties(this.isAPressed, this.isDPressed, this.characters.get(0)); //Player X movement
             this.movementFactory.calculateYProperties(this.isWPressed); //Player y movement
             this.movementFactory.calculateZombieMovement(this.zombies);
 
@@ -163,7 +162,7 @@ public class GameController extends Scene {
         character.setYPos(spawnYCoords);
 
         this.inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
-            character.updateBlockInHand(this.inventory.getBlockNameInHotbar(t1.intValue())); // FIXME: 27/10/2023 when block is picked up players hand not updated
+            character.updateBlockInHand(this.inventory.getSelectedItemStack());
         });
 
         root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
@@ -219,7 +218,6 @@ public class GameController extends Scene {
                     }
                     case SPACE -> {
                         //Attack
-                        this.isSpacePressed = true;
                         this.characters.get(0).attack(this.inventory.getSelectedItemStack());
                     }
                 }
@@ -233,7 +231,6 @@ public class GameController extends Scene {
                     this.isWPressed = false;
                     this.jumpingEffects.pause();
                 }
-                case SPACE -> this.isSpacePressed = false;
 
             }
         });
@@ -254,13 +251,7 @@ public class GameController extends Scene {
                 this.camera.createDroppedBlock(this.inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
                 this.inventory.clearCursor();
                 this.blockDropped = true;
-                String blockInHand;
-                try {
-                    blockInHand = this.inventory.getSelectedItemStack().getItemName();
-                } catch (NullPointerException error) {
-                    blockInHand = "air";
-                }
-                this.characters.get(0).updateBlockInHand(blockInHand);
+                this.characters.get(0).updateBlockInHand(this.inventory.getSelectedItemStack());
             }
         });
 
@@ -282,6 +273,10 @@ public class GameController extends Scene {
         lookupTable.put("stone", "4");
         lookupTable.put("wood", "5");
         lookupTable.put("leaves", "6");
+    }
+
+    public Inventory getInventory() {
+        return this.inventory;
     }
 
     private class PauseMenuController extends VBox {
@@ -318,9 +313,35 @@ public class GameController extends Scene {
         }
     }
 
-    public Inventory getInventory() {
-        return this.inventory;
+    private static class EventMessage extends Label {
+
+        private final PauseTransition timer;
+
+        public EventMessage(Player player) {
+            this.timer = new PauseTransition();
+            timer.setDuration(Duration.millis(2000));
+            timer.setOnFinished(e -> setVisible(false));
+            setId("eventMessage");
+            player.strengthLevelProperty().addListener((observableValue, number, t1) -> {
+                setVisible(true);
+                setText("Strength Level Up!!");
+                timer.play();
+            });
+
+            player.agilityLevelProperty().addListener((observableValue, number, t1) -> {
+                setVisible(true);
+                setText("Agility Level Up!!");
+                timer.play();
+            });
+
+            player.defenceLevelProperty().addListener((observableValue, number, t1) -> {
+                setVisible(true);
+                setText("Defence Level Up!!");
+                timer.play();
+            });
+        }
     }
+
 
 
 

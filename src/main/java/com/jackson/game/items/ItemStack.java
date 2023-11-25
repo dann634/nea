@@ -32,7 +32,7 @@ public class ItemStack extends Entity { //Child of Entity
         this.stackSizeLabel.setMouseTransparent(false);
         //Repositions Label in relation to image
         this.stackSizeLabel.setTranslateY(-10);
-        this.stackSizeLabel.setTranslateX(5);
+        this.stackSizeLabel.setTranslateX(15);
         //Width makes easier to manage
         this.stackSizeLabel.setPrefWidth(Inventory.getSlotSize() - 6);
         //If value is stack size is 1 label is invisible

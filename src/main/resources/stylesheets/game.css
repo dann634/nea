@@ -93,3 +93,12 @@
     -fx-alignment: center;
 }
 
+#eventMessage {
+    -fx-min-width: 1024;
+    -fx-min-height: 50;
+    -fx-translate-y: 100;
+    -fx-alignment: center;
+    -fx-font-size: 34;
+    -fx-font-weight: bold;
+}
+

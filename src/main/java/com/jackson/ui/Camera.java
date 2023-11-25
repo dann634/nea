@@ -14,6 +14,7 @@ import javafx.scene.Node;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -53,7 +54,7 @@ public class Camera {
         this.backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
 
-        spawnItem("wood_sword", 5, 400, 200);
+        spawnItem("wood_sword", 5, 500, 200);
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -273,9 +274,7 @@ public class Camera {
         this.root.getChildren().add(placedBlock);
         this.blocks.get(index[0]).set(index[1], placedBlock);
 
-        if(this.inventory.getSelectedItemStack() == null) {
-            this.character.updateBlockInHand("air");
-        }
+        this.character.updateBlockInHand(this.inventory.getSelectedItemStack());
     }
 
     public void checkAttackIntersect() {
@@ -284,13 +283,13 @@ public class Camera {
                 List<Zombie> deadZombies = new ArrayList<>();
                 List<Node> zombieNodes = new ArrayList<>();
                 for(Zombie zombie : zombies) {
-                    if(this.character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY() + 36, 54, 72)) { // FIXME: 21/11/2023 could make this bound more precise
+                    if(this.character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
                         //Zombie touching weapon
-                        if(zombie.takeDamage(40)) { //Returns true if dead
+                        if(zombie.takeDamage(character.getAttackDamage())) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop();
-                            character.addStrengthXP(10);
+                            character.addStrengthXP(5);
                         }
                     }
                 }
@@ -387,7 +386,7 @@ public class Camera {
                 droppedBlocksIterator.remove();
 
                 //Check hand
-                this.character.updateBlockInHand(this.inventory.getSelectedItemStack().getItemName());
+                this.character.updateBlockInHand(this.inventory.getSelectedItemStack());
             }
         }
     }
@@ -396,7 +395,7 @@ public class Camera {
         itemStack.setPos(x, y);
         this.droppedBlocks.add(itemStack);
         this.root.getChildren().add(itemStack);
-        this.character.updateBlockInHand(itemStack.getItemName());
+        this.character.updateBlockInHand(itemStack);
     }
 
     public void checkBlockBorder() {
@@ -408,7 +407,7 @@ public class Camera {
 
     public double getBlockTranslateY(int xPos) {
         for(Block block : this.blocks.get(xPos)) {
-            if(block.getItemName().equals("grass")) {
+            if(!this.backgroundBlocks.contains(block.getItemName())) {
                 return block.getTranslateY();
             }
         }

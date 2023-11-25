@@ -56,8 +56,8 @@ public class Player extends Character {
 
     private void initDisplayNameLabel() {
         this.displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
-        this.displayNameLabel.translateXProperty().bind(this.xProperty().subtract(this.displayNameLabel.getWidth() / 2));
-        this.displayNameLabel.translateYProperty().bind(this.yProperty().subtract(15));
+        this.displayNameLabel.translateXProperty().bind(xProperty().subtract(this.displayNameLabel.getWidth() / 2));
+        this.displayNameLabel.translateYProperty().bind(yProperty().subtract(15));
         this.displayNameLabel.setStyle("-fx-font-weight: bold");
         this.displayNameLabel.setVisible(false); // not for singleplayer
     }
@@ -113,32 +113,45 @@ public class Player extends Character {
 
     private double[] getXYDistance(double x, double y) {
         double xDifference;
-        if(x < this.getX()) {
-            xDifference = this.getX() - x;
+        if(x < getX()) {
+            xDifference = getX() - x;
         } else {
-            xDifference = x - this.getX();
+            xDifference = x - getX();
         }
 
         double yDifference;
-        if(y < this.getY()) {
-            yDifference = this.getY() - y;
+        if(y < getY()) {
+            yDifference = getY() - y;
         } else {
-            yDifference = y - this.getY();
+            yDifference = y - getY();
         }
         return new double[]{xDifference, yDifference};
     }
 
     @Override
     public void attack(Entity item) {
-        if(item != null && item.isUsable()) {
-            this.attackTranslate.play();
+        if(item != null && !item.isUsable()) {
+            return;
         }
+        this.attackTranslate.play();
+    }
+
+    @Override
+    public double getAttackDamage() {
+        return super.getAttackDamage() + this.strengthLevel.get();
     }
 
     public void addStrengthXP(int amount) {
         this.strengthXP.set(this.strengthXP.get() + amount);
-        if((100 * Math.pow(this.strengthLevel.get(), 1.1) < this.strengthXP.get())) {
+        if((50 * Math.pow(this.strengthLevel.get(), 1.5) + 1 < this.strengthXP.get())) {
             this.strengthLevel.set(this.strengthLevel.get() + 1);
+        }
+    }
+
+    public void addAgilityXP(int amount) {
+        this.agilityXP.set(this.agilityXP.get() + amount);
+        if((50 * Math.pow(this.agilityLevel.get(), 1.5) + 1 < this.agilityXP.get())) {
+            this.agilityLevel.set(this.agilityLevel.get() + 1);
         }
     }
 

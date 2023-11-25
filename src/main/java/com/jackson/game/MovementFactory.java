@@ -8,6 +8,7 @@ import com.jackson.ui.Camera;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.util.Duration;
 
@@ -81,7 +82,7 @@ public class MovementFactory {
 
 
 
-    public void calculateXProperties(boolean isAPressed, boolean isDPressed, AudioPlayer walkingEffects) {
+    public void calculateXProperties(boolean isAPressed, boolean isDPressed, Player player) {
 
         if(!isAPressed && !isDPressed) { //For optimization
             return;
@@ -102,14 +103,22 @@ public class MovementFactory {
                 offset = 4;
                 isCharacterMovingLeft = true;
             }
+        } else {
+            return; //Pressing A and D at the same time
+        }
+
+        if((isAPressed && !canMoveLeft) || (isDPressed && !canMoveRight)) {
+            return; //Trying to move but stuck
         }
 
 
         this.camera.translateBlocksByX(offset);
 
+
         boolean condition = isCharacterMovingLeft ? this.camera.getxOffset() > 32 : this.camera.getxOffset() < -32;
 
         if (condition) {
+            player.addAgilityXP(1);
 
             //Get block x at edge and add one
             //Will break if blocks is not ordered

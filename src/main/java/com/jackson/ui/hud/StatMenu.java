@@ -64,12 +64,10 @@ public class StatMenu extends VBox {
         ProgressBar xpBar = new ProgressBar();
         xpBar.getStyleClass().add("xpBar");
         currentXP.addListener((observableValue, number, t1) -> {
-            double currentexp = t1.doubleValue() + 100;
-            System.out.println(currentexp);
-            double lastLevelReq = STARTING_XP * Math.pow(stat.get(), 1.1);
-            double nextLevelReq = STARTING_XP * Math.pow(stat.get() + 1, 1.1);
-//            System.out.println((currentexp - lastLevelReq) / nextLevelReq);
-            xpBar.setProgress((currentexp - lastLevelReq) / nextLevelReq);
+            double currentexp = t1.doubleValue();
+            double lastLevelReq = 50 * Math.pow(stat.get() - 1, 1.5);
+            double nextLevelReq =  50 * Math.pow(stat.get(), 1.5);
+            xpBar.setProgress((currentexp - lastLevelReq) / (nextLevelReq - lastLevelReq));
         });
 
         HBox hBox = new HBox();

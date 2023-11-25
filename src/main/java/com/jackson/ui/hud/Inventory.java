@@ -225,6 +225,10 @@ public class Inventory {
         return this.itemArray[this.selectedSlotIndex.get()][0];
     }
 
+    public String getSelectedItemStackName() {
+        return this.itemArray[this.selectedSlotIndex.get()][0] == null ? "air" : this.itemArray[this.selectedSlotIndex.get()][0].getItemName();
+    }
+
     //Decrements item and removes if necessary
     public void useBlockFromSelectedSlot() {
         ItemStack itemStack = this.itemArray[this.selectedSlotIndex.get()][0];
