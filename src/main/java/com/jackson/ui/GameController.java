@@ -148,8 +148,9 @@ public class GameController extends Scene {
             zombie.setTranslateX(spawnTile * 32 + rand.nextDouble(25));
             zombie.setTranslateY(camera.getBlockTranslateY(spawnTile) - 48);
             zombie.translateXProperty().addListener((observableValue, number, t1) -> {
-                if(character.intersects(zombie.getBoundsInParent()) && zombie.canAttack()) {
-                    character.takeDamage(1);
+                if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
+                    zombie.attack(new Item("fist"));
+                    character.takeDamage(5);
                 }
             });
 

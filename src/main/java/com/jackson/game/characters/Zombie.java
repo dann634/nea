@@ -20,7 +20,7 @@ public class Zombie extends Character {
 
     public static final int SPEED = 1;
     private int xCounter;
-    private PauseTransition attackCooldown;
+    private final PauseTransition attackCooldown;
     private double jumpAcceleration;
     private double jumpVelocity;
     private boolean needsToJump;
@@ -34,7 +34,8 @@ public class Zombie extends Character {
         this.xCounter = 30;
         this.attackCooldown = new PauseTransition();
         this.attackCooldown.setDuration(Duration.seconds(2));
-        this.attackCooldown.setOnFinished(e -> System.out.println("finished"));
+        this.attackCooldown.setOnFinished(e -> {
+        });
         this.healthBar = initHealthBar();
 
         this.feetCollision.xProperty().bind(this.translateXProperty().add(4));
