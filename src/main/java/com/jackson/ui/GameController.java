@@ -3,6 +3,7 @@ package com.jackson.ui;
 import com.jackson.game.*;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
+import com.jackson.game.items.Item;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.HealthBar;
@@ -80,6 +81,7 @@ public class GameController extends Scene {
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
 
+
         root.getChildren().addAll(inventory.getInventoryVbox(), healthBar.getHealthHud(),
                 statMenu, inventory.getItemOnCursor(), new EventMessage(character));
 
@@ -135,7 +137,8 @@ public class GameController extends Scene {
             return; //No spawn
         }
         //Spawn
-        int packSize = (int) rand.nextGaussian(3, 1);
+        int packSize = 1;
+                //(int) rand.nextGaussian(3, 1);
         int spawnTile = rand.nextInt(32) + 1;
 
         List<Zombie> pack = new ArrayList<>();
@@ -144,10 +147,16 @@ public class GameController extends Scene {
             var zombie = new Zombie();
             zombie.setTranslateX(spawnTile * 32 + rand.nextDouble(25));
             zombie.setTranslateY(camera.getBlockTranslateY(spawnTile) - 48);
-            NumberBinding bind = Bindings.add(zombie.translateXProperty(), zombie.translateYProperty());
-            bind.addListener((observableValue, number, t1) -> {
-                if(character.intersects(zombie.getTranslateX(), zombie.getTranslateY(), 20, 40) && zombie.canAttack()) {
-                    character.takeDamage(5);
+            zombie.translateXProperty().addListener((observableValue, number, t1) -> {
+                if(character.intersects(zombie.getBoundsInParent()) && zombie.canAttack()) {
+                    character.takeDamage(1);
+                }
+            });
+
+            zombie.translateYProperty().addListener((observableValue, number, t1) -> {
+                if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
+                    zombie.attack(new Item("fist"));
+                    character.takeDamage(1);
                 }
             });
 
@@ -251,7 +260,6 @@ public class GameController extends Scene {
         });
 
         setOnMouseClicked(e -> {
-
             //Move hand towards cursor
 
             if(inventory.getItemStackOnCursor() != null

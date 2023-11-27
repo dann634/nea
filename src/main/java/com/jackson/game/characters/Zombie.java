@@ -1,9 +1,12 @@
 package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
+import javafx.animation.Animation;
+import javafx.animation.PauseTransition;
 import javafx.scene.Node;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
+import javafx.util.Duration;
 
 import java.util.List;
 
@@ -17,10 +20,10 @@ public class Zombie extends Character {
 
     public static final int SPEED = 1;
     private int xCounter;
+    private PauseTransition attackCooldown;
     private double jumpAcceleration;
     private double jumpVelocity;
     private boolean needsToJump;
-    private int attackCooldown; //Measured in cycles of main game loop
     private final ProgressBar healthBar;
 
     public Zombie() {
@@ -29,12 +32,12 @@ public class Zombie extends Character {
         this.jumpVelocity = 0;
         this.needsToJump = false;
         this.xCounter = 30;
-        this.attackCooldown = 100;
+        this.attackCooldown = new PauseTransition();
+        this.attackCooldown.setDuration(Duration.seconds(2));
+        this.attackCooldown.setOnFinished(e -> System.out.println("finished"));
         this.healthBar = initHealthBar();
 
-        this.attackCooldown = 100;
-
-        this.feetCollision.xProperty().bind(translateXProperty().add(4));
+        this.feetCollision.xProperty().bind(this.translateXProperty().add(4));
 
     }
 
@@ -77,7 +80,7 @@ public class Zombie extends Character {
 
     @Override
     public void attack(Entity item) {
-
+        attackCooldown.play();
     }
 
     public void addTranslateY(double value) {
@@ -121,12 +124,6 @@ public class Zombie extends Character {
     }
 
     public boolean canAttack() {
-        System.out.println(attackCooldown);
-        if(attackCooldown == 0) {
-            attackCooldown = 100;
-            return true;
-        }
-        attackCooldown--;
-        return false;
+        return attackCooldown.getStatus() == Animation.Status.STOPPED;
     }
 }
