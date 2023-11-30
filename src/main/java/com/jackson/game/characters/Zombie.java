@@ -28,28 +28,28 @@ public class Zombie extends Character {
 
     public Zombie() {
         super();
+        //Movement Values
         this.jumpAcceleration = 0;
         this.jumpVelocity = 0;
         this.needsToJump = false;
         this.xCounter = 30;
+
+        //Attack Cooldown
         this.attackCooldown = new PauseTransition();
         this.attackCooldown.setDuration(Duration.seconds(2));
-        this.attackCooldown.setOnFinished(e -> {
-        });
+
+        //Health Bar
         this.healthBar = initHealthBar();
-
-        this.feetCollision.xProperty().bind(this.translateXProperty().add(4));
-
+        rebindCollisions();
     }
 
     @Override
     public void setIdleImage() {
         setImage(new Image("file:src/main/resources/images/zombieRun1.png"));
-        rebindCollisions();
     }
 
     private ProgressBar initHealthBar() {
-        ProgressBar progressBar = new ProgressBar(1);
+        ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(34);
         progressBar.setPrefHeight(8);
         progressBar.translateXProperty().bind(this.translateXProperty().subtract(2));
@@ -64,7 +64,7 @@ public class Zombie extends Character {
         this.leftCollision.yProperty().bind((this.translateYProperty()));
         this.rightCollision.xProperty().bind(this.translateXProperty().add(29));
         this.rightCollision.yProperty().bind((this.translateYProperty()));
-        this.feetCollision.xProperty().bind(this.translateXProperty());
+        this.feetCollision.xProperty().bind(this.translateXProperty().add(4));
         this.feetCollision.yProperty().bind((this.translateYProperty().add(43)));
         this.headCollision.xProperty().bind(this.translateXProperty().add(3));
         this.headCollision.yProperty().bind(this.translateYProperty().add(-3));
@@ -72,6 +72,7 @@ public class Zombie extends Character {
 
     public void addTranslateX(int value) {
         this.setTranslateX(this.getTranslateX() + value);
+        //counter to change the image for walking animation
         this.xCounter -= 1;
         if(xCounter <= 0) {
             this.xCounter = 30;

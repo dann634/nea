@@ -179,60 +179,58 @@ public class MovementFactory {
 
     }
 
-    private void calculateZombieX(Zombie zombie) { // TODO: 10/11/2023 ADD XOFFSET
-        //make zombie face player
+    private void calculateZombieX(Zombie zombie) {
+        //which way should zombie move
         double difference = character.getX() - zombie.getTranslateX();
         boolean needsToMoveRight = difference > 0;
         zombie.setNodeOrientation(needsToMoveRight ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
 
-
         //Check collision
-        boolean canMoveLeft = !camera.isEntityTouchingBlock(zombie.getLeftCollision());
-        boolean canMoveRight = !camera.isEntityTouchingBlock(zombie.getRightCollision());
-        if(!canMoveRight && !canMoveLeft) { //Stuck
-            return;
-        }
+        boolean canMove = !camera.isEntityTouchingBlock(needsToMoveRight ? zombie.getRightCollision() : zombie.getLeftCollision());
 
-        //Move left or right
-        if((needsToMoveRight && canMoveRight) || (!needsToMoveRight && canMoveLeft)) {
+        //Move
+        if(canMove) {
             zombie.addTranslateX((needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED);
         }
 
-        if((needsToMoveRight && !canMoveRight)
-        || (!needsToMoveRight && !canMoveLeft) && zombie.getJumpAcceleration() >= 0) {
+        //Needs to go in a direction but a wall is blocking
+        if(!canMove && zombie.getJumpAcceleration() >= 0) {
             //Jump to get over block
             zombie.setNeedsToJump(true);
         }
-
-
     }
 
     private void calculateZombieY(Zombie zombie) {
         boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(zombie.getFeetCollision());
-        if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) { //Not jumping and on floor
+        if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) {
+            //Not jumping and on floor
             return;
         }
 
         if(zombie.getJumpAcceleration() < 0) { //In Mid air jumping
-            zombie.addJumpAcceleration(0.15);
+            zombie.addJumpAcceleration(0.15); //To add the parabola
             if(zombie.getJumpVelocity() < 3 && zombie.getJumpVelocity() > -3) {
+                //If smaller than max jump velocity (add more)
                 zombie.addJumpVelocity(zombie.getJumpAcceleration());
             }
             if(camera.isEntityTouchingBlock(zombie.getHeadCollision())) {
+                //Hitting head on block above
+                //Sets jump values so it falls
                 zombie.setJumpAcceleration(0);
                 zombie.setJumpVelocity(0);
             } else {
+                //Keep climbing
                 zombie.addTranslateY(zombie.getJumpVelocity());
             }
             return;
         }
 
-        if(zombie.getJumpAcceleration() > 0) { //To fix floating point math
+        if(zombie.getJumpAcceleration() > 0) { //To stop falling
             zombie.setJumpAcceleration(0);
         }
 
 
-        if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump
+        if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump and maybe acceleration == 0
             zombie.setJumpAcceleration(-2.5);
             zombie.setNeedsToJump(false);
             return;

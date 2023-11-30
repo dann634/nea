@@ -1,25 +1,24 @@
 #root {
-    -fx-background-color: lightblue;
+    -fx-background-color: linear-gradient(to top, whitesmoke, deepskyblue)
 }
 
-#inventory-unselected {
+.darkBackground {
     -fx-background-color: rgba(0,0,0,.65);
+}
+
+.inventory {
     -fx-background-radius: 8;
     -fx-border-radius: 6;
     -fx-min-width: 40;
     -fx-min-height: 40;
+    -fx-border-width: 2;
+}
+
+#unselected {
     -fx-border-color: black;
-    -fx-border-width: 2;
 }
-
-#inventory-selected {
-    -fx-background-color: rgba(0,0,0,.65);
-    -fx-background-radius: 8;
-    -fx-border-radius: 6;
-    -fx-min-width: 40;
-    -fx-min-height: 40;
+#selected {
     -fx-border-color: gold;
-    -fx-border-width: 2;
 }
 
 /*Pause Menu*/
@@ -78,7 +77,6 @@
 }
 
 #statMenu {
-    -fx-background-color: rgba(0, 0, 0, .65);
     -fx-pref-height: 180;
     -fx-pref-width: 300;
     -fx-translate-x: 1324;
@@ -102,3 +100,24 @@
     -fx-font-weight: bold;
 }
 
+#healthBox {
+    -fx-translate-x: 714;
+    -fx-translate-y: 10;
+    -fx-padding: 5;
+    -fx-background-radius: 5;
+    -fx-min-width: 300;
+    -fx-spacing: 10;
+}
+
+#healthLabel {
+    -fx-font-weight: bold;
+    -fx-font-size: 20;
+    -fx-min-width: 30;
+    -fx-alignment: center;
+    -fx-text-fill: white;
+}
+
+#healthBar {
+    -fx-min-width: 230;
+    -fx-min-height: 30;
+}

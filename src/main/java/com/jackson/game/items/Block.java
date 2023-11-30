@@ -26,7 +26,7 @@ public class Block extends Entity {
     private int xPos;
     private int yPos;
     private int toughness;
-    private Timeline breakingTimeline;
+    private Timeline breakingTimeline; //Maybe change to a transition
     private  Camera camera;
     private  Inventory inventory;
     private boolean isDropped;

@@ -10,7 +10,6 @@ import java.util.List;
 public class TextIO {
 
     private TextIO() {
-
     }
 
 
@@ -95,6 +94,9 @@ public class TextIO {
             for (int i = 0; i < ProceduralGenerator.getHeight(); i++) {
 
                 tempArray = reader.readLine().split("");
+                if(tempArray.length == 0) {
+                    continue;
+                }
                 for (int j = 0; j < ProceduralGenerator.getWidth(); j++) {
                     mapFile[j][i] = tempArray[j];
                 }

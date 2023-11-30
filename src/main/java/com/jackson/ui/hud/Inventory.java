@@ -92,10 +92,11 @@ public class Inventory {
     //Returns an inventory square
     private AnchorPane getInventorySquare(int col, int row) {
         AnchorPane pane = new AnchorPane();
-        pane.setId("inventory-unselected"); //ID for css
-
+        pane.setId("unselected"); //ID for css
+        pane.getStyleClass().addAll("inventory", "darkBackground");
         //On Click Listener
         pane.setOnMouseClicked(e -> {
+
 
             if((itemStackOnCursor == null && itemArray[row][col] == null)
             || (itemStackOnCursor != null && itemArray[row][col] != null)) {
@@ -153,7 +154,7 @@ public class Inventory {
         if(selectedSlotIndex.get() != -1) {
             inventoryArr[selectedSlotIndex.get()][0].setId("inventory-unselected");
         }
-        inventoryArr[index][0].setId("inventory-selected");
+        inventoryArr[index][0].setId("selected");
         selectedSlotIndex.set(index);
     }
 

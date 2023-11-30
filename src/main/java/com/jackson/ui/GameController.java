@@ -1,30 +1,23 @@
 package com.jackson.ui;
 
-import com.jackson.game.*;
+import com.jackson.game.MovementFactory;
+import com.jackson.game.ProceduralGenerator;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Item;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
-import com.jackson.ui.hud.HealthBar;
 import com.jackson.ui.hud.Inventory;
-import com.jackson.ui.hud.StatMenu;
-import javafx.animation.Animation;
-import javafx.animation.KeyFrame;
-import javafx.animation.PauseTransition;
-import javafx.animation.Timeline;
+import javafx.animation.*;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.DoubleBinding;
-import javafx.beans.binding.NumberBinding;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.*;
 import javafx.util.Duration;
 
 import java.util.*;
@@ -80,10 +73,10 @@ public class GameController extends Scene {
         camera = new Camera(character, map, root, this, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
+        EventMessage eventMessage = new EventMessage(character);
 
-
-        root.getChildren().addAll(inventory.getInventoryVbox(), healthBar.getHealthHud(),
-                statMenu, inventory.getItemOnCursor(), new EventMessage(character));
+        root.getChildren().addAll(inventory.getInventoryVbox(), healthBar,
+                statMenu, inventory.getItemOnCursor(), eventMessage);
 
         //Movement
         isAPressed = false;
@@ -122,8 +115,10 @@ public class GameController extends Scene {
             inventory.getItemOnCursor().toFront();
             character.toFront();
             character.getHandRectangle().toFront();
-            healthBar.getHealthHud().toFront();
+            healthBar.toFront();
             statMenu.toFront();
+            eventMessage.toFront();
+
 
         }));
         gameTimeline.play();
@@ -157,7 +152,7 @@ public class GameController extends Scene {
             zombie.translateYProperty().addListener((observableValue, number, t1) -> {
                 if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
                     zombie.attack(new Item("fist"));
-                    character.takeDamage(1);
+                    character.takeDamage(5);
                 }
             });
 
@@ -359,6 +354,91 @@ public class GameController extends Scene {
             });
         }
     }
+
+    public class HealthBar extends HBox {
+        public HealthBar(SimpleDoubleProperty healthProperty) {
+            //Initialising Values
+            ProgressBar healthBar = new ProgressBar(1);
+            Label healthLabel = new Label("");
+            getStyleClass().add("darkBackground");
+
+            //Binds label and progress bar to health
+            healthBar.progressProperty().bind(healthProperty.divide(100));
+            healthLabel.textProperty().bind(Bindings.format(new Locale("en", "uk")
+                    , "%.0f",
+                    healthProperty));
+
+            setId("healthBox");
+            healthBar.setId("healthBar");
+            healthLabel.setId("healthLabel");
+
+            this.getChildren().addAll(healthLabel, healthBar);
+        }
+    }
+
+
+    public class StatMenu extends VBox {
+        private final TranslateTransition translate;
+        private boolean isVisible;
+
+        public StatMenu(Player player) {
+            //Initialise the hbox's
+            HBox strengthHBox = createHBox("Strength", player.strengthLevelProperty(), player.strengthXPProperty());
+            HBox agilityHBox = createHBox("Agility", player.agilityLevelProperty(), player.agilityXPProperty());
+            HBox defenceHBox = createHBox("Defence", player.defenceLevelProperty(), player.defenceXPProperty());
+            this.isVisible = false;
+
+            Label title = new Label("Stats");
+            title.getStyleClass().add("title");
+
+            //Adds elements to main vbox
+            getChildren().addAll(title, strengthHBox, agilityHBox, defenceHBox);
+            setId("statMenu");
+            getStyleClass().add("darkBackground");
+
+            //Initialise animation
+            this.translate = new TranslateTransition();
+            this.translate.setNode(this);
+            this.translate.setRate(1);
+            this.translate.setInterpolator(Interpolator.EASE_BOTH);
+            this.translate.setOnFinished(e -> isVisible = !isVisible);
+        }
+
+        private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleIntegerProperty currentXP) {
+            Label statNameLabel = new Label(statName + ":"); //What the stat is called
+            statNameLabel.getStyleClass().add("statNumbers");
+
+            Pane spacer = new Pane(); //Invisible to account for different text lengths
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            Label currentLevel = new Label("1"); //Current level
+            currentLevel.getStyleClass().add("statNumbers");
+            currentLevel.textProperty().bind(stat.asString()); //Binds to current level property
+
+            ProgressBar xpBar = new ProgressBar();
+            xpBar.getStyleClass().add("xpBar");
+            currentXP.addListener((observableValue, number, t1) -> {
+                //When current xp changes, the progress bar is updated
+                double currentexp = t1.doubleValue();
+                double lastLevelReq = 50 * Math.pow(stat.get() - 1, 1.5);
+                double nextLevelReq =  50 * Math.pow(stat.get(), 1.5);
+                xpBar.setProgress((currentexp - lastLevelReq) / (nextLevelReq - lastLevelReq));
+            });
+
+            //Adds everything to a hbox
+            HBox hBox = new HBox();
+            hBox.getChildren().addAll(statNameLabel, spacer, currentLevel, xpBar);
+            hBox.getStyleClass().add("stat");
+            return hBox;
+        }
+
+        //Switches between shown and hidden
+        public void toggleShown() {
+            this.translate.setToX(this.isVisible ? 1324 : 714);
+            this.translate.play();
+        }
+    }
+
 
 
 

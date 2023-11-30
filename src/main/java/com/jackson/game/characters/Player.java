@@ -15,6 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 public class Player extends Character {
@@ -22,17 +23,12 @@ public class Player extends Character {
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
-    private final double ATTACK_RANGE = 300;
-    private final double INTERACT_RANGE = 600;
-
-    private final double LEVEL_CONSTANT = 1.1;
-
-    private SimpleIntegerProperty agilityLevel;
-    private SimpleIntegerProperty strengthLevel;
-    private SimpleIntegerProperty defenceLevel;
-    private SimpleIntegerProperty agilityXP;
+    private final SimpleIntegerProperty agilityLevel;
+    private final SimpleIntegerProperty strengthLevel;
+    private final SimpleIntegerProperty defenceLevel;
+    private final SimpleIntegerProperty agilityXP;
     private final SimpleIntegerProperty strengthXP;
-    private SimpleIntegerProperty defenceXP;
+    private final SimpleIntegerProperty defenceXP;
 
     public Player() {
         super();
@@ -41,7 +37,7 @@ public class Player extends Character {
 
         initDisplayNameLabel();
 
-        agilityLevel = new SimpleIntegerProperty(1);
+        agilityLevel = new SimpleIntegerProperty(50);
         strengthLevel = new SimpleIntegerProperty(1);
         defenceLevel = new SimpleIntegerProperty(1);
 
@@ -94,32 +90,6 @@ public class Player extends Character {
         this.isModelFacingRight.set(isModelFacingRight);
     }
 
-    public boolean isWithinInteractRange(double x, double y) {
-        return getDistance(x, y) < INTERACT_RANGE;
-    }
-
-    private double getDistance(double x, double y) {
-        double[] distance = getXYDistance(x, y);
-        return Math.hypot(distance[0], distance[1]);
-    }
-
-    private double[] getXYDistance(double x, double y) {
-        double xDifference;
-        if(x < getX()) {
-            xDifference = getX() - x;
-        } else {
-            xDifference = x - getX();
-        }
-
-        double yDifference;
-        if(y < getY()) {
-            yDifference = getY() - y;
-        } else {
-            yDifference = y - getY();
-        }
-        return new double[]{xDifference, yDifference};
-    }
-
     @Override
     public void attack(Entity item) {
         if(item != null && !item.isUsable()) {
@@ -135,69 +105,49 @@ public class Player extends Character {
 
     public void addStrengthXP(int amount) {
         strengthXP.set(strengthXP.get() + amount);
-        if((50 * Math.pow(strengthLevel.get(), 1.5) + 1 < strengthXP.get())) {
+        if((50 * Math.pow(strengthLevel.get(), 1.5) < strengthXP.get())) {
             strengthLevel.set(strengthLevel.get() + 1);
         }
     }
-
     public void addAgilityXP(int amount) {
         agilityXP.set(agilityXP.get() + amount);
-        if((50 * Math.pow(agilityLevel.get(), 1.5) + 1 < agilityXP.get())) {
+        if((50 * Math.pow(agilityLevel.get(), 1.5) < agilityXP.get())) {
             agilityLevel.set(agilityLevel.get() + 1);
         }
     }
-
-    public int getAgilityLevel() {
-        return agilityLevel.get();
+    public void addDefenceXP(int amount) {
+        defenceXP.set(defenceXP.get() + amount);
+        if((50 * Math.pow(defenceLevel.get(), 1.5)) < defenceXP.get()) {
+            defenceLevel.set(defenceLevel.get() + 1);
+        }
     }
 
     public SimpleIntegerProperty agilityLevelProperty() {
         return agilityLevel;
     }
-
-    public int getStrengthLevel() {
-        return strengthLevel.get();
-    }
-
     public SimpleIntegerProperty strengthLevelProperty() {
         return strengthLevel;
     }
-
-
-    public int getDefenceLevel() {
-        return defenceLevel.get();
-    }
-
     public SimpleIntegerProperty defenceLevelProperty() {
         return defenceLevel;
     }
-
-
-
-    public int getAgilityXP() {
-        return agilityXP.get();
-    }
-
     public SimpleIntegerProperty agilityXPProperty() {
         return agilityXP;
     }
-
-    public int getStrengthXP() {
-        return strengthXP.get();
-    }
-
     public SimpleIntegerProperty strengthXPProperty() {
         return strengthXP;
     }
-
-
-
-    public int getDefenceXP() {
-        return defenceXP.get();
-    }
-
     public SimpleIntegerProperty defenceXPProperty() {
         return defenceXP;
     }
 
+    @Override
+    public boolean takeDamage(double amount) {
+        if(new Random().nextDouble(100) < defenceLevel.get() * 0.5) {
+            System.out.println("dodge");
+            return false; //Dodge
+        }
+        addDefenceXP(10);
+        return super.takeDamage(amount);
+    }
 }

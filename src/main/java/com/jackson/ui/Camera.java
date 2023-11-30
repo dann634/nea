@@ -35,7 +35,6 @@ public class Camera {
     private final List<Zombie> zombies;
     private final GameController gameController;
     private final Inventory inventory;
-    private Block blockUnderCursor;
     private int xOffset;
     private int yOffset;
     private final List<String> backgroundBlocks; //Blocks the player can walk through
@@ -54,7 +53,7 @@ public class Camera {
         backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
 
-        spawnItem("wood_sword", 5, 500, 200);
+        spawnItem("wood_sword", 1, 500, 200);
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -276,7 +275,7 @@ public class Camera {
                 for(Zombie zombie : zombies) {
                     if(character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
                         //Zombie touching weapon
-                        if(zombie.takeDamage(character.getAttackDamage())) { //Returns true if dead
+                        if(zombie.takeDamage((int)character.getAttackDamage())) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop();
