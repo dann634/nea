@@ -176,11 +176,8 @@ public abstract class Character extends ImageView {
 
     public boolean takeDamage(double amount) { //Returns true if dead
         health.set(health.get() - amount);
-        if(health.get() <= 0) {
-            //Die
-            return true;
-        }
-        return false;
+        //Die
+        return health.get() <= 0;
     }
 
     public TranslateTransition getAttackTranslate() {

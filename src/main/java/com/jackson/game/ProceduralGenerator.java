@@ -38,23 +38,23 @@ public class ProceduralGenerator {
             fullHeightMap.addAll(getHeightMapChunk()); //Adds chunks to height map until its 1000 in size
         }
 
-        int[][] heightMapArray = new int[WIDTH][HEIGHT];
+        String[][] heightMapArray = new String[WIDTH][HEIGHT];
         for (int i = 0; i < WIDTH - 1; i++) { //Loops through each X coordinate
             try {
                 //Air blocks
-                for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
+                for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = "0";
 
                 //Grass layer
-                heightMapArray[i][fullHeightMap.get(i)] = 2;
+                heightMapArray[i][fullHeightMap.get(i)] = "2";
 
                 //Dirt Layer
-                for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = 1;
+                for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = "1";
 
                 //Stone layer
-                for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = 4;
+                for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = "4";
 
                 //Bedrock layer
-                heightMapArray[i][HEIGHT-1] = 3;
+                heightMapArray[i][HEIGHT-1] = "3";
 
 
             } catch (IndexOutOfBoundsException ignored) { //Catches any error
@@ -140,7 +140,7 @@ public class ProceduralGenerator {
         return true;
     }
 
-    private static void spawnTrees(List<Integer> heightMap, int[][] map) {
+    private static void spawnTrees(List<Integer> heightMap, String[][] map) {
         Random rand = new Random();
         boolean treeProximityFlag = false; //Flag
         for (int i = 0; i < WIDTH; i++) { //Runs entire length of map
@@ -153,7 +153,7 @@ public class ProceduralGenerator {
                 int topOfTree = heightMap.get(i) - 1 - (int) rand.nextGaussian(5, 1);
                 for (int j = heightMap.get(i)-1; j > topOfTree; j--) { //Creates trunk
                     try {
-                        map[i][j] = 5; //5 is code for wood
+                        map[i][j] = "5"; //5 is code for wood
                     } catch (ArrayIndexOutOfBoundsException ignored) {}
                 }
 
@@ -162,7 +162,7 @@ public class ProceduralGenerator {
                 for (int j = topOfTree; j > topOfTree - 3; j--) {
                     for (int k = i - (length / 2); k < i + (length / 2) + 1; k++) {
                         try{
-                            map[k][j] = 6; //6 is code for leaves
+                            map[k][j] = "6"; //6 is code for leaves
                         } catch (ArrayIndexOutOfBoundsException ignored) {
                         }
                     }

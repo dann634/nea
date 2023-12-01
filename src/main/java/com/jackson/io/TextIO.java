@@ -34,7 +34,7 @@ public class TextIO {
         return data;
     }
 
-    public static boolean updateFile(String dir, List<String> data) {
+    public static boolean updateFile(List<String> data, String dir) {
 
         if(data == null || data.isEmpty()) { //Gatekeeping
             return false;
@@ -59,7 +59,7 @@ public class TextIO {
 
 
 
-    public static boolean writeMap(int[][] bitmap, String dir) {
+    public static boolean writeMap(String[][] bitmap, String dir) {
         if(bitmap == null) { //Gatekeeping
             return false;
         }
@@ -67,8 +67,8 @@ public class TextIO {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(dir, false));
             for (int i = 0; i < bitmap[0].length; i++) {
-                for (int[] ints : bitmap) {
-                    writer.write(String.valueOf(ints[i]));
+                for (String[] strings : bitmap) {
+                    writer.write(strings[i]);
                 }
                 writer.write("\n");
             }

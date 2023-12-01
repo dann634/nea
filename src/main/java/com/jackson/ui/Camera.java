@@ -442,4 +442,14 @@ public class Camera {
         initWorld();
     }
 
+    public String[][] getMap() {
+        return map;
+    }
+
+    public List<String> getPlayerData() {
+        List<String> data = new ArrayList<>();
+        data.add(String.valueOf(character.getXPos()));
+        data.add(String.valueOf(character.getYPos()));
+        return data;
+    }
 }

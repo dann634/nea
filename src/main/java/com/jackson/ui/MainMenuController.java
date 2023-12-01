@@ -63,6 +63,7 @@ public class MainMenuController extends Scene implements Initializable {
                 Main.setScene(new CreateWorldController());
                 return;
             }
+
             Main.setScene(new GameController());
         });
 

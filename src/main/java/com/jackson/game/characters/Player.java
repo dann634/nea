@@ -36,7 +36,6 @@ public class Player extends Character {
         setY(180);
 
         initDisplayNameLabel();
-setHealth(1);
 
         agilityLevel = new SimpleIntegerProperty(1);
         strengthLevel = new SimpleIntegerProperty(1);

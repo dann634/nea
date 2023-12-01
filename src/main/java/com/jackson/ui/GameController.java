@@ -21,6 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.util.*;
@@ -78,7 +79,6 @@ public class GameController extends Scene {
         inventory = new Inventory();
         spawnCharacter();
         camera = new Camera(character, map, root, this, inventory, zombies);
-        camera.sendToSpawn();
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
@@ -93,7 +93,19 @@ public class GameController extends Scene {
 
         blockDropped = false;
 
-        character.toFront();
+        //Send character
+        List<String> playerData = TextIO.readFile("src/main/resources/saves/single_data.txt");
+        if(playerData.isEmpty()) {
+            camera.sendToSpawn();
+        } else {
+            character.setXPos(Integer.parseInt(playerData.get(0)));
+            character.setYPos(Integer.parseInt(playerData.get(1)));
+            // TODO: 01/12/2023 add x y offsets 
+            camera.initWorld();
+        }
+
+
+
 
         setRoot(root);
         root.setId("root");
@@ -336,6 +348,7 @@ public class GameController extends Scene {
             Button button = new Button("Save and Exit");
             button.setOnAction(e -> {
                 //Save first
+                saveGame();
                 Main.setScene(new MainMenuController());
             });
             return button;
@@ -472,6 +485,11 @@ public class GameController extends Scene {
             this.translate.setToX(this.isVisible ? 1324 : 714);
             this.translate.play();
         }
+    }
+
+    public void saveGame() {
+        TextIO.writeMap(camera.getMap() , "src/main/resources/saves/singleplayer.txt");
+        TextIO.updateFile(camera.getPlayerData(), "src/main/resources/saves/single_data.txt");
     }
 
 

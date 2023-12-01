@@ -154,7 +154,7 @@ public class SettingsController extends Scene {
             newSettings.add(this.muteSoundEffectsButton.getText().equals("Muted") ? "true" : "false");
             newSettings.add(String.valueOf(this.backgroundSlider.getValue()));
 
-            TextIO.updateFile("src/main/resources/settings/settings.txt", newSettings); //Updates text file with new settings
+            TextIO.updateFile(newSettings, "src/main/resources/settings/settings.txt"); //Updates text file with new settings
 
         });
 

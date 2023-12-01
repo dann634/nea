@@ -1,6 +1,7 @@
 package com.jackson.ui;
 
 import com.jackson.game.ProceduralGenerator;
+import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -11,6 +12,8 @@ import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CreateWorldController extends Scene {
 
@@ -62,6 +65,11 @@ public class CreateWorldController extends Scene {
         generateWorldButton.setOnAction(e -> {
             for (int i = 0; i < 100; i++) {
                 ProceduralGenerator.createMapFile(true);
+                try {
+                    new File("src/main/resources/saves/single_data.txt").createNewFile();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
             Main.setScene(new GameController());
         });
