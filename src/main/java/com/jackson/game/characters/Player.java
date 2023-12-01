@@ -37,7 +37,7 @@ public class Player extends Character {
 
         initDisplayNameLabel();
 
-        agilityLevel = new SimpleIntegerProperty(50);
+        agilityLevel = new SimpleIntegerProperty(1);
         strengthLevel = new SimpleIntegerProperty(1);
         defenceLevel = new SimpleIntegerProperty(1);
 
@@ -143,11 +143,15 @@ public class Player extends Character {
 
     @Override
     public boolean takeDamage(double amount) {
-        if(new Random().nextDouble(100) < defenceLevel.get() * 0.5) {
-            System.out.println("dodge");
+        if(new Random().nextDouble(100) < agilityLevel.get() * 0.5) {
             return false; //Dodge
         }
         addDefenceXP(10);
+        if(1 - (defenceLevel.get() * 0.005) <= 0.3) {
+            amount *= 0.3;
+        } else {
+            amount *= 1 - (defenceLevel.get() * 0.005); //reduce damage by 0.5% each level
+        }
         return super.takeDamage(amount);
     }
 }

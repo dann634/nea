@@ -1,5 +1,6 @@
 package com.jackson.ui;
 
+import com.jackson.game.ProceduralGenerator;
 import com.jackson.game.characters.Character;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
@@ -396,6 +397,27 @@ public class Camera {
 
     }
 
+    public void die() {
+        character.setHealth(100);
+        sendToSpawn();
+
+        List<Node> nodes = new ArrayList<>();
+        zombies.forEach(n -> nodes.addAll(n.getNodes()));
+        root.getChildren().removeAll(nodes);
+        zombies.clear();
+
+    }
+
+    private int findStartingY(String[][] map) {
+        for (int i = 0; i < ProceduralGenerator.getHeight(); i++) {
+            if(map[500][i].equals("2")) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
 
 
     public double getBlockTranslateY(int xPos) {
@@ -405,6 +427,19 @@ public class Camera {
             }
         }
         return 0;
+    }
+
+    public void sendToSpawn() {
+        character.setXPos(500);
+        character.setYPos(findStartingY(map));
+
+        //Reset World
+        if(blocks != null) {
+            blocks.forEach(n -> {
+                root.getChildren().removeAll(n);
+            });
+        }
+        initWorld();
     }
 
 }

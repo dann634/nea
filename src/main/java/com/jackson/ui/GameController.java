@@ -12,6 +12,8 @@ import javafx.animation.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -37,6 +39,7 @@ public class GameController extends Scene {
     private final Camera camera;
     private final Timeline gameTimeline;
     private final AudioPlayer audioplayer;
+    private final AudioPlayer levelUpSound;
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
     private final Random rand;
@@ -57,12 +60,16 @@ public class GameController extends Scene {
         //Initialises fields
         zombies = new ArrayList<>();
         rand = new Random();
-        String[][] map = loadMap();
+        String[][] map = TextIO.readMapFile(true);
         initLookupTable();
 
         //Sound
         audioplayer = new AudioPlayer("background");
         audioplayer.play();
+
+        levelUpSound = new AudioPlayer("levelup");
+        levelUpSound.setCycleCount(1);
+        levelUpSound.setVolume(0.4);
 
         walkingEffects = new AudioPlayer("walking");
         jumpingEffects = new AudioPlayer("jump");
@@ -71,6 +78,7 @@ public class GameController extends Scene {
         inventory = new Inventory();
         spawnCharacter();
         camera = new Camera(character, map, root, this, inventory, zombies);
+        camera.sendToSpawn();
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
@@ -85,7 +93,6 @@ public class GameController extends Scene {
 
         blockDropped = false;
 
-        camera.initWorld();
         character.toFront();
 
         setRoot(root);
@@ -145,14 +152,14 @@ public class GameController extends Scene {
             zombie.translateXProperty().addListener((observableValue, number, t1) -> {
                 if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
                     zombie.attack(new Item("fist"));
-                    character.takeDamage(5);
+                    character.takeDamage(rand.nextInt(5) + 1);
                 }
             });
 
             zombie.translateYProperty().addListener((observableValue, number, t1) -> {
                 if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
                     zombie.attack(new Item("fist"));
-                    character.takeDamage(5);
+                    character.takeDamage(rand.nextInt(5) + 1);
                 }
             });
 
@@ -164,17 +171,15 @@ public class GameController extends Scene {
     }
 
 
-    private String[][] loadMap() {
-        String[][] map = TextIO.readMapFile(true);
-        spawnYCoords = findStartingY(map);
-        return map;
-    }
-
 
     private void spawnCharacter() {
         character = new Player();
-        character.setXPos(500);
-        character.setYPos(spawnYCoords);
+
+        character.healthProperty().addListener((observableValue, number, t1) -> {
+            if(t1.doubleValue() <= 0) {
+                camera.die();
+            }
+        });
 
 
         inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
@@ -188,14 +193,6 @@ public class GameController extends Scene {
         initOnKeyPressed();
     }
 
-    private int findStartingY(String[][] map) {
-        for (int i = 0; i < ProceduralGenerator.getHeight(); i++) {
-            if(map[500][i].equals("2")) {
-                return i;
-            }
-        }
-        return -1;
-    }
 
 
 
@@ -326,7 +323,7 @@ public class GameController extends Scene {
         }
     }
 
-    private static class EventMessage extends Label {
+    private class EventMessage extends Label {
 
         private final PauseTransition timer;
 
@@ -335,22 +332,29 @@ public class GameController extends Scene {
             timer.setDuration(Duration.millis(2000));
             timer.setOnFinished(e -> setVisible(false));
             setId("eventMessage");
+
+
+
+
             character.strengthLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);
                 setText("Strength Level Up!!");
                 timer.play();
+                levelUpSound.play();
             });
 
             character.agilityLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);
                 setText("Agility Level Up!!");
                 timer.play();
+                levelUpSound.play();
             });
 
             character.defenceLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);
                 setText("Defence Level Up!!");
                 timer.play();
+                levelUpSound.play();
             });
         }
     }

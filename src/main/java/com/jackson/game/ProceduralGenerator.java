@@ -39,7 +39,7 @@ public class ProceduralGenerator {
         }
 
         int[][] heightMapArray = new int[WIDTH][HEIGHT];
-        for (int i = 0; i < WIDTH; i++) { //Loops through each X coordinate
+        for (int i = 0; i < WIDTH - 1; i++) { //Loops through each X coordinate
             try {
                 //Air blocks
                 for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = 0;
@@ -57,9 +57,8 @@ public class ProceduralGenerator {
                 heightMapArray[i][HEIGHT-1] = 3;
 
 
-            } catch (IndexOutOfBoundsException e) { //Catches any errors
-                System.err.println("Error: Map File Creation Failed");
-            }
+            } catch (IndexOutOfBoundsException ignored) { //Catches any error
+                 }
         }
 
         spawnTrees(fullHeightMap, heightMapArray);
@@ -153,7 +152,9 @@ public class ProceduralGenerator {
                 //Goes to top of grass and then gets a random truncated number from the normal distribution
                 int topOfTree = heightMap.get(i) - 1 - (int) rand.nextGaussian(5, 1);
                 for (int j = heightMap.get(i)-1; j > topOfTree; j--) { //Creates trunk
-                    map[i][j] = 5; //5 is code for wood
+                    try {
+                        map[i][j] = 5; //5 is code for wood
+                    } catch (ArrayIndexOutOfBoundsException ignored) {}
                 }
 
                 //Leaves (Pyramid Pattern)

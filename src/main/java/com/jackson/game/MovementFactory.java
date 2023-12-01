@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.util.Duration;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import static com.jackson.ui.Camera.RENDER_WIDTH;
@@ -172,10 +173,12 @@ public class MovementFactory {
 
     public void calculateZombieMovement(List<Zombie> zombies) {
 
-        for(Zombie zombie : zombies) {
-            calculateZombieX(zombie);
-            calculateZombieY(zombie);
-        }
+        try {
+            for(Zombie zombie : zombies) {
+                calculateZombieX(zombie);
+                calculateZombieY(zombie);
+            }
+        } catch (ConcurrentModificationException ignored) {}
 
     }
 
