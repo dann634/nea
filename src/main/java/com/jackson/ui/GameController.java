@@ -20,6 +20,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.*;
@@ -27,7 +28,6 @@ import java.util.*;
 public class GameController extends Scene {
 
     private final double ZOMBIE_SPAWN_RATE = 0.01;
-    private static int spawnYCoords;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -177,7 +177,7 @@ public class GameController extends Scene {
 
         character.healthProperty().addListener((observableValue, number, t1) -> {
             if(t1.doubleValue() <= 0) {
-                camera.die();
+                root.getChildren().add(new PauseMenuController(true));
             }
         });
 
@@ -225,7 +225,7 @@ public class GameController extends Scene {
 
                     case ESCAPE -> {
                         if(gameTimeline.getStatus() != Animation.Status.PAUSED) {
-                            root.getChildren().add(new PauseMenuController());
+                            root.getChildren().add(new PauseMenuController(false));
                         }
                     }
                     case SPACE -> {
@@ -290,8 +290,9 @@ public class GameController extends Scene {
     }
 
     private class PauseMenuController extends VBox {
-        public PauseMenuController() {
-            setStyle("-fx-background-color: rgba(209, 222, 227, .5);" +
+        public PauseMenuController(boolean isDead) {
+            String colour  = isDead ? "247, 45, 0" : "209, 222, 227";
+            setStyle("-fx-background-color: rgba(" + colour + ",.5);" +
                     "-fx-min-height: 544;" +
                     "-fx-min-width: 1024;" +
                     "-fx-alignment: center;" +
@@ -299,8 +300,26 @@ public class GameController extends Scene {
             gameTimeline.pause();
             audioplayer.pause();
 
-            getChildren().addAll(addResumeButton(), addSaveAndExitButton());
+            Label title = new Label(isDead ? "You died" : "Paused");
+            title.setStyle("-fx-font-weight: bold;" +
+                    "-fx-font-size: 42");
+            title.setTextFill(isDead ? Color.WHITE : Color.BLACK);
+
+
+            getChildren().addAll(title, isDead ? addRespawnButton() : addResumeButton(), addSaveAndExitButton());
             toFront();
+
+
+            if(isDead) {
+
+                //Stupid way of doing it (concurrency issue)
+                PauseTransition bringToFront = new PauseTransition();
+                bringToFront.setDuration(Duration.millis(10));
+                bringToFront.setOnFinished(e -> toFront());
+                bringToFront.play();
+            }
+
+
         }
 
         private Button addResumeButton() {
@@ -319,6 +338,18 @@ public class GameController extends Scene {
                 //Save first
                 Main.setScene(new MainMenuController());
             });
+            return button;
+        }
+
+        private Button addRespawnButton() {
+            Button button = new Button("Respawn");
+            button.setOnAction(e -> {
+                camera.respawn();
+                root.getChildren().remove(this);
+                gameTimeline.play();
+                audioplayer.play();
+            });
+            button.toFront();
             return button;
         }
     }
@@ -359,7 +390,7 @@ public class GameController extends Scene {
         }
     }
 
-    public class HealthBar extends HBox {
+    private class HealthBar extends HBox {
         public HealthBar(SimpleDoubleProperty healthProperty) {
             //Initialising Values
             ProgressBar healthBar = new ProgressBar(1);
@@ -381,7 +412,7 @@ public class GameController extends Scene {
     }
 
 
-    public class StatMenu extends VBox {
+    private class StatMenu extends VBox {
         private final TranslateTransition translate;
         private boolean isVisible;
 

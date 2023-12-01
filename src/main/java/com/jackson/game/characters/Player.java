@@ -36,6 +36,7 @@ public class Player extends Character {
         setY(180);
 
         initDisplayNameLabel();
+setHealth(1);
 
         agilityLevel = new SimpleIntegerProperty(1);
         strengthLevel = new SimpleIntegerProperty(1);
@@ -151,6 +152,10 @@ public class Player extends Character {
             amount *= 0.3;
         } else {
             amount *= 1 - (defenceLevel.get() * 0.005); //reduce damage by 0.5% each level
+        }
+        if(health.get() - amount < 0) {
+            health.set(0);
+            return true;
         }
         return super.takeDamage(amount);
     }

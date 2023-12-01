@@ -397,7 +397,7 @@ public class Camera {
 
     }
 
-    public void die() {
+    public void respawn() {
         character.setHealth(100);
         sendToSpawn();
 
