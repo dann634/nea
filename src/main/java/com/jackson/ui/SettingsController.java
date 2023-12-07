@@ -133,7 +133,10 @@ public class SettingsController extends Scene {
         var deleteSaveBtn = new Button("Delete");
         deleteSaveBtn.setId("redBtn");
 
-        deleteSaveBtn.setOnAction(e -> new File("src/main/resources/saves/singleplayer.txt").delete());
+        deleteSaveBtn.setOnAction(e -> {
+            new File("src/main/resources/saves/singleplayer.txt").delete();
+            new File("src/main/resources/saves/single_data.txt").delete();
+        });
 
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveBtn));
     } //Adds option to delete single-player save
@@ -145,7 +148,7 @@ public class SettingsController extends Scene {
             //Update Settings Text File
             List<String> newSettings = new ArrayList<>();
             String displayName = this.displayNameTextField.getText();
-            if(displayName.length() < 1 || displayName.length() > 15) { //If display name is not valid, settings not updated
+            if(displayName.length() < 3 || displayName.length() > 15) { //If display name is not valid, settings not updated
                 return;
             }
 

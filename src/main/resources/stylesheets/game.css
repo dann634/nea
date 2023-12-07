@@ -6,6 +6,8 @@
     -fx-background-color: rgba(0,0,0,.65);
 }
 
+
+
 .inventory {
     -fx-background-radius: 8;
     -fx-border-radius: 6;
@@ -120,4 +122,21 @@
 #healthBar {
     -fx-min-width: 230;
     -fx-min-height: 30;
+}
+
+.craftButton {
+    -fx-font-size: 12;
+    -fx-min-width: 75;
+    -fx-min-height: 25;
+}
+
+.craftingHbox {
+    -fx-spacing: 10;
+    -fx-max-width: 230;
+    -fx-alignment: center-left;
+    -fx-padding: 5, 0, 0, 0;
+    -fx-border-color: black;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-background-color: rgba(0, 0, 0, .65);
 }
