@@ -450,6 +450,8 @@ public class Camera {
         List<String> data = new ArrayList<>();
         data.add(String.valueOf(character.getXPos()));
         data.add(String.valueOf(character.getYPos()));
+        data.add(String.valueOf(xOffset));
+        data.add(String.valueOf(yOffset));
         return data;
     }
 }

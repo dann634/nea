@@ -1,19 +1,17 @@
 package com.jackson.ui;
 
 import com.jackson.game.MovementFactory;
-import com.jackson.game.ProceduralGenerator;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Item;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import com.jackson.ui.hud.CraftingMenu;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.*;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -21,14 +19,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 import java.util.*;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.01;
+    private final double ZOMBIE_SPAWN_RATE = 0.0;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -36,6 +33,7 @@ public class GameController extends Scene {
     private final Inventory inventory;
     private final HealthBar healthBar;
     private final StatMenu statMenu;
+    private final CraftingMenu craftingMenu;
     private final MovementFactory movementFactory;
     private final Camera camera;
     private final Timeline gameTimeline;
@@ -77,6 +75,7 @@ public class GameController extends Scene {
 
         //HUD
         inventory = new Inventory();
+        craftingMenu = new CraftingMenu();
         spawnCharacter();
         camera = new Camera(character, map, root, this, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());
@@ -84,7 +83,7 @@ public class GameController extends Scene {
         EventMessage eventMessage = new EventMessage(character);
 
         root.getChildren().addAll(inventory.getInventoryVbox(), healthBar,
-                statMenu, inventory.getItemOnCursor(), eventMessage);
+                statMenu, inventory.getItemOnCursor(), eventMessage, craftingMenu);
 
         //Movement
         isAPressed = false;
@@ -100,16 +99,17 @@ public class GameController extends Scene {
         } else {
             character.setXPos(Integer.parseInt(playerData.get(0)));
             character.setYPos(Integer.parseInt(playerData.get(1)));
-            // TODO: 01/12/2023 add x y offsets 
+            camera.addXOffset(Integer.parseInt(playerData.get(2)));
+            camera.addYOffset(Integer.parseInt(playerData.get(3)));
             camera.initWorld();
         }
-
-
 
 
         setRoot(root);
         root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
+
+        Main.getStage().setOnCloseRequest(e -> saveGame()); //Saves when red cross clicked
 
         movementFactory = new MovementFactory(character,  camera);
         gameTimeline = new Timeline();
@@ -137,6 +137,7 @@ public class GameController extends Scene {
             healthBar.toFront();
             statMenu.toFront();
             eventMessage.toFront();
+            craftingMenu.toFront();
 
 
         }));
@@ -234,6 +235,9 @@ public class GameController extends Scene {
                     case DIGIT4 -> inventory.selectSlot(3);
                     case DIGIT5 -> inventory.selectSlot(4);
                     case K -> statMenu.toggleShown();
+                    case C -> {
+                        craftingMenu.toggleShown(gameTimeline);
+                    }
 
                     case ESCAPE -> {
                         if(gameTimeline.getStatus() != Animation.Status.PAUSED) {

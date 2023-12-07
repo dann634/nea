@@ -39,26 +39,25 @@ public class ProceduralGenerator {
         }
 
         String[][] heightMapArray = new String[WIDTH][HEIGHT];
-        for (int i = 0; i < WIDTH - 1; i++) { //Loops through each X coordinate
+        for (int i = 0; i < heightMapArray.length; i++) { //Loops through each X coordinate
+            //Air blocks
+            for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = "0";
+
+            //Grass layer
+            heightMapArray[i][fullHeightMap.get(i)] = "2";
+
             try {
-                //Air blocks
-                for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = "0";
-
-                //Grass layer
-                heightMapArray[i][fullHeightMap.get(i)] = "2";
-
                 //Dirt Layer
                 for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = "1";
 
                 //Stone layer
                 for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = "4";
+            } catch (ArrayIndexOutOfBoundsException e) {
 
-                //Bedrock layer
-                heightMapArray[i][HEIGHT-1] = "3";
+            }
 
-
-            } catch (IndexOutOfBoundsException ignored) { //Catches any error
-                 }
+            //Bedrock layer
+            heightMapArray[i][HEIGHT-1] = "3";
         }
 
         spawnTrees(fullHeightMap, heightMapArray);
@@ -113,10 +112,10 @@ public class ProceduralGenerator {
         int midpointY = isPositive ? offset + lowerbound : lowerbound - offset; //Adds offset depending on gradient
 
         //Range check so array doesn't throw ArrayOutOfBoundsException
-        if(midpointY < 1) {
-            midpointY = 1;
-        } else if(midpointY > 300) {
-            midpointY = 299;
+        if(midpointY < 10) {
+            midpointY = 11;
+        } else if(midpointY > 290) {
+            midpointY = 289;
         }
         heights.set(midpoint, midpointY); //Adds new value to list
 

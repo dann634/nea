@@ -63,13 +63,11 @@ public class CreateWorldController extends Scene {
         var generateWorldButton = new Button("Generate World");
         generateWorldButton.setId("generateWorldButton");
         generateWorldButton.setOnAction(e -> {
-            for (int i = 0; i < 100; i++) {
-                ProceduralGenerator.createMapFile(true);
-                try {
-                    new File("src/main/resources/saves/single_data.txt").createNewFile();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
+            ProceduralGenerator.createMapFile(true);
+            try {
+                new File("src/main/resources/saves/single_data.txt").createNewFile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
             Main.setScene(new GameController());
         });

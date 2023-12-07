@@ -60,7 +60,7 @@ public class TextIO {
 
 
     public static boolean writeMap(String[][] bitmap, String dir) {
-        if(bitmap == null) { //Gatekeeping
+        if(bitmap == null || bitmap.length == 0) { //Gatekeeping
             return false;
         }
 
