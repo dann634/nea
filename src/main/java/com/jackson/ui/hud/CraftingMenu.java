@@ -2,21 +2,36 @@ package com.jackson.ui.hud;
 
 import com.jackson.game.items.Entity;
 import javafx.animation.Timeline;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
+import javafx.scene.paint.ImagePattern;
+import javafx.scene.shape.Rectangle;
+
+import java.util.HashMap;
 
 public class CraftingMenu extends BorderPane {
     private final ScrollPane leftMenu;
     private final HBox bottomMenu;
     private final VBox centerMenu;
+    private final Label selectedItem;
+    private VBox recipeVbox;
+    private Button craftButton;
+    private final HashMap<String, CraftingItem> craftingDirectory;
 
     public CraftingMenu() {
         this.leftMenu = new ScrollPane();
         this.centerMenu = new VBox();
         this.bottomMenu = new HBox();
+        this.selectedItem = new Label("Crafting");
+
+        this.craftingDirectory = new HashMap<>();
+        setUpCraftingDirectory();
 
         setTranslateX(2000);
         setTranslateY((544 / 2) - (425 / 2));
@@ -85,8 +100,21 @@ public class CraftingMenu extends BorderPane {
         centerMenu.setMinHeight(350);
         centerMenu.setStyle("-fx-background-color: grey;" +
                 "-fx-alignment: top-center;" +
-                "-fx-padding: 8;");
+                "-fx-padding: 8;" +
+                "-fx-spacing: 25;");
         setCenter(centerMenu);
+
+        selectedItem.setStyle("-fx-font-size: 32;" +
+                "-fx-font-weight: bold;" +
+                "-fx-text-fill: white;" +
+                "-fx-padding: 5;");
+
+        //Embedded Vbox
+        recipeVbox = new VBox();
+//        recipeVbox.setStyle("-fx-border-width: 1;" +
+//                "-fx-border-style: solid;");
+        centerMenu.getChildren().addAll(selectedItem, recipeVbox);
+
     }
 
     private void setBottomMenu() {
@@ -98,7 +126,8 @@ public class CraftingMenu extends BorderPane {
 
         Button closeButton = new Button("Close");
 //        closeButton.setOnAction(e -> setTranslateX(2000));
-        Button craftButton = new Button("Craft");
+        craftButton = new Button("Craft");
+        craftButton.setDisable(true);
 
         Pane pusherPane = new Pane();
         HBox.setHgrow(pusherPane, Priority.ALWAYS);
@@ -125,11 +154,54 @@ public class CraftingMenu extends BorderPane {
     }
 
     private void updateCenterMenu(String itemName) {
-        centerMenu.getChildren().clear();
-        Label label = new Label(itemName);
-        label.setStyle("-fx-font-size: 32;" +
-                "-fx-font-weight: bold;" +
-                "-fx-text-fill: white;");
-        centerMenu.getChildren().add(label);
+        selectedItem.setText(itemName);
+        craftButton.setDisable(false);
+        recipeVbox.getChildren().clear();
+        recipeVbox.getChildren().add(getRecipeTree(itemName));
     }
+
+    private AnchorPane getRecipeTree(String item) {
+        AnchorPane pane = new AnchorPane();
+
+        pane.getChildren().add(getRecipeIcon(item, (550 / 2) - 24, 0));
+
+        return pane;
+    }
+
+    private Pane getRecipeIcon(String item, int x, int y) {
+        Pane pane = new Pane();
+
+        ImageView imageView = new ImageView(new Image("file:src/main/resources/images/" + item + ".png"));
+        imageView.setPreserveRatio(true);
+        imageView.setFitHeight(32);
+        imageView.setFitWidth(32);
+
+        pane.getChildren().add(imageView);
+        pane.setTranslateX(x);
+
+        return pane;
+    }
+
+    private class CraftingItem {
+        private String item;
+        private int amount;
+
+        public CraftingItem(String item, int amount) {
+            this.item = item;
+            this.amount = amount;
+        }
+
+        public String getItem() {
+            return item;
+        }
+
+        public int getAmount() {
+            return amount;
+        }
+    }
+
+    private void setUpCraftingDirectory() {
+
+    }
+
 }

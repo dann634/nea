@@ -28,8 +28,7 @@ public class TextIO {
                 data.add(readLine);
             }
             reader.close();
-        } catch (IOException e) {
-            System.err.println("Error: Reading File Failed");
+        } catch (IOException ignored) {
         }
         return data;
     }
@@ -66,10 +65,12 @@ public class TextIO {
 
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(dir, false));
-            for (int i = 0; i < bitmap[0].length; i++) {
-                for (String[] strings : bitmap) {
-                    writer.write(strings[i]);
+            for (int i = 0; i < 300; i++) {
+                StringBuilder line = new StringBuilder();
+                for (int j = 0; j < 1000; j++) {
+                    line.append(bitmap[j][i]);
                 }
+                writer.write(line.toString());
                 writer.write("\n");
             }
             writer.close();

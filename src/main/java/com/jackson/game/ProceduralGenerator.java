@@ -20,6 +20,7 @@ public class ProceduralGenerator {
     private static final int WIDTH = 1000; //Map Width
     private static final int HEIGHT = 300; //Map Height
     private static final double TREE_SPAWN_CHANCE = 0.15; //On any grass block
+    private static final double NUMBER_OF_CHUNKS = 10;
 
     /*
     0 - Air
@@ -34,9 +35,14 @@ public class ProceduralGenerator {
     //Creates the 2D array of numbers to indicate block type
     public static void createMapFile(boolean isSingleplayer)  {
         List<Integer> fullHeightMap = new ArrayList<>();
-        while (fullHeightMap.size() < WIDTH) { // Loops until map is 1000 blocks wide
-            fullHeightMap.addAll(getHeightMapChunk()); //Adds chunks to height map until its 1000 in size
+
+        for (int i = 0; i < NUMBER_OF_CHUNKS; i++) {
+            fullHeightMap.addAll(getHeightMapChunk(i+1)); //Adds chunks to height map until its 1000 in size
         }
+//
+//        for(int i : fullHeightMap) {
+//            System.out.print(i + " ");
+//        }
 
         String[][] heightMapArray = new String[WIDTH][HEIGHT];
         for (int i = 0; i < heightMapArray.length; i++) { //Loops through each X coordinate
@@ -59,8 +65,10 @@ public class ProceduralGenerator {
             //Bedrock layer
             heightMapArray[i][HEIGHT-1] = "3";
         }
-
+//        System.out.println();
         spawnTrees(fullHeightMap, heightMapArray);
+
+                // FIXME: 01/12/2023 bedrock is overwritten
 
 
         //Add to file
@@ -77,7 +85,7 @@ public class ProceduralGenerator {
     }
 
 
-    private static List<Integer> getHeightMapChunk() {
+    private static List<Integer> getHeightMapChunk(int chunkNumber) {
         /*
         It works in integers for block height
         It takes the range of values for displacement
@@ -85,11 +93,16 @@ public class ProceduralGenerator {
          */
         Random rand = new Random();
         isPositive = rand.nextBoolean(); //Does chunk slope up or down
+        List<Integer> inputList = new ArrayList<>();
 
         int endY = isPositive ? rand.nextInt(RANGE) + START_Y : START_Y - rand.nextInt(RANGE); //End Y location
+        if(chunkNumber == NUMBER_OF_CHUNKS) {
+            endY = 150;
+            isPositive = (START_Y - 150) < 0;
+        }
 
         //Main breakup of loop
-        List<Integer> inputList = new ArrayList<>();
+
         while (inputList.size() < CHUNK_SIZE) inputList.add(0); //Fills arraylist with 0s
         inputList.set(0, START_Y); //Adds starting height of chunk
         inputList.set(inputList.size() - 1, endY); //Adds ending height of chunk

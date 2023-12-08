@@ -139,7 +139,6 @@ public class GameController extends Scene {
             eventMessage.toFront();
             craftingMenu.toFront();
 
-
         }));
         gameTimeline.play();
 
