@@ -67,7 +67,6 @@ public class Camera {
             } else if (nextXIndex > 999) {
                 nextXIndex = 0;
             }
-            System.out.println(nextXIndex);
             Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, inventory); //takes a string for block type and X pos and Y pos
             block.setPos(512 + (xLocalOffset * 32) + xOffset,
                     (blockIndex - 1) * 32 + yOffset);

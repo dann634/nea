@@ -1,8 +1,10 @@
 package com.jackson.ui.hud;
 
 import com.jackson.game.items.Entity;
+import com.jackson.io.TextIO;
 import javafx.animation.Timeline;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -13,7 +15,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 
 public class CraftingMenu extends BorderPane {
     private final ScrollPane leftMenu;
@@ -31,7 +36,6 @@ public class CraftingMenu extends BorderPane {
         this.selectedItem = new Label("Crafting");
 
         this.craftingDirectory = new HashMap<>();
-        setUpCraftingDirectory();
 
         setTranslateX(2000);
         setTranslateY((544 / 2) - (425 / 2));
@@ -63,10 +67,8 @@ public class CraftingMenu extends BorderPane {
 
         //Add new item
         vBox.getChildren().addAll(getItemOption("wood_sword"));
-        vBox.getChildren().add(getItemOption("dirt"));
-        vBox.getChildren().add(getItemOption("grass"));
-        vBox.getChildren().add(getItemOption("stone"));
-        vBox.getChildren().add(getItemOption("wood"));
+        vBox.getChildren().addAll(getItemOption("stone_sword"));
+        vBox.getChildren().addAll(getItemOption("metal_pickaxe"));
     }
 
     private HBox getItemOption(String itemName) {
@@ -164,6 +166,26 @@ public class CraftingMenu extends BorderPane {
         AnchorPane pane = new AnchorPane();
 
         pane.getChildren().add(getRecipeIcon(item, (550 / 2) - 24, 0));
+        HBox recipeHbox = new HBox(40);
+        recipeHbox.setPrefWidth(530);
+        recipeHbox.setAlignment(Pos.CENTER);
+        recipeHbox.setStyle("-fx-border-style: solid;" +
+                "-fx-border-width: 1;");
+        recipeHbox.setTranslateY(120);
+        pane.getChildren().add(recipeHbox);
+
+        //Get item recipe
+        List<CraftingItem> recipe = getCraftingRecipe(item);
+        Pane startPush = new Pane();
+        HBox.setHgrow(startPush, Priority.ALWAYS);
+        recipeHbox.getChildren().add(startPush);
+        for (int i = 0; i < recipe.size(); i++) {
+            Pane pusher = new Pane();
+            HBox.setHgrow(pusher, Priority.ALWAYS);
+            recipeHbox.getChildren().addAll(getRecipeIcon(recipe.get(i).item, 0, 0), pusher);
+
+        }
+
 
         return pane;
     }
@@ -200,8 +222,31 @@ public class CraftingMenu extends BorderPane {
         }
     }
 
-    private void setUpCraftingDirectory() {
+    private List<CraftingItem> getCraftingRecipe(String item) {
+        String itemType;
+        if(item.contains("_")) {
+            itemType = item.split("_")[1];
+        } else {
+            itemType = item;
+        }
 
+        List<CraftingItem> recipe = new ArrayList<>();
+        List<String> data = TextIO.readFile("src/main/resources/settings/recipes.txt");
+        for(String line : data) {
+            String[] splitLine = line.split(" ");
+            if(itemType.equals(splitLine[0])) {
+                for (int i = 1; i < splitLine.length; i++) {
+                    CraftingItem craftingItem;
+                    if(splitLine[i].contains("ingot")) {
+                        craftingItem = new CraftingItem(item.split("_")[0], Integer.parseInt(String.valueOf(splitLine[i].charAt(0))));
+                    } else {
+                        craftingItem = new CraftingItem(splitLine[i].substring(1), Integer.parseInt(String.valueOf(splitLine[i].charAt(0))));
+                    }
+                    recipe.add(craftingItem);
+                }
+            }
+        }
+        return recipe;
     }
 
 }
