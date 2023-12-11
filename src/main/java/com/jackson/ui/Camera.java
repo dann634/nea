@@ -21,6 +21,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Camera {
@@ -211,8 +212,10 @@ public class Camera {
         // TODO: 19/11/2023 get from database in future
         Entity item;
         if(GameController.lookupTable.containsKey(itemName)) {
+
             item = new Block(itemName, character.getXPos(), character.getYPos(), this, inventory);
         } else {
+
             item = new Item(itemName, character.getTranslateX(), character.getTranslateY());
         }
         item.setTranslateX(x);
@@ -223,6 +226,7 @@ public class Camera {
         itemStack.addStackValue(amount);
         droppedBlocks.add(itemStack);
         root.getChildren().add(itemStack);
+        setBlockJustBroken(true);
     }
 
     //For breaking blocks
@@ -285,7 +289,7 @@ public class Camera {
                         if(zombie.takeDamage(playerDamage)) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
-                            spawnZombieDrop();
+                            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
 
                         }
                     }
@@ -296,11 +300,28 @@ public class Camera {
         });
     }
 
-    private void spawnZombieDrop() {
+    private void spawnZombieDrop(double x, double y) {
         character.addStrengthXP(5);
 
+        Random rand = new Random();
+        double spawnChance = rand.nextDouble();
+        if(spawnChance > 0.1) {
+            return; //10% chance to spawn
+        }
         //Random Chance
-
+        /*
+        Drop stick, plank, coal
+         */
+        double randomNumber = rand.nextDouble();
+        String drop;
+        if(randomNumber < 0.3) {
+            drop = "coal";
+        } else if(randomNumber >= 0.3 && randomNumber < 0.6) {
+            drop = "plank";
+        } else {
+            drop = "stick";
+        }
+        spawnItem(drop, 1, x, y);
     }
 
     //For collisions

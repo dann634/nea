@@ -13,4 +13,6 @@ public class Item extends Entity {
         super(itemName, x, y);
         this.isUsable = true;
     }
+
+
 }
