@@ -59,6 +59,14 @@ public class Block extends Entity {
     }
 
     private void initButtonPresses() {
+
+        setOnMouseEntered(e -> {
+            if(this.isDropped) {
+                return;
+            }
+            toFront();
+        });
+
         setOnMousePressed(e -> {
 
             if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null

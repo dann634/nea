@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 
 public class ItemStack extends Entity { //Child of Entity
-    private int durability;
     private SimpleIntegerProperty stackSize;
     private final int maxStackSize;
     private Label stackSizeLabel;
@@ -43,9 +42,6 @@ public class ItemStack extends Entity { //Child of Entity
 
 
     //Getters and Setters
-    public int getDurability() {
-        return durability;
-    }
 
     public int getStackSize() {
         return stackSize.get();

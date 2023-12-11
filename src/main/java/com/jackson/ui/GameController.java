@@ -75,7 +75,7 @@ public class GameController extends Scene {
 
         //HUD
         inventory = new Inventory();
-        craftingMenu = new CraftingMenu();
+        craftingMenu = new CraftingMenu(inventory.getItemArray());
         spawnCharacter();
         camera = new Camera(character, map, root, this, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());

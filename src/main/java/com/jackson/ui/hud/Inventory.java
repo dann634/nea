@@ -265,4 +265,8 @@ public class Inventory {
     public boolean isCellHovered() {
         return isCellHovered;
     }
+
+    public ItemStack[][] getItemArray() {
+        return itemArray;
+    }
 }

@@ -1,7 +1,7 @@
-sword 2ingot 1stick 1plank
+sword 2ingot 1stick
 axe 1ingot 2stick
 pickaxe 2ingot 2stick
 shovel 1ingot 2stick
 stick 1wood
-metal_ingot 1metal_ore 1coal
-plank 1log
+metal 1metal_ore 1coal
+plank 1wood
