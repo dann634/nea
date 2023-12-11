@@ -341,4 +341,24 @@ public class Inventory {
         addItem(craftedItem);
     }
 
+    public double getWeaponInHandDamage() {
+        if(getSelectedItemStack() == null) {
+            return 0;
+        }
+        String item = getSelectedItemStackName();
+        double multiplier = 1;
+        if(item.contains("wood")) {
+            multiplier = 1.4;
+        } else if(item.contains("stone")) {
+            multiplier = 1.6;
+        } else if(item.contains("metal")) {
+            multiplier = 2;
+        }
+        if(item.contains("sword")) return 20 * multiplier;
+        if(item.contains("pickaxe")) return 10 * multiplier;
+        if(item.contains("shovel")) return 8 * multiplier;
+        if(item.contains("axe")) return 15 * multiplier;
+        return 0;
+    }
+
 }

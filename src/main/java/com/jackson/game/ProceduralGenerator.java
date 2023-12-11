@@ -39,10 +39,6 @@ public class ProceduralGenerator {
         for (int i = 0; i < NUMBER_OF_CHUNKS; i++) {
             fullHeightMap.addAll(getHeightMapChunk(i+1)); //Adds chunks to height map until its 1000 in size
         }
-//
-//        for(int i : fullHeightMap) {
-//            System.out.print(i + " ");
-//        }
 
         String[][] heightMapArray = new String[WIDTH][HEIGHT];
         for (int i = 0; i < heightMapArray.length; i++) { //Loops through each X coordinate

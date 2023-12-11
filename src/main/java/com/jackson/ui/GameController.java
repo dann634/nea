@@ -25,7 +25,7 @@ import java.util.*;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.0;
+    private final double ZOMBIE_SPAWN_RATE = 0.01;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -97,8 +97,8 @@ public class GameController extends Scene {
         if(playerData.isEmpty()) {
             camera.sendToSpawn();
         } else {
-            character.setXPos(50); //Integer.parseInt(playerData.get(0))
-            character.setYPos(140); //Integer.parseInt(playerData.get(1))
+            character.setXPos(Integer.parseInt(playerData.get(0)));
+            character.setYPos(Integer.parseInt(playerData.get(1)));
             camera.addXOffset(Integer.parseInt(playerData.get(2)));
             camera.addYOffset(Integer.parseInt(playerData.get(3)));
             camera.initWorld();

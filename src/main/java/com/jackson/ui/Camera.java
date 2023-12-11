@@ -281,7 +281,8 @@ public class Camera {
                 for(Zombie zombie : zombies) {
                     if(character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
                         //Zombie touching weapon
-                        if(zombie.takeDamage((int)character.getAttackDamage())) { //Returns true if dead
+                        int playerDamage = (int) (character.getAttackDamage() + inventory.getWeaponInHandDamage());
+                        if(zombie.takeDamage(playerDamage)) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop();
