@@ -291,6 +291,8 @@ public class GameController extends Scene {
         lookupTable.put("4", "stone");
         lookupTable.put("5", "wood");
         lookupTable.put("6", "leaves");
+        lookupTable.put("7", "plank");
+
         lookupTable.put("air", "0");
         lookupTable.put("dirt", "1");
         lookupTable.put("grass", "2");
@@ -298,6 +300,7 @@ public class GameController extends Scene {
         lookupTable.put("stone", "4");
         lookupTable.put("wood", "5");
         lookupTable.put("leaves", "6");
+        lookupTable.put("plank", "7");
     }
 
     public Inventory getInventory() {

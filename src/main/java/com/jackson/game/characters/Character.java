@@ -161,15 +161,11 @@ public abstract class Character extends ImageView {
 
     private int[] getOffsets(String itemName) {
 
-        if(itemName.contains("axe") || itemName.contains("sword") || itemName.contains("shovel")) {
-            return new int[]{-62, -3, -25};
-        }
-
         if(GameController.lookupTable.containsKey(itemName) || itemName.equals("fist")) {
             return new int[]{-25, 9, 0};
         }
 
-        return new int[]{0, 0, 0};
+        return new int[]{-62, -3, -25};
     }
 
     public abstract void attack(Entity item);

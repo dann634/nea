@@ -128,12 +128,16 @@ public class CraftingMenu extends BorderPane {
         setBottom(bottomMenu);
         bottomMenu.setMinWidth(800);
         bottomMenu.setMinHeight(75);
-        bottomMenu.setStyle("-fx-background-color: blue;" +
+        bottomMenu.setStyle("-fx-background-color: grey;" +
                 "-fx-padding: 10;" +
-                "-fx-alignment: center-right;");
+                "-fx-alignment: center-right;" +
+                "-fx-border-width: 1;" +
+                "-fx-border-style:  solid none none none;");
 
 
         craftButton = new Button("Craft");
+        craftButton.setPrefWidth(100);
+        craftButton.setPrefHeight(30);
         craftButton.setDisable(true);
         craftButton.setOnAction(e -> {
             List<ItemStack> recipe = getCraftingRecipe(selectedItem.getText());
