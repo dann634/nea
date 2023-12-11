@@ -28,6 +28,7 @@ public class ItemStack extends Entity { //Child of Entity
         this.stackSize = new SimpleIntegerProperty(0); //Stack size starts at 0
         this.stackSizeLabel = new Label(); //Initialises Label
         this.stackSizeLabel.textProperty().bind(this.stackSize.asString()); //Binds label text to the stack size
+        this.stackSizeLabel.setMaxWidth(15);
         this.stackSizeLabel.setMouseTransparent(false);
         //Repositions Label in relation to image
         this.stackSizeLabel.setTranslateY(-10);

@@ -3,6 +3,7 @@ package com.jackson.ui.hud;
 import com.jackson.game.characters.Player;
 import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
+import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.image.Image;
@@ -269,4 +270,67 @@ public class Inventory {
     public ItemStack[][] getItemArray() {
         return itemArray;
     }
+
+    public boolean canCraft(List<ItemStack> recipe) {
+        if(recipe.isEmpty()) {
+            return false;
+        }
+
+
+        for(int i = 0; i < recipe.size(); i++) {
+            int amount = 0;
+            ItemStack item = recipe.get(i);
+            for (ItemStack[] itemStacks : itemArray) {
+                for (ItemStack targetItem : itemStacks) {
+                    if (targetItem == null) {
+                        continue;
+                    }
+                    if (targetItem.getItemName().equals(item.getItemName())) {
+                        amount += targetItem.getStackSize();
+                    }
+                }
+            }
+            if(amount < item.getStackSize()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void craft(String item, List<ItemStack> recipe) {
+        //Take items to craft
+        for(ItemStack itemStack : recipe) {
+            for (int i = 0; i < itemArray.length; i++) {
+                for (int j = 0; j < itemArray[i].length; j++) {
+                    ItemStack targetItem = itemArray[i][j];
+                    if(targetItem == null || itemStack.getStackSize() == 0) {
+                        continue;
+                    }
+                    if(targetItem.getItemName().equals(itemStack.getItemName())) {
+                        //Is same so take away
+                        if(targetItem.getStackSize() > itemStack.getStackSize()) {
+                            //More than enough
+                            targetItem.addStackValue(-itemStack.getStackSize());
+                            itemStack.addStackValue(-itemStack.getStackSize());
+                        } else if(targetItem.getStackSize() <= itemStack.getStackSize()) {
+                            //Will take all so needs to be removed from inventory
+                            //Not Enough
+                            itemStack.addStackValue(-targetItem.getStackSize());
+                            targetItem.addStackValue(-targetItem.getStackSize());
+
+                            inventoryArr[i][j].getChildren().remove(targetItem);
+                            itemArray[i][j] = null;
+                        }
+                    }
+                }
+            }
+        }
+
+        //Can craft so put item in inventory
+        ItemStack craftedItem = new ItemStack(new Entity(item));
+        craftedItem.addStackValue(1);
+        addItem(craftedItem);
+    }
+
 }

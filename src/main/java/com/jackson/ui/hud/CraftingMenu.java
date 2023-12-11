@@ -30,9 +30,9 @@ public class CraftingMenu extends BorderPane {
     private VBox recipeVbox;
     private Button craftButton;
     private final List<String> fileData;
-    private final ItemStack[][] inventory;
+    private final Inventory inventory;
 
-    public CraftingMenu(ItemStack[][] inventory) {
+    public CraftingMenu(Inventory inventory) {
         this.leftMenu = new ScrollPane();
         this.inventory = inventory;
         this.centerMenu = new VBox();
@@ -136,10 +136,11 @@ public class CraftingMenu extends BorderPane {
         craftButton = new Button("Craft");
         craftButton.setDisable(true);
         craftButton.setOnAction(e -> {
-            if(!canCraft(getCraftingRecipe(selectedItem.getText()))) {
+            List<ItemStack> recipe = getCraftingRecipe(selectedItem.getText());
+            if(!inventory.canCraft(recipe)) {
                 return;
             }
-            craft(selectedItem.getText());
+            inventory.craft(selectedItem.getText(), recipe);
         });
 
         Pane pusherPane = new Pane();
@@ -171,7 +172,7 @@ public class CraftingMenu extends BorderPane {
         craftButton.setDisable(false);
         recipeVbox.getChildren().clear();
         recipeVbox.getChildren().add(getRecipeTree(itemName));
-        craftButton.setDisable(!canCraft(getCraftingRecipe(itemName)));
+        craftButton.setDisable(!inventory.canCraft(getCraftingRecipe(itemName)));
     }
 
     private AnchorPane getRecipeTree(String item) {
@@ -247,35 +248,7 @@ public class CraftingMenu extends BorderPane {
         return recipe;
     }
 
-    private boolean canCraft(List<ItemStack> recipe) {
-        if(recipe.isEmpty()) {
-            return false;
-        }
 
 
-        for(int i = 0; i < recipe.size(); i++) {
-            int amount = 0;
-            ItemStack item = recipe.get(i);
-            for (ItemStack[] itemStacks : inventory) {
-                for (ItemStack targetItem : itemStacks) {
-                    if (targetItem == null) {
-                        continue;
-                    }
-                    if (targetItem.getItemName().equals(item.getItemName())) {
-                        amount += targetItem.getStackSize();
-                    }
-                }
-            }
-            if(amount < item.getStackSize()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void craft(String item) {
-        
-    }
 
 }
