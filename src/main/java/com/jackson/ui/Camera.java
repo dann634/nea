@@ -63,9 +63,9 @@ public class Camera {
         List<Block> line = new ArrayList<>();
         for (int i = character.getYPos() - RENDER_HEIGHT; i < character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
             if(nextXIndex < 0) {
-                nextXIndex = 299;
+                nextXIndex += 1000;
             } else if (nextXIndex > 999) {
-                nextXIndex = 0;
+                nextXIndex -= 1000;
             }
             Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, inventory); //takes a string for block type and X pos and Y pos
             block.setPos(512 + (xLocalOffset * 32) + xOffset,

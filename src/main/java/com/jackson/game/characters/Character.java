@@ -2,6 +2,7 @@ package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
 import com.jackson.io.TextIO;
+import com.jackson.ui.GameController;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -10,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class Character extends ImageView {
@@ -158,17 +160,15 @@ public abstract class Character extends ImageView {
     }
 
     private int[] getOffsets(String itemName) {
-        List<String> file = TextIO.readFile("src/main/resources/settings/offsets.txt");
-        for(String str : file) {
-            if(str.contains(itemName)) {
-                String[] splitLine = str.split(" ");
-                try {
-                    return new int[]{Integer.parseInt(splitLine[1]), Integer.parseInt(splitLine[2]), Integer.parseInt(splitLine[3])};
-                } catch (NumberFormatException e) {
-                    System.err.println("Error: Offsets failed to convert");
-                }
-            }
+
+        if(itemName.contains("axe") || itemName.contains("sword") || itemName.contains("shovel")) {
+            return new int[]{-62, -3, -25};
         }
+
+        if(GameController.lookupTable.containsKey(itemName) || itemName.equals("fist")) {
+            return new int[]{-25, 9, 0};
+        }
+
         return new int[]{0, 0, 0};
     }
 

@@ -5,6 +5,7 @@ import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
+import com.jackson.ui.GameController;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -328,7 +329,14 @@ public class Inventory {
         }
 
         //Can craft so put item in inventory
-        ItemStack craftedItem = new ItemStack(new Entity(item));
+        Entity entity;
+        if(GameController.lookupTable.containsKey(item)) {
+            entity = new Entity(item);
+        } else {
+            entity = new Item(item);
+        }
+
+        ItemStack craftedItem = new ItemStack(entity);
         craftedItem.addStackValue(1);
         addItem(craftedItem);
     }

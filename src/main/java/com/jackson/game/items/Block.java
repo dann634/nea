@@ -69,6 +69,8 @@ public class Block extends Entity {
 
         setOnMousePressed(e -> {
 
+            System.out.println(this.xPos);
+
             if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null
                     && this.inventory.getItemStackOnCursor() == null && !this.inventory.getSelectedItemStack().isUsable()) {
                 //Place block
@@ -80,13 +82,38 @@ public class Block extends Entity {
                 return;
             }
 
+            //Calculate Break Speed
+            double waitTime = 200; //Default break time
+            if(inventory.getSelectedItemStack() != null) {
+                String itemInHand = inventory.getSelectedItemStackName();
+//                System.out.println((itemInHand.contains("axe") && !itemInHand.contains("pickaxe") && itemName.equals("wood")));
+//                System.out.println((itemInHand.contains("pickaxe") && itemName.equals("stone")));
+//                System.out.println((itemInHand.contains("shovel") && (itemName.equals("dirt") || itemName.equals("grass"))));
+//                System.out.println("----");
+                if((itemInHand.contains("axe") && !itemInHand.contains("pickaxe") && itemName.equals("wood")) ||
+                        (itemInHand.contains("pickaxe") && itemName.equals("stone")) ||
+                        (itemInHand.contains("shovel") && (itemName.equals("dirt") || itemName.equals("grass")))) {
+
+                    if(itemInHand.contains("metal_")) {
+                        waitTime *= 0.4;
+                    } else if(itemInHand.contains("stone_") ) {
+                        waitTime *= 0.6;
+                    } else if(itemInHand.contains("wood_") ) {
+                        waitTime *= 0.8;
+                    }
+                }
+
+            }
+
+
+
             //Break block
             this.breakingTimeline = new Timeline();
             this.breakingTimeline.setCycleCount(4);
             KeyFrame breakingFrame = new KeyFrame(Duration.millis(50), m -> { //50
                 setOpacity(getOpacity() - 0.25);
             });
-            KeyFrame waitFrame = new KeyFrame(Duration.millis(200)); //200
+            KeyFrame waitFrame = new KeyFrame(Duration.millis(waitTime)); //200
             this.breakingTimeline.getKeyFrames().addAll(breakingFrame, waitFrame);
             this.breakingTimeline.play();
         });

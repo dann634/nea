@@ -97,8 +97,8 @@ public class GameController extends Scene {
         if(playerData.isEmpty()) {
             camera.sendToSpawn();
         } else {
-            character.setXPos(Integer.parseInt(playerData.get(0)));
-            character.setYPos(Integer.parseInt(playerData.get(1)));
+            character.setXPos(50); //Integer.parseInt(playerData.get(0))
+            character.setYPos(140); //Integer.parseInt(playerData.get(1))
             camera.addXOffset(Integer.parseInt(playerData.get(2)));
             camera.addYOffset(Integer.parseInt(playerData.get(3)));
             camera.initWorld();
