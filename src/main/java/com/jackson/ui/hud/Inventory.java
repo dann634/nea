@@ -98,8 +98,7 @@ public class Inventory {
         pane.getStyleClass().addAll("inventory", "darkBackground");
         //On Click Listener
         pane.setOnMouseClicked(e -> {
-            if((itemStackOnCursor == null && itemArray[row][col] == null)
-            || (itemStackOnCursor != null && itemArray[row][col] != null)) {
+            if((itemStackOnCursor == null && itemArray[row][col] == null)) {
                 //If no item in square and nothing on cursor
                 //If item in square and item on cursor
                 return;
@@ -112,6 +111,18 @@ public class Inventory {
                 inventoryArr[row][col].getChildren().add(itemArray[row][col]);
                 return;
             }
+
+            //Item on cursor and full square
+            //Swaps items
+            if(itemStackOnCursor != null && itemArray[row][col] != null) {
+                ItemStack tempItemStack = itemArray[row][col];
+                itemArray[row][col] = itemStackOnCursor;
+                inventoryArr[row][col].getChildren().set(0, itemArray[row][col]);
+                itemStackOnCursor = tempItemStack;
+                setItemOnCursor(itemStackOnCursor.getItemName());
+                return;
+            }
+
             //Picks up stack (takes block and puts on cursor)
             itemStackOnCursor = itemArray[row][col];
             setItemOnCursor(itemStackOnCursor.getItemName());

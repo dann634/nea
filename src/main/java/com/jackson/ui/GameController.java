@@ -130,7 +130,6 @@ public class GameController extends Scene {
                 inventory.addItem(itemStack);
             }
 
-
             camera.initWorld();
         }
 

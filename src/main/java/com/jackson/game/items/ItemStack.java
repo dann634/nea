@@ -6,7 +6,7 @@ import javafx.scene.control.Label;
 
 public class ItemStack extends Entity { //Child of Entity
     private SimpleIntegerProperty stackSize;
-    private final int maxStackSize;
+    private int maxStackSize;
     private Label stackSizeLabel;
 
 
@@ -17,7 +17,15 @@ public class ItemStack extends Entity { //Child of Entity
         this.isUsable = item.isUsable;
 
         initStackSize(); //Inits Label
-        this.maxStackSize = item instanceof Item ? 1 : 100; //Sets default max size to 100
+        if(item instanceof Item) {
+            if(itemName.contains("axe") || itemName.contains("shovel") || itemName.contains("sword")) {
+                maxStackSize = 1;
+            } else {
+                maxStackSize = 20;
+            }
+        } else {
+            maxStackSize = 100;
+        }
 
         //Adds label to vbox
         this.getChildren().add(this.stackSizeLabel);
