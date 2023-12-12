@@ -158,4 +158,43 @@ public class Player extends Character {
         }
         return super.takeDamage(amount);
     }
+
+    public int getStrengthLevel() {
+        return this.strengthLevel.get();
+    }
+
+    public int getAgilityLevel() {
+        return agilityLevel.get();
+    }
+
+    public int getDefenceLevel() {
+        return defenceLevel.get();
+    }
+
+    public int getAgilityXP() {
+        return agilityXP.get();
+    }
+
+    public int getStrengthXP() {
+        return strengthXP.get();
+    }
+
+    public int getDefenceXP() {
+        return defenceXP.get();
+    }
+
+    public void setStrength(int level, int xp) {
+        strengthLevel.set(level);
+        strengthXP.set(xp);
+    }
+
+    public void setAgility(int level, int xp) {
+        agilityLevel.set(level);
+        agilityXP.set(xp);
+    }
+
+    public void setDefence(int level, int xp) {
+        defenceLevel.set(level);
+        defenceXP.set(xp);
+    }
 }

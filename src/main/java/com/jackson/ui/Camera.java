@@ -458,6 +458,10 @@ public class Camera {
         data.add(String.valueOf(xOffset));
         data.add(String.valueOf(yOffset));
 
+        data.add(character.getStrengthLevel() + " " + character.getStrengthXP());
+        data.add(character.getAgilityLevel() + " " + character.getAgilityXP());
+        data.add(character.getDefenceLevel() + " " + character.getDefenceXP());
+
         //Inventory
         ItemStack[][] inv = inventory.getItemArray();
         for (int i = 0; i < 4; i++) {

@@ -105,9 +105,16 @@ public class GameController extends Scene {
             camera.addXOffset(Integer.parseInt(playerData.get(2)));
             camera.addYOffset(Integer.parseInt(playerData.get(3)));
 
+            String[] strength = playerData.get(4).split(" ");
+            String[] agility = playerData.get(5).split(" ");
+            String[] defence = playerData.get(6).split(" ");
+
+            character.setStrength(Integer.parseInt(strength[0]), Integer.parseInt(strength[1]));
+            character.setAgility(Integer.parseInt(agility[0]), Integer.parseInt(agility[1]));
+            character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
             //Load Inventory
 
-            for (int i = 4; i < playerData.size(); i++) {
+            for (int i = 9; i < playerData.size(); i++) {
                 String line = playerData.get(i);
                 if(line.equals("null")) continue;
 
