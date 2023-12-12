@@ -21,7 +21,6 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Camera {
@@ -56,9 +55,6 @@ public class Camera {
         checkAttackIntersect();
 
         spawnItem("wood_sword", 1, 500, 200);
-        spawnItem("stick", 1, 500, 200);
-        spawnItem("plank", 1, 500, 200);
-
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -67,9 +63,9 @@ public class Camera {
         List<Block> line = new ArrayList<>();
         for (int i = character.getYPos() - RENDER_HEIGHT; i < character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
             if(nextXIndex < 0) {
-                nextXIndex += 1000;
+                nextXIndex = 299;
             } else if (nextXIndex > 999) {
-                nextXIndex -= 1000;
+                nextXIndex = 0;
             }
             Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, inventory); //takes a string for block type and X pos and Y pos
             block.setPos(512 + (xLocalOffset * 32) + xOffset,
@@ -215,10 +211,8 @@ public class Camera {
         // TODO: 19/11/2023 get from database in future
         Entity item;
         if(GameController.lookupTable.containsKey(itemName)) {
-
             item = new Block(itemName, character.getXPos(), character.getYPos(), this, inventory);
         } else {
-
             item = new Item(itemName, character.getTranslateX(), character.getTranslateY());
         }
         item.setTranslateX(x);
@@ -229,7 +223,6 @@ public class Camera {
         itemStack.addStackValue(amount);
         droppedBlocks.add(itemStack);
         root.getChildren().add(itemStack);
-        setBlockJustBroken(true);
     }
 
     //For breaking blocks
@@ -288,11 +281,10 @@ public class Camera {
                 for(Zombie zombie : zombies) {
                     if(character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
                         //Zombie touching weapon
-                        int playerDamage = (int) (character.getAttackDamage() + inventory.getWeaponInHandDamage());
-                        if(zombie.takeDamage(playerDamage)) { //Returns true if dead
+                        if(zombie.takeDamage((int)character.getAttackDamage())) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
-                            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
+                            spawnZombieDrop();
 
                         }
                     }
@@ -303,28 +295,11 @@ public class Camera {
         });
     }
 
-    private void spawnZombieDrop(double x, double y) {
+    private void spawnZombieDrop() {
         character.addStrengthXP(5);
 
-        Random rand = new Random();
-        double spawnChance = rand.nextDouble();
-        if(spawnChance > 0.1) {
-            return; //10% chance to spawn
-        }
         //Random Chance
-        /*
-        Drop stick, plank, coal
-         */
-        double randomNumber = rand.nextDouble();
-        String drop;
-        if(randomNumber < 0.3) {
-            drop = "coal";
-        } else if(randomNumber >= 0.3 && randomNumber < 0.6) {
-            drop = "plank";
-        } else {
-            drop = "stick";
-        }
-        spawnItem(drop, 1, x, y);
+
     }
 
     //For collisions
@@ -482,6 +457,19 @@ public class Camera {
         data.add(String.valueOf(character.getYPos()));
         data.add(String.valueOf(xOffset));
         data.add(String.valueOf(yOffset));
+
+        //Inventory
+        ItemStack[][] inv = inventory.getItemArray();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 5; j++) {
+                if(inv[j][i] == null) {
+                    data.add("null");
+                }
+                else {
+                    data.add(inv[j][i].getItemName() + " " + inv[j][i].getStackSize());
+                }
+            }
+        }
         return data;
     }
 }

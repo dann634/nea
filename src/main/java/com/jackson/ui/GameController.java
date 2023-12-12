@@ -3,7 +3,10 @@ package com.jackson.ui;
 import com.jackson.game.MovementFactory;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
+import com.jackson.game.items.Block;
+import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
+import com.jackson.game.items.ItemStack;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.CraftingMenu;
@@ -25,7 +28,7 @@ import java.util.*;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.01;
+    private final double ZOMBIE_SPAWN_RATE = 0.0001;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -101,8 +104,30 @@ public class GameController extends Scene {
             character.setYPos(Integer.parseInt(playerData.get(1)));
             camera.addXOffset(Integer.parseInt(playerData.get(2)));
             camera.addYOffset(Integer.parseInt(playerData.get(3)));
+
+            //Load Inventory
+
+            for (int i = 4; i < playerData.size(); i++) {
+                String line = playerData.get(i);
+                if(line.equals("null")) continue;
+
+                String[] splitLine = line.split(" ");
+                Entity entity;
+                if(lookupTable.containsKey(splitLine[0])) {
+                    entity = new Block(splitLine[0], -1, -1, camera, inventory);
+                } else {
+                    entity = new Item(splitLine[0]);
+                }
+                ItemStack itemStack = new ItemStack(entity);
+                itemStack.addStackValue(Integer.parseInt(splitLine[1]));
+                inventory.addItem(itemStack);
+            }
+
+
             camera.initWorld();
         }
+
+
 
 
         setRoot(root);
@@ -138,6 +163,7 @@ public class GameController extends Scene {
             statMenu.toFront();
             eventMessage.toFront();
             craftingMenu.toFront();
+
 
         }));
         gameTimeline.play();
@@ -383,8 +409,7 @@ public class GameController extends Scene {
             timer.setOnFinished(e -> setVisible(false));
             setId("eventMessage");
 
-
-
+            setMouseTransparent(true);
 
             character.strengthLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);

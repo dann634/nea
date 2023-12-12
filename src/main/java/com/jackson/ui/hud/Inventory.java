@@ -98,8 +98,6 @@ public class Inventory {
         pane.getStyleClass().addAll("inventory", "darkBackground");
         //On Click Listener
         pane.setOnMouseClicked(e -> {
-
-
             if((itemStackOnCursor == null && itemArray[row][col] == null)
             || (itemStackOnCursor != null && itemArray[row][col] != null)) {
                 //If no item in square and nothing on cursor
