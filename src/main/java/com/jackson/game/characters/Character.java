@@ -22,9 +22,6 @@ public abstract class Character extends ImageView {
     protected Rectangle headCollision;
     protected Rectangle leftCollision;
     protected Rectangle rightCollision;
-    protected ImageView handImageView;
-    protected TranslateTransition attackTranslate;
-    private int[] currentItemOffsets;
     private final int BASE_ATTACK_DAMAGE = 30;
 
     public Character() {
@@ -32,22 +29,15 @@ public abstract class Character extends ImageView {
         setFitWidth(32);
         health = new SimpleDoubleProperty(100);
         isModelFacingRight = new SimpleBooleanProperty(true);
-        currentItemOffsets = new int[]{0, 0, 0};
 
         initFeetCollision();
         initBodyCollision();
-        initHandRectangle();
         initHeadCollision();
         setIdleImage();
 
 
         isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
-            attackTranslate.stop(); //Fixes Attack and Turn Bug
-            attackTranslate.setByX((newValue) ? 20 : -20);
-            handImageView.setTranslateX(newValue ? currentItemOffsets[1] : currentItemOffsets[0]);
-            handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
-            handImageView.setRotate((newValue) ? 45 : -45);
         });
 
     }
@@ -71,40 +61,9 @@ public abstract class Character extends ImageView {
         rightCollision = getBodyCollision(30);
     }
 
-    protected void initHandRectangle() {
-        handImageView = new ImageView();
-        handImageView.yProperty().bind(yProperty().add(5));
-        handImageView.xProperty().bind(xProperty());
-        handImageView.setRotate(45);
-        handImageView.setScaleY(0.3);
-        handImageView.setScaleX(0.3);
-        handImageView.setTranslateX(currentItemOffsets[1]);
-        handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
 
-        attackTranslate = new TranslateTransition();
-        attackTranslate.setNode(handImageView);
-        attackTranslate.setCycleCount(2);
-        attackTranslate.setAutoReverse(true);
-        attackTranslate.setRate(4);
-        attackTranslate.setByX(20);
 
-    }
 
-    public void updateBlockInHand(Entity item) {
-        String itemName;
-        if(item == null) {
-            itemName = "fist";
-        } else {
-            itemName = item.getItemName();
-        }
-        handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
-        handImageView.setVisible(true);
-        //Offsets
-
-        currentItemOffsets = getOffsets(itemName);
-        handImageView.setTranslateY(currentItemOffsets[2]);
-        handImageView.setTranslateX(isModelFacingRight.get() ? currentItemOffsets[1] : currentItemOffsets[0]);
-    }
 
     private Rectangle getBodyCollision(int offset) {
         Rectangle rectangle = new Rectangle(5, 45);
@@ -159,14 +118,7 @@ public abstract class Character extends ImageView {
         setImage(new Image("file:src/main/resources/images/" + getClass().getSimpleName() + "Run1.png"));
     }
 
-    private int[] getOffsets(String itemName) {
 
-        if(GameController.lookupTable.containsKey(itemName) || itemName.equals("fist")) {
-            return new int[]{-25, 9, 0};
-        }
-
-        return new int[]{-62, -3, -25};
-    }
 
     public abstract void attack(Entity item);
 
@@ -176,9 +128,6 @@ public abstract class Character extends ImageView {
         return health.get() <= 0;
     }
 
-    public TranslateTransition getAttackTranslate() {
-        return attackTranslate;
-    }
 
     public boolean isIsModelFacingRight() {
         return isModelFacingRight.get();

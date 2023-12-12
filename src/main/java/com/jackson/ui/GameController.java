@@ -13,6 +13,7 @@ import com.jackson.ui.hud.CraftingMenu;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
@@ -77,9 +78,10 @@ public class GameController extends Scene {
         jumpingEffects = new AudioPlayer("jump");
 
         //HUD
-        inventory = new Inventory();
+        SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
+        inventory = new Inventory(isHoldingGun);
         craftingMenu = new CraftingMenu(inventory);
-        spawnCharacter();
+        spawnCharacter(isHoldingGun);
         camera = new Camera(character, map, root, this, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
@@ -216,8 +218,8 @@ public class GameController extends Scene {
 
 
 
-    private void spawnCharacter() {
-        character = new Player();
+    private void spawnCharacter(SimpleBooleanProperty isHoldingGun) {
+        character = new Player(isHoldingGun);
 
         character.healthProperty().addListener((observableValue, number, t1) -> {
             if(t1.doubleValue() <= 0) {
@@ -230,7 +232,7 @@ public class GameController extends Scene {
             character.updateBlockInHand(inventory.getSelectedItemStack());
         });
 
-        root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
+        root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle(), character.getAimingLine());
         root.getChildren().addAll(character.getCollisions());
         character.toFront();
 
@@ -259,16 +261,15 @@ public class GameController extends Scene {
                         jumpingEffects.playFromBeginning();
                     }
 
-                    case I -> inventory.toggleInventory();
                     case DIGIT1 -> inventory.selectSlot(0);
                     case DIGIT2 -> inventory.selectSlot(1);
                     case DIGIT3 -> inventory.selectSlot(2);
                     case DIGIT4 -> inventory.selectSlot(3);
                     case DIGIT5 -> inventory.selectSlot(4);
+
+                    case I -> inventory.toggleInventory();
                     case K -> statMenu.toggleShown();
-                    case C -> {
-                        craftingMenu.toggleShown(gameTimeline);
-                    }
+                    case C -> craftingMenu.toggleShown(gameTimeline);
 
                     case ESCAPE -> {
                         if(gameTimeline.getStatus() != Animation.Status.PAUSED) {
@@ -297,6 +298,7 @@ public class GameController extends Scene {
         setOnMouseMoved(e -> {
             inventory.getItemOnCursor().setTranslateX(e.getSceneX() - 16);
             inventory.getItemOnCursor().setTranslateY(e.getSceneY() - 16);
+            character.updateAimingLine((int) e.getSceneX(), (int) e.getSceneY());
         });
 
         setOnMouseClicked(e -> {

@@ -6,7 +6,10 @@ import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.GameController;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -33,16 +36,26 @@ public class Inventory {
     private final ImageView itemOnCursor;
     private ItemStack itemStackOnCursor;
     private boolean isCellHovered;
+    private SimpleBooleanProperty isHoldingGun;
 
 // FIXME: 06/11/2023 when player drops block it will place if block in hand
 
-    public Inventory() {
+    public Inventory(SimpleBooleanProperty isHoldingGun) {
         //Initialises all fields
+        this.isHoldingGun = isHoldingGun;
         isCellHovered = false;
         isInventoryOpen = false;
         itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE]; //2D array of all items
         inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //2D Array of all anchor pane squares
         selectedSlotIndex = new SimpleIntegerProperty(0);
+        selectedSlotIndex.addListener((observableValue, number, t1) -> {
+            if(itemArray[t1.intValue()][0] != null && (itemArray[t1.intValue()][0].getItemName().equals("rifle")
+            || itemArray[t1.intValue()][0].getItemName().equals("pistol") || itemArray[t1.intValue()][0].getItemName().equals("sniper"))) {
+                isHoldingGun.set(true);
+                return;
+            }
+            isHoldingGun.set(false);
+        });
 
         initInventory(); //Initialises all inventory squares
 

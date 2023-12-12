@@ -3,14 +3,19 @@ package com.jackson.game.characters;
 import com.jackson.game.items.Entity;
 import com.jackson.io.TextIO;
 import com.jackson.ui.Camera;
+import com.jackson.ui.GameController;
 import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
@@ -23,19 +28,38 @@ public class Player extends Character {
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
+    private Line aimingLine;
+    private ImageView handImageView;
+    private SimpleBooleanProperty isHoldingGun;
+    private TranslateTransition attackTranslate;
     private final SimpleIntegerProperty agilityLevel;
     private final SimpleIntegerProperty strengthLevel;
     private final SimpleIntegerProperty defenceLevel;
     private final SimpleIntegerProperty agilityXP;
     private final SimpleIntegerProperty strengthXP;
     private final SimpleIntegerProperty defenceXP;
+    private int[] currentItemOffsets;
 
-    public Player() {
+
+    public Player(SimpleBooleanProperty isHoldingGun) {
         super();
         setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
         setY(180);
 
         initDisplayNameLabel();
+        this.aimingLine = initAimingLine();
+        currentItemOffsets = new int[]{0, 0, 0};
+
+        this.isHoldingGun = isHoldingGun;
+        aimingLine.visibleProperty().bind(isHoldingGun);
+        isHoldingGun.addListener((observableValue, aBoolean, t1) -> {
+            handImageView.setRotate(t1 ? 0 : isModelFacingRight.get() ? 45 : -45);
+            if(!handImageView.getImage().getUrl().contains("pistol")) {
+                handImageView.setScaleX(t1 ? 0.5 : 0.3);
+                handImageView.setScaleY(t1 ? 0.5 : 0.3);
+            }
+        });
+
 
         agilityLevel = new SimpleIntegerProperty(1);
         strengthLevel = new SimpleIntegerProperty(1);
@@ -44,6 +68,57 @@ public class Player extends Character {
         agilityXP = new SimpleIntegerProperty(0);
         strengthXP = new SimpleIntegerProperty(0);
         defenceXP = new SimpleIntegerProperty(0);
+
+        initHandRectangle();
+
+        isModelFacingRight.addListener((observable, oldValue, newValue) -> {
+            setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
+            attackTranslate.stop(); //Fixes Attack and Turn Bug
+            attackTranslate.setByX((newValue) ? 20 : -20);
+            handImageView.setTranslateX(newValue ? currentItemOffsets[1] : currentItemOffsets[0]);
+            handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
+            if(isHoldingGun.get()) {
+                handImageView.setRotate(0);
+            } else {
+                handImageView.setRotate((newValue) ? 45 : -45);
+            }
+        });
+    }
+
+    protected void initHandRectangle() {
+        // TODO: 12/12/2023 move this to player class
+        handImageView = new ImageView();
+        handImageView.yProperty().bind(yProperty().add(5));
+        handImageView.xProperty().bind(xProperty());
+        handImageView.setRotate(45);
+        handImageView.setScaleY(0.3);
+        handImageView.setScaleX(0.3);
+        handImageView.setTranslateX(currentItemOffsets[1]);
+        handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
+
+        attackTranslate = new TranslateTransition();
+        attackTranslate.setNode(handImageView);
+        attackTranslate.setCycleCount(2);
+        attackTranslate.setAutoReverse(true);
+        attackTranslate.setRate(4);
+        attackTranslate.setByX(20);
+
+    }
+
+    public void updateBlockInHand(Entity item) {
+        String itemName;
+        if(item == null) {
+            itemName = "fist";
+        } else {
+            itemName = item.getItemName();
+        }
+        handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
+        handImageView.setVisible(true);
+        //Offsets
+
+        currentItemOffsets = getOffsets(itemName);
+        handImageView.setTranslateY(currentItemOffsets[2]);
+        handImageView.setTranslateX(isModelFacingRight.get() ? currentItemOffsets[1] : currentItemOffsets[0]);
     }
 
     private void initDisplayNameLabel() {
@@ -52,6 +127,17 @@ public class Player extends Character {
         displayNameLabel.translateYProperty().bind(yProperty().subtract(15));
         displayNameLabel.setStyle("-fx-font-weight: bold");
         displayNameLabel.setVisible(false); // not for singleplayer
+    }
+
+    private Line initAimingLine() {
+        Line line = new Line();
+        line.setStroke(Color.RED);
+        line.setStrokeWidth(4);
+        line.setStartX(getX() + 16);
+        line.setStartY(getY() + 32);
+        line.setEndX(0);
+        line.setEndY(0);
+        return line;
     }
 
     public int getXPos() {
@@ -183,6 +269,19 @@ public class Player extends Character {
         return defenceXP.get();
     }
 
+    private int[] getOffsets(String itemName) {
+
+        if(GameController.lookupTable.containsKey(itemName) || itemName.equals("fist")) {
+            return new int[]{-25, 9, 0};
+        }
+
+        if(itemName.equals("rifle") || itemName.contains("sniper")) {
+            return new int[]{-50, -10, -5};
+        }
+
+        return new int[]{-62, -3, -25};
+    }
+
     public void setStrength(int level, int xp) {
         strengthLevel.set(level);
         strengthXP.set(xp);
@@ -197,4 +296,22 @@ public class Player extends Character {
         defenceLevel.set(level);
         defenceXP.set(xp);
     }
+
+    public Line getAimingLine() {
+        return aimingLine;
+    }
+
+    public void updateAimingLine(int x, int y) {
+        aimingLine.setEndX(x);
+        aimingLine.setEndY(y);
+    }
+
+    public TranslateTransition getAttackTranslate() {
+        return attackTranslate;
+    }
+
+    public void setHoldingGun(boolean value) {
+        isHoldingGun.set(value);
+    }
+
 }

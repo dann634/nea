@@ -55,6 +55,9 @@ public class Camera {
         checkAttackIntersect();
 
         spawnItem("wood_sword", 1, 500, 200);
+        spawnItem("rifle", 1, 500, 200);
+        spawnItem("sniper", 1, 500, 200);
+        spawnItem("pistol", 1, 500, 200);
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -476,4 +479,5 @@ public class Camera {
         }
         return data;
     }
+
 }
