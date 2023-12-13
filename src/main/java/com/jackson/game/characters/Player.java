@@ -19,6 +19,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
@@ -28,10 +29,11 @@ public class Player extends Character {
     private int xPos;
     private int yPos;
     private Label displayNameLabel;
-    private Line aimingLine;
+    private final Line aimingLine;
     private ImageView handImageView;
-    private SimpleBooleanProperty isHoldingGun;
+    private final SimpleBooleanProperty isHoldingGun;
     private TranslateTransition attackTranslate;
+    private final PauseTransition shootingPause;
     private final SimpleIntegerProperty agilityLevel;
     private final SimpleIntegerProperty strengthLevel;
     private final SimpleIntegerProperty defenceLevel;
@@ -54,10 +56,13 @@ public class Player extends Character {
         aimingLine.visibleProperty().bind(isHoldingGun);
         isHoldingGun.addListener((observableValue, aBoolean, t1) -> {
             handImageView.setRotate(t1 ? 0 : isModelFacingRight.get() ? 45 : -45);
-            if(!handImageView.getImage().getUrl().contains("pistol")) {
-                handImageView.setScaleX(t1 ? 0.5 : 0.3);
-                handImageView.setScaleY(t1 ? 0.5 : 0.3);
-            }
+            handImageView.setScaleX(t1 ? 0.5 : 0.3);
+            handImageView.setScaleY(t1 ? 0.5 : 0.3);
+        });
+
+        this.shootingPause = new PauseTransition();
+        shootingPause.setOnFinished(e -> {
+            aimingLine.setStroke(Color.RED);
         });
 
 
@@ -86,7 +91,6 @@ public class Player extends Character {
     }
 
     protected void initHandRectangle() {
-        // TODO: 12/12/2023 move this to player class
         handImageView = new ImageView();
         handImageView.yProperty().bind(yProperty().add(5));
         handImageView.xProperty().bind(xProperty());
@@ -112,6 +116,19 @@ public class Player extends Character {
         } else {
             itemName = item.getItemName();
         }
+
+        List<String> gunList = new ArrayList<>(List.of("rifle", "sniper", "pistol"));
+        if(item != null && gunList.contains(item.getItemName())) {
+            isHoldingGun.set(true);
+            gunList.remove(2);
+            if(!gunList.contains(item.getItemName())) {
+                handImageView.setScaleX(0.3);
+                handImageView.setScaleY(0.3);
+            }
+        } else {
+            isHoldingGun.set(false);
+        }
+
         handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
         handImageView.setVisible(true);
         //Offsets
@@ -178,7 +195,21 @@ public class Player extends Character {
 
     @Override
     public void attack(Entity item) {
-        if(item != null && !item.isUsable()) {
+        if(item != null && !item.isUsable() || shootingPause.getStatus() == Animation.Status.RUNNING) {
+            return;
+        }
+
+        if(isHoldingGun.get()) {
+            //Shoot gun
+            aimingLine.setStroke(Color.BLACK);
+            int cooldownTime = switch (item.getItemName()) {
+                case "pistol" -> 600;
+                case "rifle" -> 300;
+                case "sniper" -> 1500;
+                default -> Integer.MAX_VALUE;
+            };
+            shootingPause.setDuration(Duration.millis(cooldownTime));
+            shootingPause.play();
             return;
         }
         attackTranslate.play();
@@ -314,4 +345,7 @@ public class Player extends Character {
         isHoldingGun.set(value);
     }
 
+    public PauseTransition getShootingPause() {
+        return shootingPause;
+    }
 }

@@ -15,11 +15,8 @@ public class Item extends Entity {
     }
 
     private void fixGuns() {
-        if(itemName.equals("rifle") || itemName.equals("sniper") || itemName.equals("pistol")) {
+        if(itemName.equals("rifle") || itemName.equals("sniper")) {
             setSize(100);
-//            setWidth(50);
-//            imageView.setFitWidth(50);
-//            imageView.setPreserveRatio(true);
         }
     }
 

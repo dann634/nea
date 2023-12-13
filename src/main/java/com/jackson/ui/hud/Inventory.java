@@ -51,10 +51,10 @@ public class Inventory {
         selectedSlotIndex.addListener((observableValue, number, t1) -> {
             if(itemArray[t1.intValue()][0] != null && (itemArray[t1.intValue()][0].getItemName().equals("rifle")
             || itemArray[t1.intValue()][0].getItemName().equals("pistol") || itemArray[t1.intValue()][0].getItemName().equals("sniper"))) {
-                isHoldingGun.set(true);
+//                isHoldingGun.set(true);
                 return;
             }
-            isHoldingGun.set(false);
+//            isHoldingGun.set(false);
         });
 
         initInventory(); //Initialises all inventory squares
@@ -127,6 +127,7 @@ public class Inventory {
 
             //Item on cursor and full square
             //Swaps items
+            // TODO: 13/12/2023 swap item in hand
             if(itemStackOnCursor != null && itemArray[row][col] != null) {
                 ItemStack tempItemStack = itemArray[row][col];
                 itemArray[row][col] = itemStackOnCursor;
@@ -180,6 +181,7 @@ public class Inventory {
         }
         inventoryArr[index][0].setId("selected");
         selectedSlotIndex.set(index);
+
     }
 
     public boolean addItem(ItemStack itemStack) {
@@ -190,7 +192,7 @@ public class Inventory {
             if(index[0] == -1) { //No free slot
                 return false;
             }
-            //Is free slot and block doesnt already exist
+            //Is free slot and block doesn't already exist
             itemArray[index[0]][index[1]] = itemStack; //Update Backend
             //Resets itemstack for inventory
             itemStack.setPos((Inventory.SLOT_SIZE / 2) - (itemStack.getPrefWidth() / 2),

@@ -29,7 +29,7 @@ import java.util.*;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.0001;
+    private final double ZOMBIE_SPAWN_RATE = 0.01;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -50,6 +50,7 @@ public class GameController extends Scene {
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
+    private boolean isSpacePressed;
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
@@ -97,46 +98,7 @@ public class GameController extends Scene {
 
         blockDropped = false;
 
-        //Send character
-        List<String> playerData = TextIO.readFile("src/main/resources/saves/single_data.txt");
-        if(playerData.isEmpty()) {
-            camera.sendToSpawn();
-        } else {
-            character.setXPos(Integer.parseInt(playerData.get(0)));
-            character.setYPos(Integer.parseInt(playerData.get(1)));
-            camera.addXOffset(Integer.parseInt(playerData.get(2)));
-            camera.addYOffset(Integer.parseInt(playerData.get(3)));
-
-            String[] strength = playerData.get(4).split(" ");
-            String[] agility = playerData.get(5).split(" ");
-            String[] defence = playerData.get(6).split(" ");
-
-            character.setStrength(Integer.parseInt(strength[0]), Integer.parseInt(strength[1]));
-            character.setAgility(Integer.parseInt(agility[0]), Integer.parseInt(agility[1]));
-            character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
-            //Load Inventory
-
-            for (int i = 9; i < playerData.size(); i++) {
-                String line = playerData.get(i);
-                if(line.equals("null")) continue;
-
-                String[] splitLine = line.split(" ");
-                Entity entity;
-                if(lookupTable.containsKey(splitLine[0])) {
-                    entity = new Block(splitLine[0], -1, -1, camera, inventory);
-                } else {
-                    entity = new Item(splitLine[0]);
-                }
-                ItemStack itemStack = new ItemStack(entity);
-                itemStack.addStackValue(Integer.parseInt(splitLine[1]));
-                inventory.addItem(itemStack);
-            }
-
-            camera.initWorld();
-        }
-
-
-
+        loadSave();
 
         setRoot(root);
         root.setId("root");
@@ -156,6 +118,10 @@ public class GameController extends Scene {
             if(camera.isBlockJustBroken() || blockDropped) { //Check to save cpu
                 movementFactory.calculateDroppedBlockGravity(); //Block dropping
                 blockDropped = false;
+            }
+
+            if(isSpacePressed) {
+                character.attack(inventory.getSelectedItemStack());
             }
 
             camera.checkBlockPickup();
@@ -216,6 +182,44 @@ public class GameController extends Scene {
         zombies.addAll(pack);
     }
 
+    private void loadSave() {
+        List<String> playerData = TextIO.readFile("src/main/resources/saves/single_data.txt");
+        if(playerData.isEmpty()) {
+            camera.sendToSpawn();
+        } else {
+            character.setXPos(Integer.parseInt(playerData.get(0)));
+            character.setYPos(Integer.parseInt(playerData.get(1)));
+            camera.addXOffset(Integer.parseInt(playerData.get(2)));
+            camera.addYOffset(Integer.parseInt(playerData.get(3)));
+
+            String[] strength = playerData.get(4).split(" ");
+            String[] agility = playerData.get(5).split(" ");
+            String[] defence = playerData.get(6).split(" ");
+
+            character.setStrength(Integer.parseInt(strength[0]), Integer.parseInt(strength[1]));
+            character.setAgility(Integer.parseInt(agility[0]), Integer.parseInt(agility[1]));
+            character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
+            //Load Inventory
+
+            for (int i = 9; i < playerData.size(); i++) {
+                String line = playerData.get(i);
+                if(line.equals("null")) continue;
+
+                String[] splitLine = line.split(" ");
+                Entity entity;
+                if(lookupTable.containsKey(splitLine[0])) {
+                    entity = new Block(splitLine[0], -1, -1, camera, inventory);
+                } else {
+                    entity = new Item(splitLine[0]);
+                }
+                ItemStack itemStack = new ItemStack(entity);
+                itemStack.addStackValue(Integer.parseInt(splitLine[1]));
+                inventory.addItem(itemStack);
+            }
+
+            camera.initWorld();
+        }
+    }
 
 
     private void spawnCharacter(SimpleBooleanProperty isHoldingGun) {
@@ -276,10 +280,7 @@ public class GameController extends Scene {
                             root.getChildren().add(new PauseMenuController(false));
                         }
                     }
-                    case SPACE -> {
-                        //Attack
-                        character.attack(inventory.getSelectedItemStack());
-                    }
+                    case SPACE -> isSpacePressed = true;
                 }
             });
 
@@ -291,6 +292,7 @@ public class GameController extends Scene {
                     isWPressed = false;
                     jumpingEffects.pause();
                 }
+                case SPACE -> this.isSpacePressed = false;
 
             }
         });

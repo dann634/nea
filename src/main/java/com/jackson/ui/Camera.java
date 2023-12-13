@@ -9,6 +9,7 @@ import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.hud.Inventory;
+import javafx.animation.Animation;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -289,6 +290,24 @@ public class Camera {
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop();
 
+                        }
+                    }
+                }
+                root.getChildren().removeAll(zombieNodes);
+                zombies.removeAll(deadZombies);
+            }
+        });
+
+        character.getShootingPause().statusProperty().addListener((observableValue, status, t1) -> {
+            if(t1 == Animation.Status.RUNNING) {
+                List<Zombie> deadZombies = new ArrayList<>();
+                List<Node> zombieNodes = new ArrayList<>();
+                for(Zombie zombie : zombies) {
+                    if(character.getAimingLine().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) {
+                        if(zombie.takeDamage((int) character.getAttackDamage())) {
+                            deadZombies.add(zombie);
+                            zombieNodes.addAll(zombie.getNodes());
+                            spawnZombieDrop();
                         }
                     }
                 }
