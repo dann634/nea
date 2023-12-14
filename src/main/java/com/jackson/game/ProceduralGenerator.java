@@ -4,6 +4,9 @@ import com.jackson.io.TextIO;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,67 +20,81 @@ public class ProceduralGenerator {
     private static boolean isPositive;
     private static int START_Y = 150;
     private static final int RANGE = 30;
-    private static final int WIDTH = 1000; //Map Width
-    private static final int HEIGHT = 300; //Map Height
+    private static final int MAP_WIDTH = 1000; //Map Width
+    private static final int MAP_HEIGHT = 300; //Map Height
     private static final double TREE_SPAWN_CHANCE = 0.15; //On any grass block
     private static final double NUMBER_OF_CHUNKS = 10;
+    private static final String AIR_BLOCK = "0";
+    private static final String DIRT_BLOCK = "1";
+    private static final String GRASS_BLOCK = "2";
+    private static final String BEDROCK_BLOCK = "3";
+    private static final String STONE_BLOCK = "4";
+    private static final String WOOD_BLOCK = "5";
+    private static final String LEAVES_BLOCK = "6";
+    private static final Random random = new Random();
 
-    /*
-    0 - Air
-    1 - Dirt
-    2 - Grass
-    3 - Bedrock
-    4 - Stone
-    5 - Wood
-    6 - Leaves
-     */
 
-    //Creates the 2D array of numbers to indicate block type
-    public static void createMapFile(boolean isSingleplayer)  {
+
+    public static void createMapFile(boolean isSingleplayer) {
+        List<Integer> fullHeightMap = generateFullHeightMap();
+
+        String[][] heightMapArray = initializeHeightMapArray(fullHeightMap);
+
+        spawnTrees(fullHeightMap, heightMapArray);
+
+        saveMapToFile(heightMapArray, isSingleplayer);
+    }
+
+    private static List<Integer> generateFullHeightMap() {
         List<Integer> fullHeightMap = new ArrayList<>();
 
         for (int i = 0; i < NUMBER_OF_CHUNKS; i++) {
-            fullHeightMap.addAll(getHeightMapChunk(i+1)); //Adds chunks to height map until its 1000 in size
+            fullHeightMap.addAll(getHeightMapChunk(i + 1));
         }
 
-        String[][] heightMapArray = new String[WIDTH][HEIGHT];
-        for (int i = 0; i < heightMapArray.length; i++) { //Loops through each X coordinate
-            //Air blocks
-            for (int j = 0; j < fullHeightMap.get(i); j++) heightMapArray[i][j] = "0";
+        return fullHeightMap;
+    }
 
-            //Grass layer
-            heightMapArray[i][fullHeightMap.get(i)] = "2";
+    private static String[][] initializeHeightMapArray(List<Integer> fullHeightMap) {
+        String[][] heightMapArray = new String[MAP_WIDTH][MAP_HEIGHT];
 
-            try {
-                //Dirt Layer
-                for (int j = fullHeightMap.get(i)+1; j <= fullHeightMap.get(i)+21; j++) heightMapArray[i][j] = "1";
+        for (int i = 0; i < MAP_WIDTH; i++) {
+            int currentHeight = fullHeightMap.get(i);
 
-                //Stone layer
-                for (int j = fullHeightMap.get(i)+22; j <= HEIGHT - 2; j++) heightMapArray[i][j] = "4";
-            } catch (ArrayIndexOutOfBoundsException e) {
-
+            for (int j = 0; j < currentHeight; j++) {
+                heightMapArray[i][j] = AIR_BLOCK;
             }
 
-            //Bedrock layer
-            heightMapArray[i][HEIGHT-1] = "3";
+            heightMapArray[i][currentHeight] = GRASS_BLOCK;
+
+            try {
+                for (int j = currentHeight + 1; j <= currentHeight + 21; j++) {
+                    heightMapArray[i][j] = DIRT_BLOCK;
+                }
+
+                for (int j = currentHeight + 22; j <= MAP_HEIGHT - 2; j++) {
+                    heightMapArray[i][j] = STONE_BLOCK;
+                }
+            } catch (ArrayIndexOutOfBoundsException ignored) {
+            }
+
+            heightMapArray[i][MAP_HEIGHT - 1] = BEDROCK_BLOCK;
         }
-//        System.out.println();
-        spawnTrees(fullHeightMap, heightMapArray);
 
-                // FIXME: 01/12/2023 bedrock is overwritten
+        return heightMapArray;
+    }
 
-
-        //Add to file
+    private static void saveMapToFile(String[][] heightMapArray, boolean isSingleplayer) {
         String dir = "src/main/resources/saves/";
-        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt"; //Adds correct file name
+        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt";
+
         try {
-            new File(dir).createNewFile(); //Creates file
+            Files.createFile(Paths.get(dir));
         } catch (IOException e) {
-            System.err.println("Map file could not be created");
+            System.err.println("Map file could not be created: " + e.getMessage());
         }
 
-        TextIO.writeMap(heightMapArray, dir); //Writes 2D array to file
-
+        TextIO.writeMap(heightMapArray, dir);
     }
 
 
@@ -116,16 +133,12 @@ public class ProceduralGenerator {
         int offset = 0;
         if(upperbound - lowerbound != 0) { //Range cannot be 0
             //New offset is created from the difference of upper and lower bounds
-            offset = new Random().nextInt(Math.abs(upperbound - lowerbound));
+            offset = random.nextInt(Math.abs(upperbound - lowerbound));
         }
         int midpointY = isPositive ? offset + lowerbound : lowerbound - offset; //Adds offset depending on gradient
 
-        //Range check so array doesn't throw ArrayOutOfBoundsException
-        if(midpointY < 10) {
-            midpointY = 11;
-        } else if(midpointY > 290) {
-            midpointY = 289;
-        }
+        midpointY = Math.max(11, Math.min(midpointY, 289)); // Range check
+
         heights.set(midpoint, midpointY); //Adds new value to list
 
         if (!isHeightsFull(heights)) { //Checks if all values are full
@@ -151,7 +164,7 @@ public class ProceduralGenerator {
     private static void spawnTrees(List<Integer> heightMap, String[][] map) {
         Random rand = new Random();
         boolean treeProximityFlag = false; //Flag
-        for (int i = 0; i < WIDTH; i++) { //Runs entire length of map
+        for (int i = 0; i < MAP_WIDTH; i++) { //Runs entire length of map
             if(rand.nextDouble() < TREE_SPAWN_CHANCE && !treeProximityFlag) {
                 //Does random number fall within range and is there no tree next to this
                 treeProximityFlag = true; //Set true for next block
@@ -161,7 +174,7 @@ public class ProceduralGenerator {
                 int topOfTree = heightMap.get(i) - 1 - (int) rand.nextGaussian(5, 1);
                 for (int j = heightMap.get(i)-1; j > topOfTree; j--) { //Creates trunk
                     try {
-                        map[i][j] = "5"; //5 is code for wood
+                        map[i][j] = WOOD_BLOCK;
                     } catch (ArrayIndexOutOfBoundsException ignored) {}
                 }
 
@@ -170,7 +183,7 @@ public class ProceduralGenerator {
                 for (int j = topOfTree; j > topOfTree - 3; j--) {
                     for (int k = i - (length / 2); k < i + (length / 2) + 1; k++) {
                         try{
-                            map[k][j] = "6"; //6 is code for leaves
+                            map[k][j] = LEAVES_BLOCK;
                         } catch (ArrayIndexOutOfBoundsException ignored) {
                         }
                     }
@@ -184,11 +197,11 @@ public class ProceduralGenerator {
     }
 
     public static int getWidth() {
-        return WIDTH;
+        return MAP_WIDTH;
     }
 
     public static int getHeight() {
-        return HEIGHT;
+        return MAP_HEIGHT;
     }
 
 
