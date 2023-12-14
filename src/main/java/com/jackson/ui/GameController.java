@@ -16,11 +16,13 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
@@ -87,9 +89,10 @@ public class GameController extends Scene {
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
+        HBox ammoHbox = getAmmoHBox();
 
         root.getChildren().addAll(inventory.getInventoryVbox(), healthBar,
-                statMenu, inventory.getItemOnCursor(), eventMessage, craftingMenu);
+                statMenu, inventory.getItemOnCursor(), eventMessage, craftingMenu, ammoHbox);
 
         //Movement
         isAPressed = false;
@@ -137,6 +140,9 @@ public class GameController extends Scene {
             statMenu.toFront();
             eventMessage.toFront();
             craftingMenu.toFront();
+            ammoHbox.toFront();
+
+            // FIXME: 14/12/2023 maybe to block.toBack()
 
 
         }));
@@ -151,8 +157,7 @@ public class GameController extends Scene {
             return; //No spawn
         }
         //Spawn
-        int packSize = 1;
-                //(int) rand.nextGaussian(3, 1);
+        int packSize = (int) rand.nextGaussian(3, 1);
         int spawnTile = rand.nextInt(32) + 1;
 
         List<Zombie> pack = new ArrayList<>();
@@ -531,6 +536,28 @@ public class GameController extends Scene {
     public void saveGame() {
         TextIO.writeMap(camera.getMap() , "src/main/resources/saves/singleplayer.txt");
         TextIO.updateFile(camera.getPlayerData(), "src/main/resources/saves/single_data.txt");
+    }
+
+    private HBox getAmmoHBox() {
+        Label label = new Label("");
+        label.textProperty().bind(character.ammoProperty().asString());
+        label.setStyle("-fx-font-size: 24;" +
+                "-fx-font-weight: bold;" +
+                "-fx-alignment: center-right");
+
+        ImageView bullet = new ImageView("file:src/main/resources/images/bullet.png");
+        bullet.setFitWidth(32);
+        bullet.setFitHeight(32);
+        bullet.setPreserveRatio(true);
+
+        HBox hbox = new HBox(12);
+        hbox.getChildren().addAll(label, bullet);
+        hbox.visibleProperty().bind(character.isHoldingGunProperty());
+        hbox.setMouseTransparent(true);
+        hbox.setAlignment(Pos.CENTER_RIGHT);
+        hbox.setTranslateX(950);
+        hbox.setTranslateY(500);
+        return hbox;
     }
 
 

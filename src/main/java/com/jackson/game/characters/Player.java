@@ -42,6 +42,7 @@ public class Player extends Character {
     private final SimpleIntegerProperty defenceXP;
     private int[] currentItemOffsets;
     private String itemInHand;
+    private final SimpleIntegerProperty ammo;
 
 
     public Player(SimpleBooleanProperty isHoldingGun) {
@@ -52,6 +53,7 @@ public class Player extends Character {
         initDisplayNameLabel();
         this.aimingLine = initAimingLine();
         currentItemOffsets = new int[]{0, 0, 0};
+        this.ammo = new SimpleIntegerProperty(10);
 
         this.isHoldingGun = isHoldingGun;
         aimingLine.visibleProperty().bind(isHoldingGun);
@@ -207,7 +209,11 @@ public class Player extends Character {
         }
 
         if(isHoldingGun.get()) {
+            if(ammo.get() <= 0) {
+                return;
+            }
             //Shoot gun
+            ammo.set(ammo.get() - 1);
             aimingLine.setStroke(Color.BLACK);
             int cooldownTime = switch (item.getItemName()) {
                 case "pistol" -> 600;
@@ -379,5 +385,13 @@ public class Player extends Character {
 
     public PauseTransition getShootingPause() {
         return shootingPause;
+    }
+
+    public SimpleIntegerProperty ammoProperty() {
+        return ammo;
+    }
+
+    public SimpleBooleanProperty isHoldingGunProperty() {
+        return isHoldingGun;
     }
 }
