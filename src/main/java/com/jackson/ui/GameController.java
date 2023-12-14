@@ -3,13 +3,17 @@ package com.jackson.ui;
 import com.jackson.game.MovementFactory;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
+import com.jackson.game.items.Block;
+import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
+import com.jackson.game.items.ItemStack;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.ui.hud.CraftingMenu;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.*;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
@@ -46,6 +50,7 @@ public class GameController extends Scene {
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
+    private boolean isSpacePressed;
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
@@ -74,9 +79,10 @@ public class GameController extends Scene {
         jumpingEffects = new AudioPlayer("jump");
 
         //HUD
-        inventory = new Inventory();
+        SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
+        inventory = new Inventory(isHoldingGun);
         craftingMenu = new CraftingMenu(inventory);
-        spawnCharacter();
+        spawnCharacter(isHoldingGun);
         camera = new Camera(character, map, root, this, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
@@ -92,18 +98,7 @@ public class GameController extends Scene {
 
         blockDropped = false;
 
-        //Send character
-        List<String> playerData = TextIO.readFile("src/main/resources/saves/single_data.txt");
-        if(playerData.isEmpty()) {
-            camera.sendToSpawn();
-        } else {
-            character.setXPos(Integer.parseInt(playerData.get(0)));
-            character.setYPos(Integer.parseInt(playerData.get(1)));
-            camera.addXOffset(Integer.parseInt(playerData.get(2)));
-            camera.addYOffset(Integer.parseInt(playerData.get(3)));
-            camera.initWorld();
-        }
-
+        loadSave();
 
         setRoot(root);
         root.setId("root");
@@ -125,6 +120,10 @@ public class GameController extends Scene {
                 blockDropped = false;
             }
 
+            if(isSpacePressed) {
+                character.attack(inventory.getSelectedItemStack());
+            }
+
             camera.checkBlockPickup();
             camera.checkBlockBorder();
             spawnZombiePack();
@@ -138,6 +137,7 @@ public class GameController extends Scene {
             statMenu.toFront();
             eventMessage.toFront();
             craftingMenu.toFront();
+
 
         }));
         gameTimeline.play();
@@ -182,10 +182,48 @@ public class GameController extends Scene {
         zombies.addAll(pack);
     }
 
+    private void loadSave() {
+        List<String> playerData = TextIO.readFile("src/main/resources/saves/single_data.txt");
+        if(playerData.isEmpty()) {
+            camera.sendToSpawn();
+        } else {
+            character.setXPos(Integer.parseInt(playerData.get(0)));
+            character.setYPos(Integer.parseInt(playerData.get(1)));
+            camera.addXOffset(Integer.parseInt(playerData.get(2)));
+            camera.addYOffset(Integer.parseInt(playerData.get(3)));
+
+            String[] strength = playerData.get(4).split(" ");
+            String[] agility = playerData.get(5).split(" ");
+            String[] defence = playerData.get(6).split(" ");
+
+            character.setStrength(Integer.parseInt(strength[0]), Integer.parseInt(strength[1]));
+            character.setAgility(Integer.parseInt(agility[0]), Integer.parseInt(agility[1]));
+            character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
+            //Load Inventory
+
+            for (int i = 9; i < playerData.size(); i++) {
+                String line = playerData.get(i);
+                if(line.equals("null")) continue;
+
+                String[] splitLine = line.split(" ");
+                Entity entity;
+                if(lookupTable.containsKey(splitLine[0])) {
+                    entity = new Block(splitLine[0], -1, -1, camera, inventory);
+                } else {
+                    entity = new Item(splitLine[0]);
+                }
+                ItemStack itemStack = new ItemStack(entity);
+                itemStack.addStackValue(Integer.parseInt(splitLine[1]));
+                inventory.addItem(itemStack);
+            }
+
+            camera.initWorld();
+        }
+    }
 
 
-    private void spawnCharacter() {
-        character = new Player();
+    private void spawnCharacter(SimpleBooleanProperty isHoldingGun) {
+        character = new Player(isHoldingGun);
 
         character.healthProperty().addListener((observableValue, number, t1) -> {
             if(t1.doubleValue() <= 0) {
@@ -198,7 +236,7 @@ public class GameController extends Scene {
             character.updateBlockInHand(inventory.getSelectedItemStack());
         });
 
-        root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle());
+        root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle(), character.getAimingLine());
         root.getChildren().addAll(character.getCollisions());
         character.toFront();
 
@@ -227,26 +265,22 @@ public class GameController extends Scene {
                         jumpingEffects.playFromBeginning();
                     }
 
-                    case I -> inventory.toggleInventory();
                     case DIGIT1 -> inventory.selectSlot(0);
                     case DIGIT2 -> inventory.selectSlot(1);
                     case DIGIT3 -> inventory.selectSlot(2);
                     case DIGIT4 -> inventory.selectSlot(3);
                     case DIGIT5 -> inventory.selectSlot(4);
+
+                    case I -> inventory.toggleInventory();
                     case K -> statMenu.toggleShown();
-                    case C -> {
-                        craftingMenu.toggleShown(gameTimeline);
-                    }
+                    case C -> craftingMenu.toggleShown(gameTimeline);
 
                     case ESCAPE -> {
                         if(gameTimeline.getStatus() != Animation.Status.PAUSED) {
                             root.getChildren().add(new PauseMenuController(false));
                         }
                     }
-                    case SPACE -> {
-                        //Attack
-                        character.attack(inventory.getSelectedItemStack());
-                    }
+                    case SPACE -> isSpacePressed = true;
                 }
             });
 
@@ -258,6 +292,7 @@ public class GameController extends Scene {
                     isWPressed = false;
                     jumpingEffects.pause();
                 }
+                case SPACE -> this.isSpacePressed = false;
 
             }
         });
@@ -265,6 +300,7 @@ public class GameController extends Scene {
         setOnMouseMoved(e -> {
             inventory.getItemOnCursor().setTranslateX(e.getSceneX() - 16);
             inventory.getItemOnCursor().setTranslateY(e.getSceneY() - 16);
+            character.updateAimingLine((int) e.getSceneX(), (int) e.getSceneY());
         });
 
         setOnMouseClicked(e -> {
@@ -383,8 +419,7 @@ public class GameController extends Scene {
             timer.setOnFinished(e -> setVisible(false));
             setId("eventMessage");
 
-
-
+            setMouseTransparent(true);
 
             character.strengthLevelProperty().addListener((observableValue, number, t1) -> {
                 setVisible(true);

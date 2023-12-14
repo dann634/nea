@@ -6,7 +6,10 @@ import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.GameController;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -33,16 +36,26 @@ public class Inventory {
     private final ImageView itemOnCursor;
     private ItemStack itemStackOnCursor;
     private boolean isCellHovered;
+    private SimpleBooleanProperty isHoldingGun;
 
 // FIXME: 06/11/2023 when player drops block it will place if block in hand
 
-    public Inventory() {
+    public Inventory(SimpleBooleanProperty isHoldingGun) {
         //Initialises all fields
+        this.isHoldingGun = isHoldingGun;
         isCellHovered = false;
         isInventoryOpen = false;
         itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE]; //2D array of all items
         inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //2D Array of all anchor pane squares
         selectedSlotIndex = new SimpleIntegerProperty(0);
+        selectedSlotIndex.addListener((observableValue, number, t1) -> {
+            if(itemArray[t1.intValue()][0] != null && (itemArray[t1.intValue()][0].getItemName().equals("rifle")
+            || itemArray[t1.intValue()][0].getItemName().equals("pistol") || itemArray[t1.intValue()][0].getItemName().equals("sniper"))) {
+//                isHoldingGun.set(true);
+                return;
+            }
+//            isHoldingGun.set(false);
+        });
 
         initInventory(); //Initialises all inventory squares
 
@@ -98,10 +111,7 @@ public class Inventory {
         pane.getStyleClass().addAll("inventory", "darkBackground");
         //On Click Listener
         pane.setOnMouseClicked(e -> {
-
-
-            if((itemStackOnCursor == null && itemArray[row][col] == null)
-            || (itemStackOnCursor != null && itemArray[row][col] != null)) {
+            if((itemStackOnCursor == null && itemArray[row][col] == null)) {
                 //If no item in square and nothing on cursor
                 //If item in square and item on cursor
                 return;
@@ -114,6 +124,19 @@ public class Inventory {
                 inventoryArr[row][col].getChildren().add(itemArray[row][col]);
                 return;
             }
+
+            //Item on cursor and full square
+            //Swaps items
+            // TODO: 13/12/2023 swap item in hand
+            if(itemStackOnCursor != null && itemArray[row][col] != null) {
+                ItemStack tempItemStack = itemArray[row][col];
+                itemArray[row][col] = itemStackOnCursor;
+                inventoryArr[row][col].getChildren().set(0, itemArray[row][col]);
+                itemStackOnCursor = tempItemStack;
+                setItemOnCursor(itemStackOnCursor.getItemName());
+                return;
+            }
+
             //Picks up stack (takes block and puts on cursor)
             itemStackOnCursor = itemArray[row][col];
             setItemOnCursor(itemStackOnCursor.getItemName());
@@ -158,6 +181,7 @@ public class Inventory {
         }
         inventoryArr[index][0].setId("selected");
         selectedSlotIndex.set(index);
+
     }
 
     public boolean addItem(ItemStack itemStack) {
@@ -168,7 +192,7 @@ public class Inventory {
             if(index[0] == -1) { //No free slot
                 return false;
             }
-            //Is free slot and block doesnt already exist
+            //Is free slot and block doesn't already exist
             itemArray[index[0]][index[1]] = itemStack; //Update Backend
             //Resets itemstack for inventory
             itemStack.setPos((Inventory.SLOT_SIZE / 2) - (itemStack.getPrefWidth() / 2),
@@ -341,24 +365,6 @@ public class Inventory {
         addItem(craftedItem);
     }
 
-    public double getWeaponInHandDamage() {
-        if(getSelectedItemStack() == null) {
-            return 0;
-        }
-        String item = getSelectedItemStackName();
-        double multiplier = 1;
-        if(item.contains("wood")) {
-            multiplier = 1.4;
-        } else if(item.contains("stone")) {
-            multiplier = 1.6;
-        } else if(item.contains("metal")) {
-            multiplier = 2;
-        }
-        if(item.contains("sword")) return 20 * multiplier;
-        if(item.contains("pickaxe")) return 10 * multiplier;
-        if(item.contains("shovel")) return 8 * multiplier;
-        if(item.contains("axe")) return 15 * multiplier;
-        return 0;
-    }
+
 
 }

@@ -4,9 +4,12 @@ import com.jackson.ui.hud.Inventory;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemStack extends Entity { //Child of Entity
     private SimpleIntegerProperty stackSize;
-    private final int maxStackSize;
+    private int maxStackSize;
     private Label stackSizeLabel;
 
 
@@ -17,7 +20,16 @@ public class ItemStack extends Entity { //Child of Entity
         this.isUsable = item.isUsable;
 
         initStackSize(); //Inits Label
-        this.maxStackSize = 100; //Sets default max size to 100
+        if(item instanceof Item) {
+            if(itemName.contains("axe") || itemName.contains("shovel") || itemName.contains("sword")
+            || itemName.contains("pistol") || itemName.contains("rifle") || itemName.contains("sniper")) {
+                maxStackSize = 1;
+            } else {
+                maxStackSize = 20;
+            }
+        } else {
+            maxStackSize = 100;
+        }
 
         //Adds label to vbox
         this.getChildren().add(this.stackSizeLabel);
