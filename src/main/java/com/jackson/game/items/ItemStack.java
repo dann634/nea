@@ -4,6 +4,9 @@ import com.jackson.ui.hud.Inventory;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ItemStack extends Entity { //Child of Entity
     private SimpleIntegerProperty stackSize;
     private int maxStackSize;
@@ -18,7 +21,8 @@ public class ItemStack extends Entity { //Child of Entity
 
         initStackSize(); //Inits Label
         if(item instanceof Item) {
-            if(itemName.contains("axe") || itemName.contains("shovel") || itemName.contains("sword")) {
+            if(itemName.contains("axe") || itemName.contains("shovel") || itemName.contains("sword")
+            || itemName.contains("pistol") || itemName.contains("rifle") || itemName.contains("sniper")) {
                 maxStackSize = 1;
             } else {
                 maxStackSize = 20;

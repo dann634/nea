@@ -41,6 +41,7 @@ public class Player extends Character {
     private final SimpleIntegerProperty strengthXP;
     private final SimpleIntegerProperty defenceXP;
     private int[] currentItemOffsets;
+    private String itemInHand;
 
 
     public Player(SimpleBooleanProperty isHoldingGun) {
@@ -54,11 +55,6 @@ public class Player extends Character {
 
         this.isHoldingGun = isHoldingGun;
         aimingLine.visibleProperty().bind(isHoldingGun);
-        isHoldingGun.addListener((observableValue, aBoolean, t1) -> {
-            handImageView.setRotate(t1 ? 0 : isModelFacingRight.get() ? 45 : -45);
-            handImageView.setScaleX(t1 ? 0.5 : 0.3);
-            handImageView.setScaleY(t1 ? 0.5 : 0.3);
-        });
 
         this.shootingPause = new PauseTransition();
         shootingPause.setOnFinished(e -> {
@@ -116,17 +112,28 @@ public class Player extends Character {
         } else {
             itemName = item.getItemName();
         }
+        itemInHand = itemName;
 
         List<String> gunList = new ArrayList<>(List.of("rifle", "sniper", "pistol"));
         if(item != null && gunList.contains(item.getItemName())) {
             isHoldingGun.set(true);
             gunList.remove(2);
+
+            //Update for rifle and sniper
+            handImageView.setRotate(0);
+            handImageView.setScaleX(0.5);
+            handImageView.setScaleY(0.5);
             if(!gunList.contains(item.getItemName())) {
+                //Pistol
                 handImageView.setScaleX(0.3);
                 handImageView.setScaleY(0.3);
             }
         } else {
             isHoldingGun.set(false);
+            //Everything else
+            handImageView.setRotate(isModelFacingRight.get() ? 45 : -45);
+            handImageView.setScaleX(0.3);
+            handImageView.setScaleY(0.3);
         }
 
         handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
@@ -217,9 +224,34 @@ public class Player extends Character {
 
     @Override
     public double getAttackDamage() {
-        return super.getAttackDamage() + strengthLevel.get();
+        return super.getAttackDamage() + strengthLevel.get() + getWeaponInHandDamage();
     }
 
+
+    public double getWeaponInHandDamage() {
+        if(itemInHand.equals("fist")) {
+            return 0;
+        }
+
+        //Guns
+        if(itemInHand.equals("pistol")) return 10;
+        if(itemInHand.equals("rifle")) return 20;
+        if(itemInHand.equals("sniper")) return 50;
+
+        double multiplier = 1;
+        if(itemInHand.contains("wood")) {
+            multiplier = 1.4;
+        } else if(itemInHand.contains("stone")) {
+            multiplier = 1.6;
+        } else if(itemInHand.contains("metal")) {
+            multiplier = 2;
+        }
+        if(itemInHand.contains("sword")) return 20 * multiplier;
+        if(itemInHand.contains("pickaxe")) return 10 * multiplier;
+        if(itemInHand.contains("shovel")) return 8 * multiplier;
+        if(itemInHand.contains("axe")) return 15 * multiplier;
+        return 0;
+    }
     public void addStrengthXP(int amount) {
         strengthXP.set(strengthXP.get() + amount);
         if((50 * Math.pow(strengthLevel.get(), 1.5) < strengthXP.get())) {
