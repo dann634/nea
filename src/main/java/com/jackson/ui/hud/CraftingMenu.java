@@ -217,9 +217,16 @@ public class CraftingMenu extends BorderPane {
         imageView.setFitHeight(64);
         imageView.setFitWidth(64);
 
-        pane.getChildren().add(imageView);
-        pane.setTranslateX(x);
+        if(item.equals("bullet")) {
+            ItemStack itemStack = new ItemStack(new Item("bullet"));
+            itemStack.addStackValue(20);
+            itemStack.setSize(64);
+            pane.getChildren().add(itemStack);
+        } else {
+            pane.getChildren().add(imageView);
+        }
 
+        pane.setTranslateX(x);
         return pane;
     }
 

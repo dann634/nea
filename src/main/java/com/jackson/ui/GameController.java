@@ -82,14 +82,16 @@ public class GameController extends Scene {
 
         //HUD
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
-        inventory = new Inventory(isHoldingGun);
+        SimpleIntegerProperty ammo = new SimpleIntegerProperty(0);
+
+        inventory = new Inventory(isHoldingGun, ammo);
         craftingMenu = new CraftingMenu(inventory);
-        spawnCharacter(isHoldingGun);
+        spawnCharacter(isHoldingGun, ammo);
         camera = new Camera(character, map, root, this, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
-        HBox ammoHbox = getAmmoHBox();
+        HBox ammoHbox = getAmmoHBox(ammo);
 
         root.getChildren().addAll(inventory.getInventoryVbox(), healthBar,
                 statMenu, inventory.getItemOnCursor(), eventMessage, craftingMenu, ammoHbox);
@@ -206,7 +208,7 @@ public class GameController extends Scene {
             character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
             //Load Inventory
 
-            for (int i = 9; i < playerData.size(); i++) {
+            for (int i = 7; i < playerData.size(); i++) {
                 String line = playerData.get(i);
                 if(line.equals("null")) continue;
 
@@ -227,8 +229,8 @@ public class GameController extends Scene {
     }
 
 
-    private void spawnCharacter(SimpleBooleanProperty isHoldingGun) {
-        character = new Player(isHoldingGun);
+    private void spawnCharacter(SimpleBooleanProperty isHoldingGun, SimpleIntegerProperty ammo) {
+        character = new Player(isHoldingGun, ammo);
 
         character.healthProperty().addListener((observableValue, number, t1) -> {
             if(t1.doubleValue() <= 0) {
@@ -538,12 +540,13 @@ public class GameController extends Scene {
         TextIO.updateFile(camera.getPlayerData(), "src/main/resources/saves/single_data.txt");
     }
 
-    private HBox getAmmoHBox() {
+    private HBox getAmmoHBox(SimpleIntegerProperty ammo) {
         Label label = new Label("");
-        label.textProperty().bind(character.ammoProperty().asString());
+        label.textProperty().bind(ammo.asString());
         label.setStyle("-fx-font-size: 24;" +
                 "-fx-font-weight: bold;" +
-                "-fx-alignment: center-right");
+                "-fx-alignment: center-right;" +
+                "-fx-min-width: 50");
 
         ImageView bullet = new ImageView("file:src/main/resources/images/bullet.png");
         bullet.setFitWidth(32);
@@ -555,7 +558,7 @@ public class GameController extends Scene {
         hbox.visibleProperty().bind(character.isHoldingGunProperty());
         hbox.setMouseTransparent(true);
         hbox.setAlignment(Pos.CENTER_RIGHT);
-        hbox.setTranslateX(950);
+        hbox.setTranslateX(920);
         hbox.setTranslateY(500);
         return hbox;
     }

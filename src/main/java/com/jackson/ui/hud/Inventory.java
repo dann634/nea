@@ -37,25 +37,20 @@ public class Inventory {
     private ItemStack itemStackOnCursor;
     private boolean isCellHovered;
     private SimpleBooleanProperty isHoldingGun;
+    private SimpleIntegerProperty ammo;
 
 // FIXME: 06/11/2023 when player drops block it will place if block in hand
 
-    public Inventory(SimpleBooleanProperty isHoldingGun) {
+    public Inventory(SimpleBooleanProperty isHoldingGun, SimpleIntegerProperty ammo) {
         //Initialises all fields
         this.isHoldingGun = isHoldingGun;
+        this.ammo = ammo;
         isCellHovered = false;
         isInventoryOpen = false;
         itemArray = new ItemStack[HOTBAR_SIZE][INVENTORY_SIZE]; //2D array of all items
         inventoryArr = new AnchorPane[HOTBAR_SIZE][INVENTORY_SIZE]; //2D Array of all anchor pane squares
         selectedSlotIndex = new SimpleIntegerProperty(0);
-        selectedSlotIndex.addListener((observableValue, number, t1) -> {
-            if(itemArray[t1.intValue()][0] != null && (itemArray[t1.intValue()][0].getItemName().equals("rifle")
-            || itemArray[t1.intValue()][0].getItemName().equals("pistol") || itemArray[t1.intValue()][0].getItemName().equals("sniper"))) {
-//                isHoldingGun.set(true);
-                return;
-            }
-//            isHoldingGun.set(false);
-        });
+
 
         initInventory(); //Initialises all inventory squares
 
@@ -362,6 +357,10 @@ public class Inventory {
 
         ItemStack craftedItem = new ItemStack(entity);
         craftedItem.addStackValue(1);
+        if(item.equals("bullet")) {
+            ammo.set(ammo.get() + 20);
+            return;
+        }
         addItem(craftedItem);
     }
 

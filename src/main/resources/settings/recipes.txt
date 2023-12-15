@@ -5,3 +5,7 @@ shovel 1ingot 2stick
 stick 1wood
 metal 1metal_ore 1coal
 plank 1wood
+sniper 8metal
+rifle 6metal
+pistol 3metal
+bullet 1metal

@@ -45,7 +45,7 @@ public class Player extends Character {
     private final SimpleIntegerProperty ammo;
 
 
-    public Player(SimpleBooleanProperty isHoldingGun) {
+    public Player(SimpleBooleanProperty isHoldingGun, SimpleIntegerProperty ammo) {
         super();
         setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
         setY(180);
@@ -53,9 +53,9 @@ public class Player extends Character {
         initDisplayNameLabel();
         this.aimingLine = initAimingLine();
         currentItemOffsets = new int[]{0, 0, 0};
-        this.ammo = new SimpleIntegerProperty(10);
 
         this.isHoldingGun = isHoldingGun;
+        this.ammo = ammo;
         aimingLine.visibleProperty().bind(isHoldingGun);
 
         this.shootingPause = new PauseTransition();
@@ -385,10 +385,6 @@ public class Player extends Character {
 
     public PauseTransition getShootingPause() {
         return shootingPause;
-    }
-
-    public SimpleIntegerProperty ammoProperty() {
-        return ammo;
     }
 
     public SimpleBooleanProperty isHoldingGunProperty() {
