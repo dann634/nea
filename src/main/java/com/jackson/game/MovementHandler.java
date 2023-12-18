@@ -3,12 +3,10 @@ package com.jackson.game;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.ItemStack;
-import com.jackson.ui.AudioPlayer;
 import com.jackson.ui.Camera;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.geometry.NodeOrientation;
 import javafx.util.Duration;
 
@@ -19,7 +17,7 @@ import static com.jackson.ui.Camera.RENDER_WIDTH;
 import static java.lang.Math.abs;
 import static java.lang.Math.divideExact;
 
-public class MovementFactory {
+public class MovementHandler {
 
     private final Player character;
     private double jumpVelocity;
@@ -27,7 +25,7 @@ public class MovementFactory {
     private final Camera camera;
     private double oldX;
 
-    public MovementFactory(Player character, Camera camera) {
+    public MovementHandler(Player character, Camera camera) {
         this.character = character;
         this.camera = camera;
     }

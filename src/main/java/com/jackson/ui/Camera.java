@@ -55,10 +55,16 @@ public class Camera {
         backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
 
-        spawnItem("wood_sword", 1, 500, 200);
-        spawnItem("rifle", 1, 500, 200);
-        spawnItem("sniper", 1, 500, 200);
-        spawnItem("pistol", 1, 500, 200);
+//        spawnItem("wood_sword", 1, 500, 200);
+//        spawnItem("rifle", 1, 500, 200);
+//        spawnItem("sniper", 1, 500, 200);
+//        spawnItem("pistol", 1, 500, 200);
+//        spawnItem("metal_sword", 1, 500, 200);
+//        spawnItem("metal_pickaxe", 1, 500, 200);
+//        spawnItem("metal_axe", 1, 500, 200);
+//        spawnItem("metal_shovel", 1, 500, 200);
+
+
     }
 
     public List<Block> getVerticalLine(int xLocalOffset) {
@@ -211,7 +217,7 @@ public class Camera {
         cleanupEntities();
     }
 
-    private void spawnItem(String itemName, int amount, double x, double y) {
+    public void spawnItem(String itemName, int amount, double x, double y) {
         // TODO: 19/11/2023 get from database in future
         Entity item;
         if(GameController.lookupTable.containsKey(itemName)) {

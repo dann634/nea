@@ -23,6 +23,7 @@ public class ProceduralGenerator {
     private static final int MAP_WIDTH = 1000; //Map Width
     private static final int MAP_HEIGHT = 300; //Map Height
     private static final double TREE_SPAWN_CHANCE = 0.15; //On any grass block
+    private static final double ORE_SPAWN_CHANCE = 0.03; //On any stone block
     private static final double NUMBER_OF_CHUNKS = 10;
     private static final String AIR_BLOCK = "0";
     private static final String DIRT_BLOCK = "1";
@@ -31,29 +32,27 @@ public class ProceduralGenerator {
     private static final String STONE_BLOCK = "4";
     private static final String WOOD_BLOCK = "5";
     private static final String LEAVES_BLOCK = "6";
+    private static final String METAL_BLOCK = "8";
+    private static final String COAL_BLOCK = "9";
     private static final Random random = new Random();
 
 
 
     public static void createMapFile(boolean isSingleplayer) {
-        List<Integer> fullHeightMap = generateFullHeightMap();
-
-        String[][] heightMapArray = initializeHeightMapArray(fullHeightMap);
-
-        spawnTrees(fullHeightMap, heightMapArray);
-
-        saveMapToFile(heightMapArray, isSingleplayer);
-    }
-
-    private static List<Integer> generateFullHeightMap() {
         List<Integer> fullHeightMap = new ArrayList<>();
 
         for (int i = 0; i < NUMBER_OF_CHUNKS; i++) {
             fullHeightMap.addAll(getHeightMapChunk(i + 1));
         }
 
-        return fullHeightMap;
+        String[][] heightMapArray = initializeHeightMapArray(fullHeightMap);
+
+        spawnTrees(fullHeightMap, heightMapArray);
+        spawnOres(heightMapArray);
+
+        saveMapToFile(heightMapArray, isSingleplayer);
     }
+
 
     private static String[][] initializeHeightMapArray(List<Integer> fullHeightMap) {
         String[][] heightMapArray = new String[MAP_WIDTH][MAP_HEIGHT];
@@ -136,7 +135,6 @@ public class ProceduralGenerator {
             offset = random.nextInt(Math.abs(upperbound - lowerbound));
         }
         int midpointY = isPositive ? offset + lowerbound : lowerbound - offset; //Adds offset depending on gradient
-
         midpointY = Math.max(11, Math.min(midpointY, 289)); // Range check
 
         heights.set(midpoint, midpointY); //Adds new value to list
@@ -193,6 +191,22 @@ public class ProceduralGenerator {
                 continue;
             }
             treeProximityFlag = false;
+        }
+    }
+
+    private static void spawnOres(String[][] map) {
+        /*
+        Give each stone block a chance to be a metal or coal
+         */
+        for (int i = 0; i < MAP_WIDTH; i++) {
+            for (int j = 0; j < MAP_HEIGHT; j++) {
+                //Gatekeeping checks
+                if (!map[i][j].equals(STONE_BLOCK)) continue;
+                if (random.nextDouble() > ORE_SPAWN_CHANCE) continue;
+
+                map[i][j] = random.nextBoolean() ? METAL_BLOCK : COAL_BLOCK;
+
+            }
         }
     }
 

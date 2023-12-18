@@ -1,6 +1,6 @@
 package com.jackson.ui;
 
-import com.jackson.game.MovementFactory;
+import com.jackson.game.MovementHandler;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
@@ -31,7 +31,7 @@ import java.util.*;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.01;
+    private final double ZOMBIE_SPAWN_RATE = 0.00;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -40,7 +40,7 @@ public class GameController extends Scene {
     private final HealthBar healthBar;
     private final StatMenu statMenu;
     private final CraftingMenu craftingMenu;
-    private final MovementFactory movementFactory;
+    private final MovementHandler movementHandler;
     private final Camera camera;
     private final Timeline gameTimeline;
     private final AudioPlayer audioplayer;
@@ -111,17 +111,17 @@ public class GameController extends Scene {
 
         Main.getStage().setOnCloseRequest(e -> saveGame()); //Saves when red cross clicked
 
-        movementFactory = new MovementFactory(character,  camera);
+        movementHandler = new MovementHandler(character,  camera);
         gameTimeline = new Timeline();
         gameTimeline.setCycleCount(Animation.INDEFINITE);
         gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
 
-            movementFactory.calculateXProperties(isAPressed, isDPressed, character); //character X movement
-            movementFactory.calculateYProperties(isWPressed); //character y movement
-            movementFactory.calculateZombieMovement(zombies);
+            movementHandler.calculateXProperties(isAPressed, isDPressed, character); //character X movement
+            movementHandler.calculateYProperties(isWPressed); //character y movement
+            movementHandler.calculateZombieMovement(zombies);
 
             if(camera.isBlockJustBroken() || blockDropped) { //Check to save cpu
-                movementFactory.calculateDroppedBlockGravity(); //Block dropping
+                movementHandler.calculateDroppedBlockGravity(); //Block dropping
                 blockDropped = false;
             }
 
@@ -335,6 +335,8 @@ public class GameController extends Scene {
         lookupTable.put("5", "wood");
         lookupTable.put("6", "leaves");
         lookupTable.put("7", "plank");
+        lookupTable.put("8", "metal_ore");
+        lookupTable.put("9", "coal_ore");
 
         lookupTable.put("air", "0");
         lookupTable.put("dirt", "1");
@@ -344,6 +346,8 @@ public class GameController extends Scene {
         lookupTable.put("wood", "5");
         lookupTable.put("leaves", "6");
         lookupTable.put("plank", "7");
+        lookupTable.put("metal_ore", "8");
+        lookupTable.put("coal_ore", "9");
     }
 
     public Inventory getInventory() {
