@@ -302,11 +302,10 @@ public class Inventory {
             ItemStack item = recipe.get(i);
             for (ItemStack[] itemStacks : itemArray) {
                 for (ItemStack targetItem : itemStacks) {
-                    if (targetItem == null) {
-                        continue;
-                    }
+                    if (targetItem == null) continue;
+
                     if (targetItem.getItemName().equals(item.getItemName())) {
-                        amount += targetItem.getStackSize();
+                        amount = amount + targetItem.getStackSize();
                     }
                 }
             }

@@ -5,21 +5,15 @@ import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.io.TextIO;
 import javafx.animation.Timeline;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*;
-import javafx.scene.paint.ImagePattern;
-import javafx.scene.shape.Rectangle;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 
 public class CraftingMenu extends BorderPane {
@@ -92,7 +86,6 @@ public class CraftingMenu extends BorderPane {
         hBox.getStyleClass().add("craftingHbox");
 
         Entity icon = new Entity(itemName);
-        itemName.replace("_", " ");
 
         Label label = new Label(itemName);
         label.setStyle("-fx-text-fill: white;" +
@@ -145,6 +138,7 @@ public class CraftingMenu extends BorderPane {
                 return;
             }
             inventory.craft(selectedItem.getText(), recipe);
+            craftButton.setDisable(!inventory.canCraft(getCraftingRecipe(selectedItem.getText()))); //Disables if it cannot craft anymore
         });
 
         Pane pusherPane = new Pane();
@@ -182,7 +176,7 @@ public class CraftingMenu extends BorderPane {
     private AnchorPane getRecipeTree(String item) {
         AnchorPane pane = new AnchorPane();
 
-        pane.getChildren().add(getRecipeIcon(item, (550 / 2) - 42, 0));
+        pane.getChildren().add(getRecipeIcon(item));
         HBox recipeHbox = new HBox(40);
         recipeHbox.setPrefWidth(530);
         recipeHbox.setAlignment(Pos.CENTER);
@@ -209,7 +203,7 @@ public class CraftingMenu extends BorderPane {
         return pane;
     }
 
-    private Pane getRecipeIcon(String item, int x, int y) {
+    private Pane getRecipeIcon(String item) {
         Pane pane = new Pane();
 
         ImageView imageView = new ImageView(new Image("file:src/main/resources/images/" + item + ".png"));
@@ -226,12 +220,12 @@ public class CraftingMenu extends BorderPane {
             pane.getChildren().add(imageView);
         }
 
-        pane.setTranslateX(x);
+        pane.setTranslateX(233);
         return pane;
     }
 
 
-    private List<ItemStack> getCraftingRecipe(String item) {
+    private List<ItemStack> getCraftingRecipe(String item) { // FIXME: 19/12/2023 isnt given stack size
         String itemType;
         if(item.contains("_")) {
             itemType = item.split("_")[1];

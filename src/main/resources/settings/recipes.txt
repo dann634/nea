@@ -9,3 +9,4 @@ sniper 8metal
 rifle 6metal
 pistol 3metal
 bullet 1metal
+coal 1coal_ore

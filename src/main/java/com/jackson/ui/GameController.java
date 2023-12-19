@@ -56,6 +56,7 @@ public class GameController extends Scene {
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
+
     public GameController() {
         super(new VBox());
 
@@ -87,7 +88,7 @@ public class GameController extends Scene {
         inventory = new Inventory(isHoldingGun, ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, this, inventory, zombies);
+        camera = new Camera(character, map, root, inventory, zombies);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);

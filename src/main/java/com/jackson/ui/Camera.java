@@ -35,13 +35,14 @@ public class Camera {
     private List<List<Block>> blocks;
     private final List<ItemStack> droppedBlocks;
     private final List<Zombie> zombies;
-    private final GameController gameController;
     private final Inventory inventory;
     private int xOffset;
     private int yOffset;
     private final List<String> backgroundBlocks; //Blocks the player can walk through
 
-    public Camera(Player character, String[][] map, AnchorPane root, GameController gameController, Inventory inventory, List<Zombie> zombies) {
+    // TODO: 19/12/2023 LOAD IMAGES ONCE IN CONSTRUCTOR
+
+    public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies) {
         this.character = character;
         this.zombies = zombies;
         this.map = map;
@@ -50,7 +51,6 @@ public class Camera {
         yOffset = 0;
         droppedBlocks = new ArrayList<>();
         blockJustBroken = false;
-        this.gameController = gameController;
         this.inventory = inventory;
         backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
@@ -406,7 +406,7 @@ public class Camera {
             ItemStack itemStack = droppedBlocksIterator.next();
             if(character.intersects(itemStack.getBoundsInParent())) {
                 //Touching
-                if(!gameController.getInventory().addItem(itemStack)) {
+                if(!inventory.addItem(itemStack)) {
                     continue;
                 }
                 root.getChildren().remove(itemStack);
