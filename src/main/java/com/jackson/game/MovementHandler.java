@@ -232,7 +232,7 @@ public class MovementHandler {
 
 
         if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump and maybe acceleration == 0
-            zombie.setJumpAcceleration(-2.5);
+            zombie.setJumpAcceleration(-2.5 * zombie.JUMPING_POWER());
             zombie.setNeedsToJump(false);
             return;
 

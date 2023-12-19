@@ -8,6 +8,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.Image;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Zombie extends Character {
@@ -24,7 +25,7 @@ public class Zombie extends Character {
     private double jumpAcceleration;
     private double jumpVelocity;
     private boolean needsToJump;
-    private final ProgressBar healthBar;
+    protected final ProgressBar healthBar;
 
     public Zombie() {
         super();
@@ -80,6 +81,8 @@ public class Zombie extends Character {
         }
     }
 
+
+
     @Override
     public void attack(Entity item) {
         attackCooldown.play();
@@ -90,7 +93,7 @@ public class Zombie extends Character {
     }
 
     public List<Node> getNodes() { //More Optimised
-        return List.of(this, this.leftCollision, this.rightCollision, this.feetCollision, this.healthBar, this.headCollision);
+        return new ArrayList<>(List.of(this, this.leftCollision, this.rightCollision, this.feetCollision, this.healthBar, this.headCollision));
     }
 
     public double getJumpAcceleration() {
@@ -127,5 +130,9 @@ public class Zombie extends Character {
 
     public boolean canAttack() {
         return attackCooldown.getStatus() == Animation.Status.STOPPED;
+    }
+
+    public double JUMPING_POWER() {
+        return 1;
     }
 }

@@ -62,13 +62,14 @@ public class Camera {
         checkAttackIntersect();
 
 //        spawnItem("wood_sword", 1, 500, 200);
-//        spawnItem("rifle", 1, 500, 200);
-//        spawnItem("sniper", 1, 500, 200);
-//        spawnItem("pistol", 1, 500, 200);
-//        spawnItem("metal_sword", 1, 500, 200);
+        spawnItem("rifle", 1, 500, 200);
+        spawnItem("sniper", 1, 500, 200);
+        spawnItem("pistol", 1, 500, 200);
+        spawnItem("metal_sword", 1, 500, 200);
 //        spawnItem("metal_pickaxe", 1, 500, 200);
 //        spawnItem("metal_axe", 1, 500, 200);
 //        spawnItem("metal_shovel", 1, 500, 200);
+        spawnItem("metal", 10, 500, 200);
 
 
     }

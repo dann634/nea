@@ -1,6 +1,7 @@
 package com.jackson.ui;
 
 import com.jackson.game.MovementHandler;
+import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
@@ -34,7 +35,7 @@ import java.util.*;
 
 public class GameController extends Scene {
 
-    private double ZOMBIE_SPAWN_RATE = 0.001;
+    private double ZOMBIE_SPAWN_RATE;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -114,9 +115,10 @@ public class GameController extends Scene {
 
         loadSave();
 
+        spawnBoss();
 
         bloodMoonTimer = new PauseTransition();
-        bloodMoonTimer.setDuration(Duration.seconds(10));
+        bloodMoonTimer.setDuration(Duration.minutes(2));
         bloodMoonTimer.setOnFinished(e -> setBloodMoon(false));
         setBloodMoon(false);
 
@@ -202,6 +204,13 @@ public class GameController extends Scene {
         }
         root.getChildren().addAll(nodes);
         zombies.addAll(pack);
+    }
+
+    private void spawnBoss() {
+        Boss boss = new Boss();
+        root.getChildren().addAll(boss.getNodes());
+        boss.toFront();
+        zombies.add(boss);
     }
 
     private void loadSave() {
@@ -560,7 +569,7 @@ public class GameController extends Scene {
         root.setStyle("-fx-background-color: linear-gradient(to top," + backgroundColour + ");" +
                 "-fx-min-width: 1024;" +
                 "-fx-min-height: 544;");
-        ZOMBIE_SPAWN_RATE = value ? 0.003 : 0.001;
+        ZOMBIE_SPAWN_RATE = value ? 0.003 : 0.000;
         if(value) bloodMoonTimer.play();
     }
 
