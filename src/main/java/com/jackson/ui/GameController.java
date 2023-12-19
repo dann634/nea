@@ -25,13 +25,14 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.util.Duration;
 
 import java.util.*;
 
 public class GameController extends Scene {
 
-    private final double ZOMBIE_SPAWN_RATE = 0.00;
+    private double ZOMBIE_SPAWN_RATE = 0.001;
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
@@ -48,6 +49,7 @@ public class GameController extends Scene {
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
     private final Random rand;
+    private PauseTransition bloodMoonTimer;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
@@ -105,6 +107,12 @@ public class GameController extends Scene {
         blockDropped = false;
 
         loadSave();
+
+
+        bloodMoonTimer = new PauseTransition();
+        bloodMoonTimer.setDuration(Duration.seconds(10));
+        bloodMoonTimer.setOnFinished(e -> setBloodMoon(false));
+        setBloodMoon(true);
 
         setRoot(root);
         root.setId("root");
@@ -351,10 +359,6 @@ public class GameController extends Scene {
         lookupTable.put("coal_ore", "9");
     }
 
-    public Inventory getInventory() {
-        return inventory;
-    }
-
     private class PauseMenuController extends VBox {
         public PauseMenuController(boolean isDead) {
             String colour  = isDead ? "247, 45, 0" : "209, 222, 227";
@@ -543,6 +547,15 @@ public class GameController extends Scene {
     public void saveGame() {
         TextIO.writeMap(camera.getMap() , "src/main/resources/saves/singleplayer.txt");
         TextIO.updateFile(camera.getPlayerData(), "src/main/resources/saves/single_data.txt");
+    }
+
+    private void setBloodMoon(boolean value) {
+        String backgroundColour = value ? "red, indianred" : "whitesmoke, deepskyblue";
+        root.setStyle("-fx-background-color: linear-gradient(to top," + backgroundColour + ");" +
+                "-fx-min-width: 1024;" +
+                "-fx-min-height: 544;");
+        ZOMBIE_SPAWN_RATE = value ? 0.003 : 0.001;
+        if(value) bloodMoonTimer.play();
     }
 
     private HBox getAmmoHBox(SimpleIntegerProperty ammo) {
