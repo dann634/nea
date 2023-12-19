@@ -10,6 +10,7 @@ import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -22,6 +23,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Camera {
@@ -38,17 +40,21 @@ public class Camera {
     private final Inventory inventory;
     private int xOffset;
     private int yOffset;
+    private Random rand;
     private final List<String> backgroundBlocks; //Blocks the player can walk through
+    private final SimpleBooleanProperty isBloodMoonActive;
 
     // TODO: 19/12/2023 LOAD IMAGES ONCE IN CONSTRUCTOR
 
-    public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies) {
+    public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies, SimpleBooleanProperty isBloodMoonActive) {
+        this.rand = new Random();
         this.character = character;
         this.zombies = zombies;
         this.map = map;
         this.root = root;
         xOffset = 0;
         yOffset = 0;
+        this.isBloodMoonActive = isBloodMoonActive;
         droppedBlocks = new ArrayList<>();
         blockJustBroken = false;
         this.inventory = inventory;
@@ -295,7 +301,6 @@ public class Camera {
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop();
-
                         }
                     }
                 }
@@ -326,7 +331,10 @@ public class Camera {
     private void spawnZombieDrop() {
         character.addStrengthXP(5);
 
-        //Random Chance
+        //Random Chance to start blood moon
+        if(rand.nextDouble() < 0.01) {
+            isBloodMoonActive.set(true);
+        }
 
     }
 

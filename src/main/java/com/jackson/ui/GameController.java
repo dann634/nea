@@ -16,6 +16,8 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -50,6 +52,7 @@ public class GameController extends Scene {
     private final AudioPlayer jumpingEffects;
     private final Random rand;
     private PauseTransition bloodMoonTimer;
+    private SimpleBooleanProperty isBloodMoonActive;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
@@ -87,10 +90,13 @@ public class GameController extends Scene {
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
         SimpleIntegerProperty ammo = new SimpleIntegerProperty(0);
 
+        this.isBloodMoonActive = new SimpleBooleanProperty(false);
+        isBloodMoonActive.addListener((observableValue, aBoolean, t1) -> setBloodMoon(t1));
+
         inventory = new Inventory(isHoldingGun, ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, inventory, zombies);
+        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
@@ -112,7 +118,7 @@ public class GameController extends Scene {
         bloodMoonTimer = new PauseTransition();
         bloodMoonTimer.setDuration(Duration.seconds(10));
         bloodMoonTimer.setOnFinished(e -> setBloodMoon(false));
-        setBloodMoon(true);
+        setBloodMoon(false);
 
         setRoot(root);
         root.setId("root");
