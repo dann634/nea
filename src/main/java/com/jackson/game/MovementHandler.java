@@ -1,5 +1,6 @@
 package com.jackson.game;
 
+import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.ItemStack;
@@ -208,6 +209,11 @@ public class MovementHandler {
             return;
         }
 
+        //For boss
+        if(zombie instanceof Boss && ((Boss) zombie).isDoingAttack()) {
+            return;
+        }
+
         if(zombie.getJumpAcceleration() < 0) { //In Mid air jumping
             zombie.addJumpAcceleration(0.15); //To add the parabola
             if(zombie.getJumpVelocity() < 3 && zombie.getJumpVelocity() > -3) {
@@ -237,7 +243,7 @@ public class MovementHandler {
             return;
 
         }
-        zombie.addTranslateY(3); //Falling
+        zombie.addTranslateY(3 * zombie.JUMPING_POWER()); //Falling
     }
 
 

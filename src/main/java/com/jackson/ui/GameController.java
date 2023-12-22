@@ -208,6 +208,17 @@ public class GameController extends Scene {
 
     private void spawnBoss() {
         Boss boss = new Boss();
+        boss.translateXProperty().addListener((observableValue, number, t1) -> {
+            if(boss.canAttack()) {
+                boss.attack(new Item("fist"));
+            }
+        });
+
+        boss.translateYProperty().addListener((observableValue, number, t1) -> {
+            if(boss.canAttack()) {
+                boss.attack(new Item("fist"));
+            }
+        });
         root.getChildren().addAll(boss.getNodes());
         boss.toFront();
         zombies.add(boss);
@@ -484,9 +495,7 @@ public class GameController extends Scene {
 
             //Binds label and progress bar to health
             healthBar.progressProperty().bind(healthProperty.divide(100));
-            healthLabel.textProperty().bind(Bindings.format(new Locale("en", "uk")
-                    , "%.0f",
-                    healthProperty));
+            healthLabel.textProperty().bind(healthProperty.asString("%.0f"));
 
             setId("healthBox");
             healthBar.setId("healthBar");

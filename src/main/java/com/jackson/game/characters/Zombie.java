@@ -21,7 +21,7 @@ public class Zombie extends Character {
 
     public static final int SPEED = 1;
     private int xCounter;
-    private final PauseTransition attackCooldown;
+    protected final PauseTransition attackCooldown;
     private double jumpAcceleration;
     private double jumpVelocity;
     private boolean needsToJump;
