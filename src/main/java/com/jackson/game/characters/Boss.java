@@ -2,17 +2,24 @@ package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
 import com.jackson.ui.Camera;
-import javafx.animation.PauseTransition;
-import javafx.animation.TranslateTransition;
+import javafx.animation.*;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
+import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
 import java.util.List;
+import java.util.Random;
 
 public class Boss extends Zombie {
 
@@ -20,7 +27,8 @@ public class Boss extends Zombie {
     private final int DAMAGE = 30;
     private ImageView leftArm;
     private ImageView rightArm;
-    private boolean isDoingAttack;
+    private boolean canMove;
+    private boolean canJump;
     private final Camera camera;
 
     private final Image bossImage1 = new Image("file:src/main/resources/images/boss_body1.png");
@@ -33,7 +41,8 @@ public class Boss extends Zombie {
         setImage(bossImage1);
         setTranslateX(400);
         setTranslateY(200);
-        this.isDoingAttack = false;
+        this.canMove = true;
+        this.canJump = true;
 
         attackCooldown.setDuration(Duration.seconds(5));
 
@@ -51,7 +60,7 @@ public class Boss extends Zombie {
     @Override
     public void attack(Entity item) {
         super.attack(item);
-        jumpAttack();
+        rockAttack();
     }
 
     @Override
@@ -99,6 +108,7 @@ public class Boss extends Zombie {
 
         rightArm = new ImageView(arm);
         rightArm.translateXProperty().bind(translateXProperty().add(40));
+        rightArm.setRotate(45);
 
         setArms(15);
 
@@ -123,7 +133,8 @@ public class Boss extends Zombie {
         Goes to player location
         Falls
          */
-        isDoingAttack = true;
+
+        canJump = false;
         //Point arms to sky
         leftArm.setRotate(90);
         rightArm.setRotate(-90);
@@ -134,7 +145,7 @@ public class Boss extends Zombie {
         TranslateTransition jumpAnimation = new TranslateTransition();
         jumpAnimation.setNode(this);
         jumpAnimation.setDuration(Duration.seconds(animationValue));
-        jumpAnimation.setToY(-200);
+        jumpAnimation.setToY(-150); //-200
 
         jumpAnimation.setOnFinished(e -> {
             setTranslateX(484);
@@ -142,7 +153,7 @@ public class Boss extends Zombie {
             leftArm.setRotate(-90);
             rightArm.setRotate(90);
             setArms(45);
-            isDoingAttack = false;
+            canJump = true;
         });
         jumpAnimation.play();
 
@@ -154,7 +165,7 @@ public class Boss extends Zombie {
             leftArm.setRotate(-45);
             rightArm.setRotate(45);
             setArms(15);
-            camera.makeCrater(this); // TODO: 22/12/2023 fix this
+            camera.makeCrater(this.getTranslateX() + 33, 4, 2); // TODO: 22/12/2023 fix this
         });
         resetAnimation.play();
 
@@ -170,12 +181,10 @@ public class Boss extends Zombie {
     }
 
     private void rockAttack() {
-
+        camera.moveRock(getTranslateX() + 10, getTranslateY() + 20, getTranslateX() + (isModelFacingRight.get() ? 30 : -30), -100);
+        camera.setIsRainingRocks(true);
     }
 
-    public boolean isDoingAttack() {
-        return isDoingAttack;
-    }
 
     public ImageView getLeftArm() {
         return leftArm;
@@ -183,6 +192,14 @@ public class Boss extends Zombie {
 
     public ImageView getRightArm() {
         return rightArm;
+    }
+
+    public boolean isCanMove() {
+        return canMove;
+    }
+
+    public boolean isCanJump() {
+        return canJump;
     }
 
 

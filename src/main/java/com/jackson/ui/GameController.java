@@ -25,6 +25,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -39,6 +40,7 @@ public class GameController extends Scene {
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
+    private final List<Rock> rocks;
     public static HashMap<String, String> lookupTable;
     private final Inventory inventory;
     private final HealthBar healthBar;
@@ -54,6 +56,7 @@ public class GameController extends Scene {
     private final Random rand;
     private PauseTransition bloodMoonTimer;
     private SimpleBooleanProperty isBloodMoonActive;
+    private SimpleBooleanProperty isRainingRocks;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
@@ -72,6 +75,7 @@ public class GameController extends Scene {
 
         //Initialises fields
         zombies = new ArrayList<>();
+        rocks = new ArrayList<>();
         rand = new Random();
         String[][] map = TextIO.readMapFile(true);
         initLookupTable();
@@ -93,11 +97,12 @@ public class GameController extends Scene {
 
         this.isBloodMoonActive = new SimpleBooleanProperty(false);
         isBloodMoonActive.addListener((observableValue, aBoolean, t1) -> setBloodMoon(t1));
+        this.isRainingRocks = new SimpleBooleanProperty(false);
 
         inventory = new Inventory(isHoldingGun, ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive);
+        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
@@ -128,7 +133,7 @@ public class GameController extends Scene {
 
         Main.getStage().setOnCloseRequest(e -> saveGame()); //Saves when red cross clicked
 
-        movementHandler = new MovementHandler(character,  camera);
+        movementHandler = new MovementHandler(character, camera);
         gameTimeline = new Timeline();
         gameTimeline.setCycleCount(Animation.INDEFINITE);
         gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
@@ -568,6 +573,18 @@ public class GameController extends Scene {
         }
     }
 
+    private class Rock extends ImageView {
+        private double fallingSpeed;
+
+        public double getFallingSpeed() {
+            return fallingSpeed;
+        }
+
+        public void addSpeed(double value) {
+            fallingSpeed += value;
+        }
+    }
+
     public void saveGame() {
         TextIO.writeMap(camera.getMap() , "src/main/resources/saves/singleplayer.txt");
         TextIO.updateFile(camera.getPlayerData(), "src/main/resources/saves/single_data.txt");
@@ -604,6 +621,8 @@ public class GameController extends Scene {
         hbox.setTranslateY(500);
         return hbox;
     }
+
+
 
 
 

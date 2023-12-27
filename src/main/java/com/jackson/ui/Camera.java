@@ -11,14 +11,18 @@ import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
+import javafx.animation.PathTransition;
+import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.Shape;
+import javafx.scene.shape.*;
+import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -36,6 +40,7 @@ public class Camera {
     private final AnchorPane root;
     private boolean blockJustBroken;
     private List<List<Block>> blocks;
+    private List<ImageView> rocks;
     private final List<ItemStack> droppedBlocks;
     private final List<Zombie> zombies;
     private final Inventory inventory;
@@ -44,19 +49,25 @@ public class Camera {
     private Random rand;
     private final List<String> backgroundBlocks; //Blocks the player can walk through
     private final SimpleBooleanProperty isBloodMoonActive;
+    private ImageView rock;
+    private final Image rockImage = new Image("file:src/main/resources/images/rock.png");
+    private final SimpleBooleanProperty isRainingRocks;
 
     // TODO: 19/12/2023 LOAD IMAGES ONCE IN CONSTRUCTOR
 
-    public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies, SimpleBooleanProperty isBloodMoonActive) {
+    public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies,
+                  SimpleBooleanProperty isBloodMoonActive, SimpleBooleanProperty isRainingRocks) {
         this.rand = new Random();
         this.character = character;
         this.zombies = zombies;
         this.map = map;
         this.root = root;
+        this.rock = initRock();
         xOffset = 0;
         yOffset = 0;
         this.isBloodMoonActive = isBloodMoonActive;
         droppedBlocks = new ArrayList<>();
+        rocks = new ArrayList<>();
         blockJustBroken = false;
         this.inventory = inventory;
         backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
@@ -71,6 +82,15 @@ public class Camera {
 //        spawnItem("metal_axe", 1, 500, 200);
 //        spawnItem("metal_shovel", 1, 500, 200);
 //        spawnItem("metal", 10, 500, 200);
+
+        this.isRainingRocks = isRainingRocks;
+        isRainingRocks.addListener((observableValue, aBoolean, t1) -> {
+            if(!this.isRainingRocks.get()) return;
+            for (int i = 0; i < 5; i++) {
+                spawnFallingRock();
+            }
+            isRainingRocks.set(false);
+        });
 
 
     }
@@ -164,6 +184,10 @@ public class Camera {
         for(Zombie zombie : zombies) {
             zombie.addTranslateX(offset);
         }
+        rock.setTranslateX(rock.getTranslateX() + offset);
+        for(ImageView rock1 : rocks) {
+            rock1.setTranslateX(rock1.getTranslateX() + offset);
+        }
 
     }
 
@@ -180,6 +204,10 @@ public class Camera {
 
         for(Zombie zombie : zombies) {
             zombie.addTranslateY(offset);
+        }
+        rock.setTranslateY(rock.getTranslateY() + offset);
+        for(ImageView rock1 : rocks) {
+            rock1.setTranslateY(rock1.getTranslateY() + offset);
         }
     }
 
@@ -245,6 +273,7 @@ public class Camera {
 
     //For breaking blocks
     public void removeBlock(Block remBlock) { //Remove block and replaces with air block
+        if(remBlock.getItemName().equals("air") || remBlock.getItemName().equals("bedrock")) return;
         int[] index = new int[2];
         Block newBlock = new Block("air", -1, -1, this, inventory);
         for(int j = 0; j < blocks.size(); j++) {
@@ -528,15 +557,14 @@ public class Camera {
         return data;
     }
 
-    public void makeCrater(Boss boss) {
-        double bossMidpoint = boss.getTranslateX() + 33;
+    public void makeCrater(double x, int length, int depth) {
 
         //Find grass block
         Block block = null;
         for (int i = 0; i < blocks.size() - 1; i++) {
             Block b = blocks.get(i).get(0);
             Block nextB = blocks.get(i + 1).get(0);
-            if (bossMidpoint > b.getTranslateX() && bossMidpoint < nextB.getTranslateX()) {
+            if (x > b.getTranslateX() && x < nextB.getTranslateX()) {
                 for (int j = 0; j < blocks.get(i).size(); j++) {
                     if (!backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
                         block = blocks.get(i).get(j);
@@ -547,22 +575,88 @@ public class Camera {
         }
             if(block == null) return;
 
-            int length = 4;
-            int depth = 2;
             for (int j = block.getYPos(); j < block.getYPos() + depth; j++) {
                 for (int k = block.getXPos() - (length / 2); k < block.getXPos() + (length / 2) + 1; k++) {
                     removeBlock(k, j);
                 }
                 length--; //Must decrement for cone shape
             }
-
-
-
-
-
-
+            this.blockJustBroken = true;
     }
 
+    public void addNode(Node node) {
+        this.root.getChildren().add(node);
+    }
+
+    public void setIsRainingRocks(boolean isRainingRocks) {
+        this.isRainingRocks.set(isRainingRocks);
+    }
+
+    public void moveRock(double startX, double startY, double endX, double endY) {
+
+        //Move Rock
+        root.getChildren().add(rock);
+
+        //Path
+        Path path = new Path();
+        path.getElements().add(new MoveTo(startX, startY));
+        path.getElements().add(new LineTo(endX, endY));
+
+        //Animation
+        PathTransition pathTransition = new PathTransition();
+        pathTransition.setPath(path);
+        pathTransition.setNode(rock);
+        pathTransition.setDuration(Duration.millis(750));
+        pathTransition.setOnFinished(e -> {
+
+            root.getChildren().remove(rock);
+        });
+        pathTransition.play();
+    }
+    private ImageView initRock() {
+        ImageView rock = new ImageView(rockImage);
+        rock.setFitWidth(40);
+        rock.setPreserveRatio(true);
+        return rock;
+    }
+
+    private void spawnFallingRock() {
+        double spawnX = rand.nextDouble(1000);
+        ImageView rock = new ImageView(rockImage);
+        rock.setFitWidth(40);
+        rock.setPreserveRatio(true);
+        rocks.add(rock);
+
+        rock.setTranslateX(spawnX);
+        rock.setTranslateY(-100);
+
+        //Find target y
+        double y = 0;
+        for (int i = 0; i < blocks.size() - 1; i++) {
+            if(spawnX > blocks.get(i).get(0).getTranslateX() && spawnX < blocks.get(i+1).get(0).getTranslateX()) {
+                for (int j = 0; j < blocks.get(i).size(); j++) {
+                    if(!backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
+                        y = blocks.get(i).get(j).getTranslateY();
+                        break;
+                    }
+                }
+            }
+        }
+
+        TranslateTransition fallingAnimation = new TranslateTransition();
+        fallingAnimation.setNode(rock);
+        fallingAnimation.setDuration(Duration.millis(2000));
+        fallingAnimation.setToY(y-30); //-30 for height of rock
+        fallingAnimation.play();
+        fallingAnimation.setOnFinished(e -> {
+            rocks.remove(rock);
+            root.getChildren().remove(rock);
+            makeCrater(rock.getTranslateX(), 1, 1); //Change for nukes
+        });
+
+        root.getChildren().add(rock);
+
+    }
 
 
 }
