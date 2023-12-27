@@ -1,6 +1,7 @@
 package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
+import com.jackson.ui.Camera;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.NodeOrientation;
@@ -18,12 +19,14 @@ public class Boss extends Zombie {
     private ImageView leftArm;
     private ImageView rightArm;
     private boolean isDoingAttack;
+    private final Camera camera;
 
     private final Image bossImage1 = new Image("file:src/main/resources/images/boss_body1.png");
     private final Image bossImage2 = new Image("file:src/main/resources/images/boss_body2.png");
 
-    public Boss() {
+    public Boss(Camera camera) {
         super();
+        this.camera = camera;
         health.set(HEALTH);
         setImage(bossImage1);
         setTranslateX(400);
@@ -152,7 +155,9 @@ public class Boss extends Zombie {
         });
         resetAnimation.play();
 
-        //Make crator
+        //Make crater
+        camera.makeCrater(this); // TODO: 22/12/2023 fix this
+        // TODO: 22/12/2023 need to find block that intersects
 
     }
 

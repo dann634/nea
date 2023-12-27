@@ -1,6 +1,7 @@
 package com.jackson.ui;
 
 import com.jackson.game.ProceduralGenerator;
+import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Character;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
@@ -267,6 +268,18 @@ public class Camera {
         map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
     }
 
+    public void removeBlock(int xPos, int yPos) {
+        for (List<Block> blocks : blocks) {
+            for (Block block : blocks) {
+                if(block.getXPos() == xPos && block.getY() == yPos) {
+                    removeBlock(block);
+                }
+            }
+        }
+    }
+
+
+
     //For Placing Blocks
     public void placeBlock(Block block) { // TODO: 04/11/2023 doesnt update map file
 
@@ -513,5 +526,18 @@ public class Camera {
         }
         return data;
     }
+
+    public void makeCrater(Boss boss) {
+
+        int length = 0;
+        for (int i = 0; i < 2; i++) {
+            for (int j = xPos - 2 + length; j < xPos + 2 + length; j++) {
+                removeBlock(xPos, yPos);
+            }
+            length--;
+        }
+    }
+
+
 
 }
