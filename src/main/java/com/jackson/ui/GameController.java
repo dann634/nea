@@ -207,7 +207,7 @@ public class GameController extends Scene {
     }
 
     private void spawnBoss() {
-        Boss boss = new Boss();
+        Boss boss = new Boss(camera);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));

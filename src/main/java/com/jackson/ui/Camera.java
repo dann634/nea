@@ -271,7 +271,7 @@ public class Camera {
     public void removeBlock(int xPos, int yPos) {
         for (List<Block> blocks : blocks) {
             for (Block block : blocks) {
-                if(block.getXPos() == xPos && block.getY() == yPos) {
+                if(block.getXPos() == xPos && block.getYPos() == yPos) {
                     removeBlock(block);
                 }
             }
@@ -354,7 +354,7 @@ public class Camera {
 
     //For collisions
     // TODO: 10/11/2023 could maybe optimise using xPos and yPos
-    public boolean isEntityTouchingBlock(Rectangle collision) {
+    public boolean isEntityTouchingBlock(Node collision) {
         List<Block> blocks = new ArrayList<>();
         for(List<Block> blockArr : this.blocks) { //Loops through all blocks on screen
             for(Block block : blockArr) {
@@ -368,6 +368,7 @@ public class Camera {
         }
         return !blocks.isEmpty();
     }
+
 
     //For Dropped blocks
     public double getBlockHeightUnderBlock(ItemStack itemStack) {
@@ -528,14 +529,38 @@ public class Camera {
     }
 
     public void makeCrater(Boss boss) {
+        double bossMidpoint = boss.getTranslateX() + 33;
 
-        int length = 0;
-        for (int i = 0; i < 2; i++) {
-            for (int j = xPos - 2 + length; j < xPos + 2 + length; j++) {
-                removeBlock(xPos, yPos);
+        //Find grass block
+        Block block = null;
+        for (int i = 0; i < blocks.size() - 1; i++) {
+            Block b = blocks.get(i).get(0);
+            Block nextB = blocks.get(i + 1).get(0);
+            if (bossMidpoint > b.getTranslateX() && bossMidpoint < nextB.getTranslateX()) {
+                for (int j = 0; j < blocks.get(i).size(); j++) {
+                    if (!backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
+                        block = blocks.get(i).get(j);
+                        break;
+                    }
+                }
             }
-            length--;
         }
+            if(block == null) return;
+
+            int length = 4;
+            int depth = 2;
+            for (int j = block.getYPos(); j < block.getYPos() + depth; j++) {
+                for (int k = block.getXPos() - (length / 2); k < block.getXPos() + (length / 2) + 1; k++) {
+                    removeBlock(k, j);
+                }
+                length--; //Must decrement for cone shape
+            }
+
+
+
+
+
+
     }
 
 
