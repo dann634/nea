@@ -187,11 +187,6 @@ public class MovementHandler {
         boolean needsToMoveRight = difference > 0;
         zombie.setNodeOrientation(needsToMoveRight ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
 
-        //For boss
-        if(zombie instanceof Boss && !((Boss) zombie).isCanMove()) {
-            return;
-        }
-
         //Check collision
         boolean canMove = !camera.isEntityTouchingBlock(needsToMoveRight ? zombie.getRightCollision() : zombie.getLeftCollision());
 

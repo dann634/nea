@@ -86,7 +86,7 @@ public class Camera {
         this.isRainingRocks = isRainingRocks;
         isRainingRocks.addListener((observableValue, aBoolean, t1) -> {
             if(!this.isRainingRocks.get()) return;
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 6; i++) {
                 spawnFallingRock();
             }
             isRainingRocks.set(false);
@@ -557,7 +557,7 @@ public class Camera {
         return data;
     }
 
-    public void makeCrater(double x, int length, int depth) {
+    public void makeCrater(double x, double y, int length, int depth) {
 
         //Find grass block
         Block block = null;
@@ -565,15 +565,18 @@ public class Camera {
             Block b = blocks.get(i).get(0);
             Block nextB = blocks.get(i + 1).get(0);
             if (x > b.getTranslateX() && x < nextB.getTranslateX()) {
+                //Finds block within these values
                 for (int j = 0; j < blocks.get(i).size(); j++) {
-                    if (!backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
+                    //Loops down list to find first solid block
+                    if (blocks.get(i).get(j).getTranslateY() > y &&
+                            !backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
                         block = blocks.get(i).get(j);
                         break;
                     }
                 }
             }
         }
-            if(block == null) return;
+            if(block == null) return; //Null check
 
             for (int j = block.getYPos(); j < block.getYPos() + depth; j++) {
                 for (int k = block.getXPos() - (length / 2); k < block.getXPos() + (length / 2) + 1; k++) {
@@ -581,7 +584,7 @@ public class Camera {
                 }
                 length--; //Must decrement for cone shape
             }
-            this.blockJustBroken = true;
+        this.blockJustBroken = true; // Flag to make all drops fall to ground
     }
 
     public void addNode(Node node) {
@@ -594,10 +597,10 @@ public class Camera {
 
     public void moveRock(double startX, double startY, double endX, double endY) {
 
-        //Move Rock
+        //Add rock to root
         root.getChildren().add(rock);
 
-        //Path
+        //Path - Straight Line
         Path path = new Path();
         path.getElements().add(new MoveTo(startX, startY));
         path.getElements().add(new LineTo(endX, endY));
@@ -607,10 +610,7 @@ public class Camera {
         pathTransition.setPath(path);
         pathTransition.setNode(rock);
         pathTransition.setDuration(Duration.millis(750));
-        pathTransition.setOnFinished(e -> {
-
-            root.getChildren().remove(rock);
-        });
+        pathTransition.setOnFinished(e -> root.getChildren().remove(rock));
         pathTransition.play();
     }
     private ImageView initRock() {
@@ -621,16 +621,16 @@ public class Camera {
     }
 
     private void spawnFallingRock() {
-        double spawnX = rand.nextDouble(1000);
+        double spawnX = rand.nextDouble(1000); // Get random spawn location
+        //initialise rock
         ImageView rock = new ImageView(rockImage);
         rock.setFitWidth(40);
         rock.setPreserveRatio(true);
-        rocks.add(rock);
-
+        rocks.add(rock); //Add to list so it's moved when player moves
         rock.setTranslateX(spawnX);
         rock.setTranslateY(-100);
 
-        //Find target y
+        //Find target y - nearest solid block
         double y = 0;
         for (int i = 0; i < blocks.size() - 1; i++) {
             if(spawnX > blocks.get(i).get(0).getTranslateX() && spawnX < blocks.get(i+1).get(0).getTranslateX()) {
@@ -643,19 +643,21 @@ public class Camera {
             }
         }
 
+        //Animation
         TranslateTransition fallingAnimation = new TranslateTransition();
         fallingAnimation.setNode(rock);
         fallingAnimation.setDuration(Duration.millis(2000));
-        fallingAnimation.setToY(y-30); //-30 for height of rock
+        fallingAnimation.setToY(y-50); //-30 for height of rock
         fallingAnimation.play();
         fallingAnimation.setOnFinished(e -> {
-            rocks.remove(rock);
-            root.getChildren().remove(rock);
-            makeCrater(rock.getTranslateX(), 1, 1); //Change for nukes
+            rocks.remove(rock); //Remove rock from rock list
+            root.getChildren().remove(rock); //Remove rock from root
+            makeCrater(rock.getTranslateX(), rock.getTranslateY(), 1, 1); //Make small crater
+            if(character.intersects(rock.getBoundsInParent())) {
+                character.takeDamage(10); //If touching player deal damage
+            }
         });
-
-        root.getChildren().add(rock);
-
+        root.getChildren().add(rock); //Add rock to root
     }
 
 

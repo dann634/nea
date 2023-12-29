@@ -47,7 +47,7 @@ public class ProceduralGenerator {
 
         String[][] heightMapArray = initializeHeightMapArray(fullHeightMap);
 
-        spawnTrees(fullHeightMap, heightMapArray);
+//        spawnTrees(fullHeightMap, heightMapArray);
         spawnOres(heightMapArray);
 
         saveMapToFile(heightMapArray, isSingleplayer);

@@ -212,7 +212,7 @@ public class GameController extends Scene {
     }
 
     private void spawnBoss() {
-        Boss boss = new Boss(camera);
+        Boss boss = new Boss(camera, character, 0, 0);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));
@@ -391,6 +391,9 @@ public class GameController extends Scene {
     }
 
     private class PauseMenuController extends VBox {
+
+        // TODO: 29/12/2023 remove all dropped blocks on death
+
         public PauseMenuController(boolean isDead) {
             String colour  = isDead ? "247, 45, 0" : "209, 222, 227";
             setStyle("-fx-background-color: rgba(" + colour + ",.5);" +

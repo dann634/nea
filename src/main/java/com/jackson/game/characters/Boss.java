@@ -27,29 +27,30 @@ public class Boss extends Zombie {
     private final int DAMAGE = 30;
     private ImageView leftArm;
     private ImageView rightArm;
-    private boolean canMove;
     private boolean canJump;
     private final Camera camera;
-
+    private final Player player;
     private final Image bossImage1 = new Image("file:src/main/resources/images/boss_body1.png");
     private final Image bossImage2 = new Image("file:src/main/resources/images/boss_body2.png");
 
-    public Boss(Camera camera) {
-        super();
+    public Boss(Camera camera, Player player, double spawnX, double spawnY) {
+        super(); //Initialises fields in zombie class
+        //Initialises fields
         this.camera = camera;
-        health.set(HEALTH);
-        setImage(bossImage1);
-        setTranslateX(400);
-        setTranslateY(200);
-        this.canMove = true;
-        this.canJump = true;
+        this.player = player;
 
-        attackCooldown.setDuration(Duration.seconds(5));
-
+        //Sets size, location, health
+        setTranslateX(spawnX);
+        setTranslateY(spawnY);
         setFitWidth(66);
-        initArms();
-        changeCollisions();
-        
+        setImage(bossImage1);
+        health.set(HEALTH);
+
+        this.canJump = true; //Used during jump ability
+        attackCooldown.setDuration(Duration.seconds(5)); //5 Second cooldown between attacks
+
+        initArms(); //Sets up the arms and their offsets
+        changeCollisions(); //Updates collisions for larger model
     }
 
     @Override
@@ -59,18 +60,39 @@ public class Boss extends Zombie {
 
     @Override
     public void attack(Entity item) {
-        super.attack(item);
+        super.attack(item); //Plays the attack cooldown
+        //50% chance for either attack
         rockAttack();
+//        if(new Random().nextBoolean()) {
+//            jumpAttack();
+//        } else {
+//
+//        }
     }
 
     @Override
     public void swapMovingImage() {
+        //Swaps image to create the walking animation
         if(getImage() == bossImage1) {
             setImage(bossImage2);
         } else {
             setImage(bossImage1);
         }
     }
+
+    @Override
+    public List<Node> getNodes() {
+        //Gets all previous nodes from zombie class and adds arms
+        List<Node> nodes = super.getNodes();
+        nodes.add(leftArm);
+        nodes.add(rightArm);
+        return nodes;
+    }
+
+    @Override
+    public double JUMPING_POWER() {
+        return 1.5;
+    } //Boss can jump higher than regular zombies
 
     private void changeCollisions() {
         int collisionHeight = 85;
@@ -114,64 +136,52 @@ public class Boss extends Zombie {
 
     }
 
-    @Override
-    public List<Node> getNodes() {
-        List<Node> nodes = super.getNodes();
-        nodes.add(leftArm);
-        nodes.add(rightArm);
-        return nodes;
-    }
 
-    @Override
-    public double JUMPING_POWER() {
-        return 1.5;
-    }
 
     private void jumpAttack() {
-        /*
-        Jumps to sky (offscreen)
-        Goes to player location
-        Falls
-         */
-
         canJump = false;
         //Point arms to sky
         leftArm.setRotate(90);
         rightArm.setRotate(-90);
         setArms(-30); //Changed y offset
 
-        int animationValue = 1;
-        //Start jump
+        int animationLength = 1;
+        //Jump from floor to offscreen
         TranslateTransition jumpAnimation = new TranslateTransition();
         jumpAnimation.setNode(this);
-        jumpAnimation.setDuration(Duration.seconds(animationValue));
-        jumpAnimation.setToY(-150); //-200
-
+        jumpAnimation.setDuration(Duration.seconds(animationLength));
+        jumpAnimation.setToY(-150);
         jumpAnimation.setOnFinished(e -> {
+            //Move to player location
             setTranslateX(484);
             setRotate(180);
+            //Flip over for dive
             leftArm.setRotate(-90);
             rightArm.setRotate(90);
             setArms(45);
             canJump = true;
         });
-        jumpAnimation.play();
 
         PauseTransition resetAnimation = new PauseTransition();
-        resetAnimation.setDelay(Duration.seconds(animationValue));
+        resetAnimation.setDelay(Duration.seconds(animationLength));
         resetAnimation.setDuration(Duration.seconds(2));
         resetAnimation.setOnFinished(e -> {
+            //Reset rotation
             setRotate(0);
             leftArm.setRotate(-45);
             rightArm.setRotate(45);
             setArms(15);
-            camera.makeCrater(this.getTranslateX() + 33, 4, 2); // TODO: 22/12/2023 fix this
+            //Make crater on impact point
+            camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 10, 8);
+
+            //Player takes damage
+            if(player.intersects(getBoundsInParent())) {
+                player.takeDamage(DAMAGE);
+            }
         });
+        //Play animations
+        jumpAnimation.play();
         resetAnimation.play();
-
-        //Make crater
-        // TODO: 22/12/2023 need to find block that intersects
-
     }
 
     private void setArms(int yOffset) {
@@ -186,17 +196,6 @@ public class Boss extends Zombie {
     }
 
 
-    public ImageView getLeftArm() {
-        return leftArm;
-    }
-
-    public ImageView getRightArm() {
-        return rightArm;
-    }
-
-    public boolean isCanMove() {
-        return canMove;
-    }
 
     public boolean isCanJump() {
         return canJump;
