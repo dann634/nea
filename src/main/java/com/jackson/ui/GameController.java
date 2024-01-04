@@ -247,10 +247,11 @@ public class GameController extends Scene {
             character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
             character.setAmmo(Integer.parseInt(playerData.get(7)));
             character.setHealth(Double.parseDouble(playerData.get(8)));
+            camera.setKillCounter(Integer.parseInt(playerData.get(10)));
 
             //Load Inventory
 
-            for (int i = 10; i < playerData.size(); i++) {
+            for (int i = 11; i < playerData.size(); i++) {
                 String line = playerData.get(i);
                 if(line.equals("null")) continue;
 
@@ -454,6 +455,8 @@ public class GameController extends Scene {
             Button button = new Button("Respawn");
             button.setOnAction(e -> {
                 camera.respawn();
+                root.getChildren().removeAll(camera.getDroppedBlocks());
+                camera.getDroppedBlocks().clear();
                 root.getChildren().remove(this);
                 gameTimeline.play();
                 audioplayer.play();

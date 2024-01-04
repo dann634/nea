@@ -45,6 +45,7 @@ public class Player extends Character {
     private final SimpleIntegerProperty ammo;
 
 
+
     public Player(SimpleBooleanProperty isHoldingGun, SimpleIntegerProperty ammo) {
         super();
         setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
@@ -76,9 +77,8 @@ public class Player extends Character {
 
         isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
-            attackTranslate.stop(); //Fixes Attack and Turn Bug
             attackTranslate.setByX((newValue) ? 20 : -20);
-            handImageView.setTranslateX(newValue ? currentItemOffsets[1] : currentItemOffsets[0]);
+            handImageView.xProperty().bind(xProperty().add(newValue ? currentItemOffsets[1] : currentItemOffsets[0]));
             handImageView.setNodeOrientation((newValue) ? NodeOrientation.RIGHT_TO_LEFT : NodeOrientation.LEFT_TO_RIGHT);
             if(isHoldingGun.get()) {
                 handImageView.setRotate(0);
@@ -92,10 +92,6 @@ public class Player extends Character {
         handImageView = new ImageView();
         handImageView.yProperty().bind(yProperty().add(5));
         handImageView.xProperty().bind(xProperty());
-        handImageView.setRotate(45);
-        handImageView.setScaleY(0.3);
-        handImageView.setScaleX(0.3);
-        handImageView.setTranslateX(currentItemOffsets[1]);
         handImageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
 
         attackTranslate = new TranslateTransition();
@@ -104,7 +100,6 @@ public class Player extends Character {
         attackTranslate.setAutoReverse(true);
         attackTranslate.setRate(4);
         attackTranslate.setByX(20);
-
     }
 
     public void updateBlockInHand(Entity item) {
@@ -143,8 +138,8 @@ public class Player extends Character {
         //Offsets
 
         currentItemOffsets = getOffsets(itemName);
-        handImageView.setTranslateY(currentItemOffsets[2]);
-        handImageView.setTranslateX(isModelFacingRight.get() ? currentItemOffsets[1] : currentItemOffsets[0]);
+        handImageView.yProperty().bind(yProperty().add(currentItemOffsets[2]));
+        handImageView.xProperty().bind(xProperty().add(isModelFacingRight.get() ? currentItemOffsets[1] : currentItemOffsets[0]));
     }
 
     private void initDisplayNameLabel() {

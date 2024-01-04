@@ -355,7 +355,7 @@ public class Camera {
                 List<Zombie> deadZombies = new ArrayList<>();
                 List<Node> zombieNodes = new ArrayList<>();
                 for(Zombie zombie : zombies) {
-                    if(character.getHandRectangle().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
+                    if(character.getHandRectangle().intersects(zombie.getTranslateX(), zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
                         //Zombie touching weapon
                         if(zombie.takeDamage((int)character.getAttackDamage())) { //Returns true if dead
                             deadZombies.add(zombie);
@@ -581,6 +581,7 @@ public class Camera {
 
         data.add(String.valueOf(character.getAmmo()));
         data.add(String.valueOf(character.healthProperty().get()));
+        data.add(String.valueOf(killCounter.get()));
 
         //Inventory
         ItemStack[][] inv = inventory.getItemArray();
@@ -700,5 +701,7 @@ public class Camera {
         root.getChildren().add(rock); //Add rock to root
     }
 
-
+    public void setKillCounter(int killCounter) {
+        this.killCounter.set(killCounter);
+    }
 }
