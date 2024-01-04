@@ -1,9 +1,6 @@
 package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
-import com.jackson.io.TextIO;
-import com.jackson.ui.GameController;
-import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.geometry.NodeOrientation;
@@ -11,7 +8,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Rectangle;
 
-import java.util.Arrays;
 import java.util.List;
 
 public abstract class Character extends ImageView {
@@ -77,13 +73,9 @@ public abstract class Character extends ImageView {
         this.health.set(health);
     }
 
-    public void addHealth(int value) {
-        if(health.get() + value > 100 || health.get() + value < 0) {
-            return;
-        }
-        health.set(health.get() + value);
+    public void setHealth(double value) {
+        health.set(value);
     }
-
 
     public List<Rectangle> getCollisions() {
         return List.of(feetCollision, leftCollision, rightCollision, headCollision);

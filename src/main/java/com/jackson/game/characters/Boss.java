@@ -1,5 +1,6 @@
 package com.jackson.game.characters;
 
+import com.jackson.game.Difficulty;
 import com.jackson.game.items.Entity;
 import com.jackson.ui.Camera;
 import javafx.animation.*;
@@ -33,8 +34,8 @@ public class Boss extends Zombie {
     private final Image bossImage1 = new Image("file:src/main/resources/images/boss_body1.png");
     private final Image bossImage2 = new Image("file:src/main/resources/images/boss_body2.png");
 
-    public Boss(Camera camera, Player player, double spawnX, double spawnY) {
-        super(); //Initialises fields in zombie class
+    public Boss(Camera camera, Player player, double spawnX, double spawnY, Difficulty difficulty) {
+        super(difficulty); //Initialises fields in zombie class
         //Initialises fields
         this.camera = camera;
         this.player = player;
@@ -62,12 +63,11 @@ public class Boss extends Zombie {
     public void attack(Entity item) {
         super.attack(item); //Plays the attack cooldown
         //50% chance for either attack
-        rockAttack();
-//        if(new Random().nextBoolean()) {
-//            jumpAttack();
-//        } else {
-//
-//        }
+        if(new Random().nextBoolean()) {
+            jumpAttack();
+        } else {
+            rockAttack();
+        }
     }
 
     @Override
@@ -172,7 +172,7 @@ public class Boss extends Zombie {
             rightArm.setRotate(45);
             setArms(15);
             //Make crater on impact point
-            camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 10, 8);
+            camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 4, 2);
 
             //Player takes damage
             if(player.intersects(getBoundsInParent())) {

@@ -32,7 +32,7 @@ public class MovementHandler {
     }
 
     public void calculateYProperties(boolean isWPressed) {
-        boolean isCharacterTouchingFloor = camera.isEntityTouchingBlock(character.getFeetCollision()); //Is character touching floor
+        boolean isCharacterTouchingFloor = camera.isEntityTouchingBlock(character.getFeetCollision(), true); //Is character touching floor
         if(isCharacterTouchingFloor && !isWPressed && jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
@@ -41,11 +41,11 @@ public class MovementHandler {
             if(jumpVelocity < 3 && jumpVelocity > -3) {
                 jumpVelocity += jumpAcceleration;
             }
-            if(camera.isEntityTouchingBlock(character.getHeadCollision())) { //Get head collision
+            if(camera.isEntityTouchingBlock(character.getHeadCollision(), true)) { //Get head collision
                 jumpAcceleration = 0;
                 jumpVelocity = 0;
             } else {
-                doYOffsetStuff((int) -jumpVelocity, false);
+                updateYOffset((int) -jumpVelocity, false);
             }
             return;
         }
@@ -58,26 +58,25 @@ public class MovementHandler {
             jumpAcceleration = -2.5;
             return;
         }
-        doYOffsetStuff(-4, true);
+        updateYOffset(-4, true);
 
     }
 
-    private boolean doYOffsetStuff(int offset, boolean isCharacterMovingDown) {
-        boolean condition = isCharacterMovingDown ? camera.getyOffset() < -32 : camera.getyOffset() > 32; // FIXME: 22/10/2023 problem
-        if (condition) {
+    private void updateYOffset(int offset, boolean isCharacterMovingDown) {
+        camera.translateBlocksByY(offset); //Move world by a value
+        boolean condition = isCharacterMovingDown ? camera.getyOffset() < -32 : camera.getyOffset() > 32;
+        if(!condition) return;
 
-            int newYPos = isCharacterMovingDown ? 1 : -1;
-            int newYOffset = isCharacterMovingDown ? 32 : -32;
+        //If y offset has exceeded the height of the block
 
-            camera.drawHorizontalLine(!isCharacterMovingDown);
-            camera.deleteHorizontal(isCharacterMovingDown);
-            character.addYPos(newYPos);
-            camera.addYOffset(newYOffset);
-        }
+        int newYPos = isCharacterMovingDown ? 1 : -1;
+        int newYOffset = isCharacterMovingDown ? 32 : -32;
 
+        camera.drawHorizontalLine(!isCharacterMovingDown); //Add new line
+        camera.deleteHorizontal(isCharacterMovingDown); //Delete opposite line
+        character.addYPos(newYPos); //Update y position of player
+        camera.addYOffset(newYOffset); //Reset offset of blocks
 
-        camera.translateBlocksByY(offset);
-        return condition;
     }
 
 
@@ -90,8 +89,8 @@ public class MovementHandler {
 
 //        walkingEffects.play();
 
-        boolean canMoveLeft = !camera.isEntityTouchingBlock(character.getLeftCollision());
-        boolean canMoveRight = !camera.isEntityTouchingBlock(character.getRightCollision());
+        boolean canMoveLeft = !camera.isEntityTouchingBlock(character.getLeftCollision(), true);
+        boolean canMoveRight = !camera.isEntityTouchingBlock(character.getRightCollision(), true);
 
         int offset = 0;
         boolean isCharacterMovingLeft = false;
@@ -115,18 +114,18 @@ public class MovementHandler {
         camera.translateBlocksByX(offset);
 
 
+        //Condition Changes based on direction
         boolean condition = isCharacterMovingLeft ? camera.getxOffset() > 32 : camera.getxOffset() < -32;
-
         if (condition) {
-            player.addAgilityXP(1);
+            player.addAgilityXP(1); //Gain xp from moving
 
             //Get block x at edge and add one
-            //Will break if blocks is not ordered
             int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH : RENDER_WIDTH;
             int newXPos = isCharacterMovingLeft ? -1 : 1;
             int newXOffset = isCharacterMovingLeft ? -32 : 32;
 
-            camera.addLine(camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft); // FIXME: 30/10/2023 optimise this shit
+            //Load new line into world
+            camera.addLine(camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft);
             camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
             character.addXPos(newXPos); //Updates x pos of character
             camera.addXOffset(newXOffset); //Resets camera offset
@@ -188,7 +187,7 @@ public class MovementHandler {
         zombie.setNodeOrientation(needsToMoveRight ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
 
         //Check collision
-        boolean canMove = !camera.isEntityTouchingBlock(needsToMoveRight ? zombie.getRightCollision() : zombie.getLeftCollision());
+        boolean canMove = !camera.isEntityTouchingBlock(needsToMoveRight ? zombie.getRightCollision() : zombie.getLeftCollision(), false);
 
         //Move
         if(canMove) {
@@ -203,7 +202,7 @@ public class MovementHandler {
     }
 
     private void calculateZombieY(Zombie zombie) {
-        boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(zombie.getFeetCollision());
+        boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(zombie.getFeetCollision(), false);
         if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) {
             //Not jumping and on floor
             return;
@@ -220,7 +219,7 @@ public class MovementHandler {
                 //If smaller than max jump velocity (add more)
                 zombie.addJumpVelocity(zombie.getJumpAcceleration());
             }
-            if(camera.isEntityTouchingBlock(zombie.getHeadCollision())) {
+            if(camera.isEntityTouchingBlock(zombie.getHeadCollision(), false)) {
                 //Hitting head on block above
                 //Sets jump values so it falls
                 zombie.setJumpAcceleration(0);

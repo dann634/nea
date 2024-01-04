@@ -24,7 +24,7 @@ public class ProceduralGenerator {
     private static final int MAP_HEIGHT = 300; //Map Height
     private static final double TREE_SPAWN_CHANCE = 0.15; //On any grass block
     private static final double ORE_SPAWN_CHANCE = 0.03; //On any stone block
-    private static final double NUMBER_OF_CHUNKS = 10;
+    private static final int NUMBER_OF_CHUNKS = 10;
     private static final String AIR_BLOCK = "0";
     private static final String DIRT_BLOCK = "1";
     private static final String GRASS_BLOCK = "2";
@@ -47,7 +47,7 @@ public class ProceduralGenerator {
 
         String[][] heightMapArray = initializeHeightMapArray(fullHeightMap);
 
-//        spawnTrees(fullHeightMap, heightMapArray);
+        spawnTrees(fullHeightMap, heightMapArray);
         spawnOres(heightMapArray);
 
         saveMapToFile(heightMapArray, isSingleplayer);
@@ -195,15 +195,15 @@ public class ProceduralGenerator {
     }
 
     private static void spawnOres(String[][] map) {
-        /*
-        Give each stone block a chance to be a metal or coal
-         */
+        //Loop through whole map
         for (int i = 0; i < MAP_WIDTH; i++) {
             for (int j = 0; j < MAP_HEIGHT; j++) {
-                //Gatekeeping checks
+                //If not stone
                 if (!map[i][j].equals(STONE_BLOCK)) continue;
+                //If not ore block
                 if (random.nextDouble() > ORE_SPAWN_CHANCE) continue;
 
+                //Turn stone into ore
                 map[i][j] = random.nextBoolean() ? METAL_BLOCK : COAL_BLOCK;
 
             }

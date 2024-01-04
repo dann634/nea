@@ -39,9 +39,10 @@
     -fx-background-color: #c7200e;
 }
 
-#greenBtn {
-    -fx-background-color: #0aad07;
+#redBtn:hover {
+    -fx-font-weight: bold;
 }
+
 
 #confirmButton {
     -fx-font-weight: bold;

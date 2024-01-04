@@ -1,5 +1,6 @@
 package com.jackson.game.characters;
 
+import com.jackson.game.Difficulty;
 import com.jackson.game.items.Entity;
 import javafx.animation.Animation;
 import javafx.animation.PauseTransition;
@@ -10,6 +11,7 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Zombie extends Character {
 
@@ -26,14 +28,16 @@ public class Zombie extends Character {
     private double jumpVelocity;
     private boolean needsToJump;
     protected final ProgressBar healthBar;
+    protected Difficulty difficulty;
 
-    public Zombie() {
+    public Zombie(Difficulty difficulty) {
         super();
         //Movement Values
         this.jumpAcceleration = 0;
         this.jumpVelocity = 0;
         this.needsToJump = false;
         this.xCounter = 30;
+        this.difficulty = difficulty;
 
         //Attack Cooldown
         this.attackCooldown = new PauseTransition();
@@ -41,6 +45,11 @@ public class Zombie extends Character {
 
         //Health Bar
         this.healthBar = initHealthBar();
+        //Update Health for Difficulty
+        switch(difficulty) {
+            case MEDIUM -> health.set(120);
+            case HARD -> health.set(150);
+        }
         rebindCollisions();
     }
 
@@ -134,5 +143,21 @@ public class Zombie extends Character {
 
     public double JUMPING_POWER() {
         return 1;
+    }
+
+    public double getAttack() {
+        Random rand = new Random();
+        //Multiplier between 1 and 2
+        double multiplier = rand.nextDouble() + 1;
+        switch (difficulty) {
+            case MEDIUM -> {
+                return 5 * multiplier;
+            }
+            case HARD -> {
+                return 8 * multiplier;
+            }
+        }
+        //Easy
+        return 3 * multiplier;
     }
 }

@@ -15,6 +15,7 @@ import javafx.animation.PathTransition;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -52,11 +53,12 @@ public class Camera {
     private ImageView rock;
     private final Image rockImage = new Image("file:src/main/resources/images/rock.png");
     private final SimpleBooleanProperty isRainingRocks;
+    private final SimpleIntegerProperty killCounter;
 
     // TODO: 19/12/2023 LOAD IMAGES ONCE IN CONSTRUCTOR
 
     public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies,
-                  SimpleBooleanProperty isBloodMoonActive, SimpleBooleanProperty isRainingRocks) {
+                  SimpleBooleanProperty isBloodMoonActive, SimpleBooleanProperty isRainingRocks, SimpleIntegerProperty killCounter) {
         this.rand = new Random();
         this.character = character;
         this.zombies = zombies;
@@ -66,6 +68,7 @@ public class Camera {
         xOffset = 0;
         yOffset = 0;
         this.isBloodMoonActive = isBloodMoonActive;
+        this.killCounter = killCounter;
         droppedBlocks = new ArrayList<>();
         rocks = new ArrayList<>();
         blockJustBroken = false;
@@ -77,6 +80,7 @@ public class Camera {
 //        spawnItem("rifle", 1, 500, 200);
 //        spawnItem("sniper", 1, 500, 200);
 //        spawnItem("pistol", 1, 500, 200);
+//        spawnItem("metal", 20, 500, 200);
 //        spawnItem("metal_sword", 1, 500, 200);
 //        spawnItem("metal_pickaxe", 1, 500, 200);
 //        spawnItem("metal_axe", 1, 500, 200);
@@ -97,17 +101,20 @@ public class Camera {
 
     public List<Block> getVerticalLine(int xLocalOffset) {
         int nextXIndex = character.getXPos() + xLocalOffset; //Gets index of line to be loaded
-        int blockIndex = 0;
+        int blockIndex = 0; //To track position in line
         List<Block> line = new ArrayList<>();
         for (int i = character.getYPos() - RENDER_HEIGHT; i < character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
+            //world looping
             if(nextXIndex < 0) {
-                nextXIndex = 299;
+                //if on left side of world
+                nextXIndex += 1000;
             } else if (nextXIndex > 999) {
-                nextXIndex = 0;
+                //if on right side of world
+                nextXIndex -= 1000;
             }
-            Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, inventory); //takes a string for block type and X pos and Y pos
-            block.setPos(512 + (xLocalOffset * 32) + xOffset,
-                    (blockIndex - 1) * 32 + yOffset);
+            Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, inventory);
+            //Positions block on screen
+            block.setPos(512 + (xLocalOffset * 32) + xOffset, (blockIndex - 1) * 32 + yOffset);
             line.add(block);
             blockIndex++;
         }
@@ -115,6 +122,7 @@ public class Camera {
     }
 
     public void deleteVertical(boolean isLeft) {
+        //Find index and remove it from blocks and scenegraph
         int index = isLeft ? 0 : blocks.size() - 1;
         root.getChildren().removeAll(blocks.get(index));
         blocks.remove(index);
@@ -124,11 +132,11 @@ public class Camera {
 
         List<Block> newBlocks = new ArrayList<>();
         for (List<Block> line : blocks) {
-            if(line.isEmpty()) {
-                continue;
-            }
+            if(line.isEmpty()) continue; //If vertical line is empty
+
             int newIndex;
             double yTranslate;
+            //Get new y index and y translate from previous block
             if(isUp) {
                 newIndex = line.get(0).getYPos() - 1;
                 yTranslate = line.get(0).getTranslateY() - 32;
@@ -136,75 +144,83 @@ public class Camera {
                 newIndex = line.get(line.size() - 1).getYPos() + 1;
                 yTranslate = line.get(line.size() - 1).getTranslateY() + 32;
             }
-            int xIndex = line.get(0).getXPos();
+
+            int xIndex = line.get(0).getXPos(); //Get xIndex
             String key;
-            if(newIndex >= 300) {
+            if(newIndex >= 300) { //If below y level 300
                 key = "3"; //Just bedrock below
-            }  else {
-                try {
-                    key = map[xIndex][newIndex];
-                } catch (IndexOutOfBoundsException e) {
-                    key = "0";
-                }
+            }  else if(newIndex < 0){
+                key = "0"; //Above 0 is just air
+            } else {
+                key = map[xIndex][newIndex]; //get from map
             }
+
+            //Initialise block
             Block block = new Block(GameController.lookupTable.get(key), xIndex, newIndex, this, inventory);
+            //Set new block pos
             block.setPos(line.get(0).getX(), yTranslate);
+            //Add to line
             line.add((isUp) ? 0 : line.size(), block);
             newBlocks.add(block);
         }
+        //Add all new blocks to root
         root.getChildren().addAll(newBlocks);
-
     }
 
 
-    public void deleteHorizontal(boolean isUp) { //It wouldn't delete a clear line (as invisible imageviews didn't exist?)
-
+    public void deleteHorizontal(boolean isUp) {
+        //Gatekeeping checks to avoid errors
         if (blocks.isEmpty() || blocks.get(0).isEmpty()) {
             return;
         }
-
+        //Loop through blocks and remove top or bottom of the list
         for (List<Block> blockList : blocks) {
             Block block = blockList.get(isUp ? 0 : blockList.size() - 1);
             blockList.remove(block);
-            root.getChildren().remove(block);
+            root.getChildren().remove(block); //Remove from scenegraph
         }
     }
 
     public void translateBlocksByX(int offset) {
-        xOffset += offset;
+        xOffset += offset; //Add to global offset
+        //Move all blocks
         for (List<Block> blocks : blocks) {
             for (Block block : blocks) {
                 block.addPos(offset, 0);
             }
         }
+        //Move all dropped blocks
         for(ItemStack itemStack : droppedBlocks) {
             itemStack.addPos(offset, 0);
         }
-
+        //Moves all zombies
         for(Zombie zombie : zombies) {
             zombie.addTranslateX(offset);
         }
+        //Move rocks (for boss)
         rock.setTranslateX(rock.getTranslateX() + offset);
         for(ImageView rock1 : rocks) {
             rock1.setTranslateX(rock1.getTranslateX() + offset);
         }
-
     }
 
     public void translateBlocksByY(int offset) {
-        yOffset = yOffset + offset;
+        yOffset += offset; //Add to global offset
+        //Move all blocks
         for (List<Block> blocks : blocks) {
             for (Block block : blocks) {
                 block.addPos(0, offset);
             }
         }
+        //Move all dropped blocks
         for(ItemStack itemStack : droppedBlocks) {
             itemStack.addPos(0, offset);
         }
-
+        //Move all zombies
         for(Zombie zombie : zombies) {
             zombie.addTranslateY(offset);
         }
+        //Move Rocks for (boss)
         rock.setTranslateY(rock.getTranslateY() + offset);
         for(ImageView rock1 : rocks) {
             rock1.setTranslateY(rock1.getTranslateY() + offset);
@@ -269,6 +285,7 @@ public class Camera {
         itemStack.addStackValue(amount);
         droppedBlocks.add(itemStack);
         root.getChildren().add(itemStack);
+        this.blockJustBroken = true;
     }
 
     //For breaking blocks
@@ -343,7 +360,7 @@ public class Camera {
                         if(zombie.takeDamage((int)character.getAttackDamage())) { //Returns true if dead
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
-                            spawnZombieDrop();
+                            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
                         }
                     }
                 }
@@ -361,7 +378,7 @@ public class Camera {
                         if(zombie.takeDamage((int) character.getAttackDamage())) {
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
-                            spawnZombieDrop();
+                            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
                         }
                     }
                 }
@@ -371,7 +388,9 @@ public class Camera {
         });
     }
 
-    private void spawnZombieDrop() {
+    private void spawnZombieDrop(double x, double y) {
+        killCounter.set(killCounter.get() + 1);
+        //Add Strength XP
         character.addStrengthXP(5);
 
         //Random Chance to start blood moon
@@ -379,16 +398,34 @@ public class Camera {
             isBloodMoonActive.set(true);
         }
 
+        double spawnChance = rand.nextDouble();
+        if(spawnChance < 0.1) {
+            return; //10% chance to spawn
+        }
+
+        double itemSpawnChance = rand.nextDouble();
+        if(itemSpawnChance < 0.3) {
+            //Spawn coal
+            spawnItem("coal", 1, x, y);
+        } else if(itemSpawnChance < 0.6) {
+            //Spawn plank
+            spawnItem("plank", 1, x, y);
+        } else {
+            //Spawn stick
+            spawnItem("stick", 1, x, y);
+        }
     }
 
     //For collisions
     // TODO: 10/11/2023 could maybe optimise using xPos and yPos
-    public boolean isEntityTouchingBlock(Node collision) {
+    public boolean isEntityTouchingBlock(Node collision, boolean isPlayer) {
         List<Block> blocks = new ArrayList<>();
         for(List<Block> blockArr : this.blocks) { //Loops through all blocks on screen
             for(Block block : blockArr) {
                 if(collision.intersects(block.getBoundsInParent()) &&
                         !backgroundBlocks.contains(block.getItemName())) {
+                    if(block.getItemName().equals("plank") && isPlayer) continue; //Walk through planks
+
                     //If rectangle is touching block its added to list
                     //If player cannot pass through the block
                     blocks.add(block);
@@ -435,7 +472,7 @@ public class Camera {
         while(droppedBlockIterator.hasNext()) {
             ItemStack itemStack = droppedBlockIterator.next();
             if(itemStack.getX() < -200 || itemStack.getX() > 1224
-                    || itemStack.getY() < -100 || itemStack.getY() > 644) {
+                    || itemStack.getY() < -300 || itemStack.getY() > 644) {
                 root.getChildren().remove(itemStack);
                 droppedBlockIterator.remove();
             }
@@ -541,6 +578,9 @@ public class Camera {
         data.add(character.getStrengthLevel() + " " + character.getStrengthXP());
         data.add(character.getAgilityLevel() + " " + character.getAgilityXP());
         data.add(character.getDefenceLevel() + " " + character.getDefenceXP());
+
+        data.add(String.valueOf(character.getAmmo()));
+        data.add(String.valueOf(character.healthProperty().get()));
 
         //Inventory
         ItemStack[][] inv = inventory.getItemArray();

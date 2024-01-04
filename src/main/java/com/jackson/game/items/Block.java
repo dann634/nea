@@ -25,11 +25,9 @@ public class Block extends Entity {
 
     private int xPos;
     private int yPos;
-    private int toughness;
     private Timeline breakingTimeline; //Maybe change to a transition
     private  Camera camera;
     private  Inventory inventory;
-    private boolean isDropped;
     private boolean isBreakable;
 
 
@@ -43,7 +41,6 @@ public class Block extends Entity {
     private void initFields(int xPos, int yPos, Camera camera, Inventory inventory) {
         this.camera = camera;
         this.inventory = inventory;
-        this.isDropped = false;
 
         this.isBreakable = true;
         if(this.itemName.equals("air") || this.itemName.equals("bedrock")) {
@@ -61,9 +58,6 @@ public class Block extends Entity {
     private void initButtonPresses() {
 
         setOnMouseEntered(e -> {
-            if(this.isDropped) {
-                return;
-            }
             toFront();
         });
 
@@ -76,7 +70,7 @@ public class Block extends Entity {
                 return;
             }
 
-            if(getOpacity() == 0 || !this.isBreakable || this.isDropped) {
+            if(getOpacity() == 0 || !this.isBreakable) {
                 return;
             }
 
@@ -84,10 +78,7 @@ public class Block extends Entity {
             double waitTime = 200; //Default break time
             if(inventory.getSelectedItemStack() != null) {
                 String itemInHand = inventory.getSelectedItemStackName();
-//                System.out.println((itemInHand.contains("axe") && !itemInHand.contains("pickaxe") && itemName.equals("wood")));
-//                System.out.println((itemInHand.contains("pickaxe") && itemName.equals("stone")));
-//                System.out.println((itemInHand.contains("shovel") && (itemName.equals("dirt") || itemName.equals("grass"))));
-//                System.out.println("----");
+
                 if((itemInHand.contains("axe") && !itemInHand.contains("pickaxe") && itemName.equals("wood")) ||
                         (itemInHand.contains("pickaxe") && itemName.equals("stone")) ||
                         (itemInHand.contains("shovel") && (itemName.equals("dirt") || itemName.equals("grass")))) {
@@ -117,7 +108,7 @@ public class Block extends Entity {
         });
 
         setOnMouseReleased(e -> {
-            if(!this.isBreakable || this.isDropped) {
+            if(!this.isBreakable) {
                 return;
             }
             this.breakingTimeline.stop();
@@ -144,7 +135,6 @@ public class Block extends Entity {
         this.imageView.setRotate(new Random().nextDouble(360) + 1);
         this.setOpacity(1);
         this.camera.removeBlock(this);
-        this.isDropped = true;
     }
 
 

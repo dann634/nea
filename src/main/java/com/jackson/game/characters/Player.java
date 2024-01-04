@@ -379,9 +379,6 @@ public class Player extends Character {
         return attackTranslate;
     }
 
-    public void setHoldingGun(boolean value) {
-        isHoldingGun.set(value);
-    }
 
     public PauseTransition getShootingPause() {
         return shootingPause;
@@ -389,5 +386,13 @@ public class Player extends Character {
 
     public SimpleBooleanProperty isHoldingGunProperty() {
         return isHoldingGun;
+    }
+
+    public int getAmmo() {
+        return ammo.get();
+    }
+
+    public void setAmmo(int ammo) {
+        this.ammo.set(ammo);
     }
 }

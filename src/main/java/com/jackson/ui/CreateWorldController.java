@@ -1,5 +1,6 @@
 package com.jackson.ui;
 
+import com.jackson.game.Difficulty;
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
@@ -69,7 +70,7 @@ public class CreateWorldController extends Scene {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            Main.setScene(new GameController());
+            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toString().toUpperCase())));
         });
 
         //Back button (back to main menu)

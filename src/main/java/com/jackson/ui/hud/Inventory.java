@@ -36,14 +36,12 @@ public class Inventory {
     private final ImageView itemOnCursor;
     private ItemStack itemStackOnCursor;
     private boolean isCellHovered;
-    private SimpleBooleanProperty isHoldingGun;
     private SimpleIntegerProperty ammo;
 
 // FIXME: 06/11/2023 when player drops block it will place if block in hand
 
-    public Inventory(SimpleBooleanProperty isHoldingGun, SimpleIntegerProperty ammo) {
+    public Inventory(SimpleIntegerProperty ammo) {
         //Initialises all fields
-        this.isHoldingGun = isHoldingGun;
         this.ammo = ammo;
         isCellHovered = false;
         isInventoryOpen = false;

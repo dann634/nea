@@ -32,6 +32,16 @@
 
 #generateWorldButton {
     -fx-pref-width: 250;
+    -fx-background-color: #0aad07;
+    -fx-text-fill: white;
+    -fx-border-style: solid;
+    -fx-border-width: 1;
+    -fx-border-radius: 3;
+    -fx-background-radius: 3;
+}
+
+#generateWorldButton:hover {
+    -fx-font-weight: bold;
 }
 
 #descriptionLabel {

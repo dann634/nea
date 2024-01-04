@@ -1,5 +1,7 @@
 package com.jackson.ui;
 
+import com.jackson.game.Difficulty;
+import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
@@ -64,7 +66,7 @@ public class MainMenuController extends Scene implements Initializable {
                 return;
             }
 
-            Main.setScene(new GameController());
+            Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9))));
         });
 
         multiplayerButton.setOnAction(e -> Main.setScene(new LobbyController()));

@@ -25,10 +25,8 @@ import java.util.List;
 public class SettingsController extends Scene {
 
     private TextField displayNameTextField;
-    private Button muteSoundEffectsButton;
     private Slider backgroundSlider;
-    private Label title;
-
+    private Slider soundEffectsSlider;
 
 
     public SettingsController() {
@@ -54,27 +52,31 @@ public class SettingsController extends Scene {
         }
         this.displayNameTextField.setText(settingsList.get(0)); //Set text to current display name
 
-        if(settingsList.get(1).equals("true")) { //If true set to muted (unmuted by default)
-            this.muteSoundEffectsButton.setId("redBtn");
-            this.muteSoundEffectsButton.setText("Muted");
-        }
 
-        double volume;
+
+        double backgroundVolume;
+        double effectsVolume;
         try {
-            volume = Double.parseDouble(settingsList.get(2));
+            backgroundVolume = Double.parseDouble(settingsList.get(2));
         } catch (NumberFormatException e) {
-            volume = 100;
+            backgroundVolume = 100;
         }
-        this.backgroundSlider.setValue(volume);
+        try {
+            effectsVolume = Double.parseDouble(settingsList.get(1));
+        } catch (NumberFormatException e) {
+            effectsVolume = 100;
+        }
+        this.backgroundSlider.setValue(backgroundVolume);
+        this.soundEffectsSlider.setValue(effectsVolume);
 
 
 
     }
 
     private void addContent(VBox root) {
-        this.title = new Label("Settings");
-        this.title.setId("title");
-        root.getChildren().add(this.title);
+        Label title = new Label("Settings");
+        title.setId("title");
+        root.getChildren().add(title);
 
         // TODO: 17/08/2023 remove title as a field
 
@@ -110,19 +112,22 @@ public class SettingsController extends Scene {
     } //Adds option to change display name
 
     private void addMuteSoundEffects(VBox root) {
-        var muteSoundEffectsLabel = new Label("Mute Sound Effects:");
-        this.muteSoundEffectsButton = getToggleButton();
-        root.getChildren().add(createHBox(muteSoundEffectsLabel, this.muteSoundEffectsButton));
+        var muteSoundEffectsLabel = new Label("Sound Effects Volume:");
+        this.soundEffectsSlider = new Slider();
+        var valueLabel = new Label(String.valueOf(this.soundEffectsSlider.getValue()));
+        valueLabel.setId("value");
+        valueLabel.textProperty().bind(soundEffectsSlider.valueProperty().asString("%.0f"));
+
+        root.getChildren().add(createHBox(muteSoundEffectsLabel, valueLabel, soundEffectsSlider));
     } //Adds option to mute sound effects
 
     private void addMuteBackground(VBox root) {
         var muteBackgroundLabel = new Label("Background Music Volume:");
         this.backgroundSlider = new Slider();
+
         var valueLabel = new Label(String.valueOf(this.backgroundSlider.getValue()));
         valueLabel.setId("value");
-        this.backgroundSlider.valueProperty().addListener((observableValue, number, t1) -> {
-            valueLabel.setText(new DecimalFormat("0.00").format(t1));
-        });
+        valueLabel.textProperty().bind(backgroundSlider.valueProperty().asString("%.0f"));
 
 
         root.getChildren().add(createHBox(muteBackgroundLabel, valueLabel, this.backgroundSlider));
@@ -136,6 +141,8 @@ public class SettingsController extends Scene {
         deleteSaveBtn.setOnAction(e -> {
             new File("src/main/resources/saves/singleplayer.txt").delete();
             new File("src/main/resources/saves/single_data.txt").delete();
+            deleteSaveBtn.setDisable(true);
+            deleteSaveBtn.setOpacity(0.7);
         });
 
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveBtn));
@@ -154,7 +161,7 @@ public class SettingsController extends Scene {
 
             //Gets new data from ui
             newSettings.add(displayName);
-            newSettings.add(this.muteSoundEffectsButton.getText().equals("Muted") ? "true" : "false");
+            newSettings.add(String.valueOf(this.soundEffectsSlider.getValue()));
             newSettings.add(String.valueOf(this.backgroundSlider.getValue()));
 
             TextIO.updateFile(newSettings, "src/main/resources/settings/settings.txt"); //Updates text file with new settings
@@ -181,21 +188,6 @@ public class SettingsController extends Scene {
         hBox.getChildren().add(1, region); //Seperates label from button / text field
 
         return hBox;
-    }
-
-    private Button getToggleButton() {
-        Button btn = new Button("Unmuted");
-        btn.setId("greenBtn");
-        btn.setOnAction(e -> { //Changes ui elements when pressed to act like a toggle
-            if(btn.getText().equals("Unmuted")) {
-                btn.setId("redBtn");
-                btn.setText("Muted");
-            } else {
-                btn.setId("greenBtn");
-                btn.setText("Unmuted");
-            }
-        });
-        return btn;
     }
 
 

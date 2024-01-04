@@ -1,5 +1,6 @@
 package com.jackson.ui;
 
+import com.jackson.game.Difficulty;
 import com.jackson.game.MovementHandler;
 import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Player;
@@ -13,23 +14,19 @@ import com.jackson.main.Main;
 import com.jackson.ui.hud.CraftingMenu;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.*;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 import java.util.*;
@@ -40,7 +37,6 @@ public class GameController extends Scene {
     private final AnchorPane root;
     private Player character;
     private final List<Zombie> zombies;
-    private final List<Rock> rocks;
     public static HashMap<String, String> lookupTable;
     private final Inventory inventory;
     private final HealthBar healthBar;
@@ -54,20 +50,21 @@ public class GameController extends Scene {
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
     private final Random rand;
-    private PauseTransition bloodMoonTimer;
-    private SimpleBooleanProperty isBloodMoonActive;
-    private SimpleBooleanProperty isRainingRocks;
+    private final PauseTransition bloodMoonTimer;
     private boolean blockDropped;
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
     private boolean isSpacePressed;
+    private final Difficulty difficulty;
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
 
-    public GameController() {
+    public GameController(Difficulty difficulty) {
         super(new VBox());
+
+        this.difficulty = difficulty;
 
         //Root
         root = new AnchorPane();
@@ -75,7 +72,6 @@ public class GameController extends Scene {
 
         //Initialises fields
         zombies = new ArrayList<>();
-        rocks = new ArrayList<>();
         rand = new Random();
         String[][] map = TextIO.readMapFile(true);
         initLookupTable();
@@ -94,22 +90,26 @@ public class GameController extends Scene {
         //HUD
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
         SimpleIntegerProperty ammo = new SimpleIntegerProperty(0);
+        SimpleIntegerProperty killCounter = new SimpleIntegerProperty(0);
 
-        this.isBloodMoonActive = new SimpleBooleanProperty(false);
+        SimpleBooleanProperty isBloodMoonActive = new SimpleBooleanProperty(false);
         isBloodMoonActive.addListener((observableValue, aBoolean, t1) -> setBloodMoon(t1));
-        this.isRainingRocks = new SimpleBooleanProperty(false);
+        SimpleBooleanProperty isRainingRocks = new SimpleBooleanProperty(false);
 
-        inventory = new Inventory(isHoldingGun, ammo);
+        inventory = new Inventory(ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks);
+        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
-        HBox ammoHbox = getAmmoHBox(ammo);
+
+        HBox ammoHbox = createCounterHBox(ammo, "bullet", false, 920);
+        ammoHbox.visibleProperty().bind(character.isHoldingGunProperty());
+        HBox killCounterHBox = createCounterHBox(killCounter, "zombieRun1", true, 10);
 
         root.getChildren().addAll(inventory.getInventoryVbox(), healthBar,
-                statMenu, inventory.getItemOnCursor(), eventMessage, craftingMenu, ammoHbox);
+                statMenu, inventory.getItemOnCursor(), eventMessage, craftingMenu, ammoHbox, killCounterHBox);
 
         //Movement
         isAPressed = false;
@@ -119,8 +119,6 @@ public class GameController extends Scene {
         blockDropped = false;
 
         loadSave();
-
-        spawnBoss();
 
         bloodMoonTimer = new PauseTransition();
         bloodMoonTimer.setDuration(Duration.minutes(2));
@@ -165,6 +163,7 @@ public class GameController extends Scene {
             eventMessage.toFront();
             craftingMenu.toFront();
             ammoHbox.toFront();
+            killCounterHBox.toFront();
 
             // FIXME: 14/12/2023 maybe to block.toBack()
 
@@ -187,20 +186,20 @@ public class GameController extends Scene {
         List<Zombie> pack = new ArrayList<>();
         List<Node> nodes = new ArrayList<>();
         for (int i = 0; i < packSize; i++) {
-            var zombie = new Zombie();
+            var zombie = new Zombie(difficulty);
             zombie.setTranslateX(spawnTile * 32 + rand.nextDouble(25));
             zombie.setTranslateY(camera.getBlockTranslateY(spawnTile) - 48);
             zombie.translateXProperty().addListener((observableValue, number, t1) -> {
                 if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
                     zombie.attack(new Item("fist"));
-                    character.takeDamage(rand.nextInt(5) + 1);
+                    character.takeDamage(zombie.getAttack());
                 }
             });
 
             zombie.translateYProperty().addListener((observableValue, number, t1) -> {
                 if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
                     zombie.attack(new Item("fist"));
-                    character.takeDamage(rand.nextInt(5) + 1);
+                    character.takeDamage(zombie.getAttack());
                 }
             });
 
@@ -212,7 +211,7 @@ public class GameController extends Scene {
     }
 
     private void spawnBoss() {
-        Boss boss = new Boss(camera, character, 0, 0);
+        Boss boss = new Boss(camera, character, 0, 0, difficulty);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));
@@ -246,9 +245,12 @@ public class GameController extends Scene {
             character.setStrength(Integer.parseInt(strength[0]), Integer.parseInt(strength[1]));
             character.setAgility(Integer.parseInt(agility[0]), Integer.parseInt(agility[1]));
             character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
+            character.setAmmo(Integer.parseInt(playerData.get(7)));
+            character.setHealth(Double.parseDouble(playerData.get(8)));
+
             //Load Inventory
 
-            for (int i = 7; i < playerData.size(); i++) {
+            for (int i = 10; i < playerData.size(); i++) {
                 String line = playerData.get(i);
                 if(line.equals("null")) continue;
 
@@ -401,7 +403,9 @@ public class GameController extends Scene {
                     "-fx-min-width: 1024;" +
                     "-fx-alignment: center;" +
                     "-fx-spacing: 12;");
-            gameTimeline.pause();
+            if(gameTimeline != null) {
+                gameTimeline.pause();
+            }
             audioplayer.pause();
 
             Label title = new Label(isDead ? "You died" : "Paused");
@@ -576,21 +580,11 @@ public class GameController extends Scene {
         }
     }
 
-    private class Rock extends ImageView {
-        private double fallingSpeed;
-
-        public double getFallingSpeed() {
-            return fallingSpeed;
-        }
-
-        public void addSpeed(double value) {
-            fallingSpeed += value;
-        }
-    }
-
     public void saveGame() {
         TextIO.writeMap(camera.getMap() , "src/main/resources/saves/singleplayer.txt");
-        TextIO.updateFile(camera.getPlayerData(), "src/main/resources/saves/single_data.txt");
+        List<String> playerData = camera.getPlayerData();
+        playerData.add(9, difficulty.name()); //Add difficulty
+        TextIO.updateFile(playerData, "src/main/resources/saves/single_data.txt");
     }
 
     private void setBloodMoon(boolean value) {
@@ -598,29 +592,42 @@ public class GameController extends Scene {
         root.setStyle("-fx-background-color: linear-gradient(to top," + backgroundColour + ");" +
                 "-fx-min-width: 1024;" +
                 "-fx-min-height: 544;");
-        ZOMBIE_SPAWN_RATE = value ? 0.003 : 0.000;
+        //Blood moon vs Regular spawn rate
+        ZOMBIE_SPAWN_RATE = value ? 0.003 : switch (difficulty) {
+            case EASY -> 0.001;
+            case MEDIUM -> 0.0012;
+            case HARD -> 0.0015;
+        };
         if(value) bloodMoonTimer.play();
     }
 
-    private HBox getAmmoHBox(SimpleIntegerProperty ammo) {
-        Label label = new Label("");
-        label.textProperty().bind(ammo.asString());
+
+
+    private HBox createCounterHBox(SimpleIntegerProperty property, String imageName, boolean imageOnLeft, double x) {
+        //Label styling
+        Label label = new Label();
+        label.textProperty().bind(property.asString());
         label.setStyle("-fx-font-size: 24;" +
                 "-fx-font-weight: bold;" +
-                "-fx-alignment: center-right;" +
                 "-fx-min-width: 50");
+        label.setAlignment(imageOnLeft ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
 
-        ImageView bullet = new ImageView("file:src/main/resources/images/bullet.png");
-        bullet.setFitWidth(32);
-        bullet.setFitHeight(32);
-        bullet.setPreserveRatio(true);
+        //Image
+        ImageView imageView = new ImageView("file:src/main/resources/images/" + imageName + ".png");
+        imageView.setFitWidth(32);
+        imageView.setFitHeight(32);
+        imageView.setPreserveRatio(true);
 
+        //Hbox that contains both
         HBox hbox = new HBox(12);
-        hbox.getChildren().addAll(label, bullet);
-        hbox.visibleProperty().bind(character.isHoldingGunProperty());
+        if(imageOnLeft) {
+            hbox.getChildren().addAll(imageView, label);
+        } else {
+            hbox.getChildren().addAll(label, imageView);
+        }
         hbox.setMouseTransparent(true);
         hbox.setAlignment(Pos.CENTER_RIGHT);
-        hbox.setTranslateX(920);
+        hbox.setTranslateX(x);
         hbox.setTranslateY(500);
         return hbox;
     }

@@ -22,7 +22,13 @@ https://creativecommons.org/licenses/by/4.0/
         this.media = new Media(getClass().getResource("/sound/" + sound + ".mp3").toExternalForm());
         this.mediaPlayer = new MediaPlayer(media);
         this.mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        setVolume(Double.parseDouble(TextIO.readFile("src/main/resources/settings/settings.txt").get(2)) / 100);
+
+        //volume
+        if(sound.equals("background")) {
+            setVolume(Double.parseDouble(TextIO.readFile("src/main/resources/settings/settings.txt").get(2)) / 100);
+        } else {
+            setVolume(Double.parseDouble(TextIO.readFile("src/main/resources/settings/settings.txt").get(1)) / 100);
+        }
     }
 
     public void play() {
