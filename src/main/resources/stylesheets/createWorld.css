@@ -1,6 +1,5 @@
 #root {
     -fx-alignment: center;
-    -fx-spacing: 120;
     -fx-padding: 20;
 }
 
@@ -52,5 +51,9 @@
 #difficultyVbox {
     -fx-spacing: 30;
     -fx-alignment: center;
+}
+
+#passwordHbox {
+    -fx-pref-width: 200;
 }
 

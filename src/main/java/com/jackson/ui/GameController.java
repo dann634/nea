@@ -4,6 +4,7 @@ import com.jackson.game.Difficulty;
 import com.jackson.game.MovementHandler;
 import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Player;
+import com.jackson.game.characters.PlayerInterface;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
@@ -11,12 +12,16 @@ import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import com.jackson.network.connections.Client;
+import com.jackson.network.connections.PseudoPlayer;
 import com.jackson.ui.hud.CraftingMenu;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -29,7 +34,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class GameController extends Scene {
 
@@ -57,23 +66,27 @@ public class GameController extends Scene {
     private boolean isWPressed;
     private boolean isSpacePressed;
     private final Difficulty difficulty;
+    private final boolean isSingleplayer;
+    private Client client;
 
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
 
-    public GameController(Difficulty difficulty) {
+    public GameController(Difficulty difficulty, boolean isSingleplayer) {
         super(new VBox());
 
+        client = null;
         this.difficulty = difficulty;
+        this.isSingleplayer = isSingleplayer;
 
         //Root
         root = new AnchorPane();
         Main.applyWindowSize(root);
 
         //Initialises fields
-        zombies = new ArrayList<>();
+        zombies = new CopyOnWriteArrayList<>();
         rand = new Random();
-        String[][] map = TextIO.readMapFile(true);
+        String[][] map = TextIO.readMapFile(isSingleplayer);
         initLookupTable();
 
         //Sound
@@ -87,10 +100,15 @@ public class GameController extends Scene {
         walkingEffects = new AudioPlayer("walking");
         jumpingEffects = new AudioPlayer("jump");
 
+
         //HUD
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
         SimpleIntegerProperty ammo = new SimpleIntegerProperty(0);
         SimpleIntegerProperty killCounter = new SimpleIntegerProperty(0);
+        killCounter.addListener((observableValue, number, t1) -> {
+            //Must kill 50 zombies for boss to spawn
+            if(t1.intValue() == 50) spawnBoss();
+        });
 
         SimpleBooleanProperty isBloodMoonActive = new SimpleBooleanProperty(false);
         isBloodMoonActive.addListener((observableValue, aBoolean, t1) -> setBloodMoon(t1));
@@ -118,26 +136,34 @@ public class GameController extends Scene {
 
         blockDropped = false;
 
-        loadSave();
+        if(isSingleplayer) loadSaveData(TextIO.readFile("src/main/resources/saves/single_data.txt"));
 
         bloodMoonTimer = new PauseTransition();
         bloodMoonTimer.setDuration(Duration.minutes(2));
         bloodMoonTimer.setOnFinished(e -> setBloodMoon(false));
         setBloodMoon(false);
 
+
         setRoot(root);
         root.setId("root");
         getStylesheets().add("file:src/main/resources/stylesheets/game.css");
 
-        Main.getStage().setOnCloseRequest(e -> saveGame()); //Saves when red cross clicked
+        Main.getStage().setOnCloseRequest(e -> {
+            if(isSingleplayer) saveGame();
+        });
+
 
         movementHandler = new MovementHandler(character, camera);
         gameTimeline = new Timeline();
         gameTimeline.setCycleCount(Animation.INDEFINITE);
         gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
 
-            movementHandler.calculateXProperties(isAPressed, isDPressed, character); //character X movement
-            movementHandler.calculateYProperties(isWPressed); //character y movement
+            try {
+                movementHandler.calculateXProperties(isAPressed, isDPressed, character); //character X movement
+                movementHandler.calculateYProperties(isWPressed); //character y movement
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             movementHandler.calculateZombieMovement(zombies);
 
             if(camera.isBlockJustBroken() || blockDropped) { //Check to save cpu
@@ -170,12 +196,11 @@ public class GameController extends Scene {
 
         }));
         gameTimeline.play();
-
-
     }
 
     private void spawnZombiePack() {
         //Do check first
+        if(!isSingleplayer) return;
         if(rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
             return; //No spawn
         }
@@ -228,15 +253,15 @@ public class GameController extends Scene {
         zombies.add(boss);
     }
 
-    private void loadSave() {
-        List<String> playerData = TextIO.readFile("src/main/resources/saves/single_data.txt");
-        if(playerData.isEmpty()) {
+    public void loadSaveData(List<String> playerData) {
+        if (playerData.isEmpty()) {
             camera.sendToSpawn();
         } else {
             character.setXPos(Integer.parseInt(playerData.get(0)));
             character.setYPos(Integer.parseInt(playerData.get(1)));
             camera.addXOffset(Integer.parseInt(playerData.get(2)));
             camera.addYOffset(Integer.parseInt(playerData.get(3)));
+            CopyOnWriteArrayList<Zombie> e = new CopyOnWriteArrayList<>();
 
             String[] strength = playerData.get(4).split(" ");
             String[] agility = playerData.get(5).split(" ");
@@ -247,17 +272,17 @@ public class GameController extends Scene {
             character.setDefence(Integer.parseInt(defence[0]), Integer.parseInt(defence[1]));
             character.setAmmo(Integer.parseInt(playerData.get(7)));
             character.setHealth(Double.parseDouble(playerData.get(8)));
-            camera.setKillCounter(Integer.parseInt(playerData.get(10)));
+            camera.setKillCounter(Integer.parseInt(playerData.get(isSingleplayer ? 10 : 9)));
 
             //Load Inventory
 
-            for (int i = 11; i < playerData.size(); i++) {
+            for (int i = isSingleplayer ? 11 : 10; i < playerData.size(); i++) {
                 String line = playerData.get(i);
-                if(line.equals("null")) continue;
+                if (line.equals("null")) continue;
 
                 String[] splitLine = line.split(" ");
                 Entity entity;
-                if(lookupTable.containsKey(splitLine[0])) {
+                if (lookupTable.containsKey(splitLine[0])) {
                     entity = new Block(splitLine[0], -1, -1, camera, inventory);
                 } else {
                     entity = new Item(splitLine[0]);
@@ -266,7 +291,6 @@ public class GameController extends Scene {
                 itemStack.addStackValue(Integer.parseInt(splitLine[1]));
                 inventory.addItem(itemStack);
             }
-
             camera.initWorld();
         }
     }
@@ -286,12 +310,37 @@ public class GameController extends Scene {
             character.updateBlockInHand(inventory.getSelectedItemStack());
         });
 
-        root.getChildren().addAll(character, character.getDisplayNameLabel(), character.getHandRectangle(), character.getAimingLine());
+        root.getChildren().addAll(character, character.getHandRectangle(), character.getAimingLine());
         root.getChildren().addAll(character.getCollisions());
         character.toFront();
 
         initOnKeyPressed();
     }
+
+    public void addPlayer(PseudoPlayer player) {
+        List<List<Block>> blocks = camera.getBlocks();
+        int leftBorder = blocks.get(0).get(0).getXPos();
+        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
+        int topBorder = blocks.get(0).get(0).getYPos();
+        int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
+        if(player.getXPos() < leftBorder || player.getXPos() > rightBorder || player.getYPos() < topBorder || player.getYPos() > bottomBorder) {
+            System.out.println("non on screen");
+            return; //Not on screen
+        }
+        for(List<Block> line : blocks) {
+            if(line.get(0).getXPos() == player.getXPos()) {
+                for(Block block : line) {
+                    if(block.getYPos() == player.getYPos()) {
+                        player.getImageView().setTranslateY(block.getTranslateY() - 48 - 62);
+                        player.getImageView().setTranslateX(block.getTranslateX() - 32);
+                    }
+                }
+            }
+        }
+        root.getChildren().add(player.getImageView());
+        camera.addOnlinePlayer(player);
+    }
+
 
 
 
@@ -404,7 +453,7 @@ public class GameController extends Scene {
                     "-fx-min-width: 1024;" +
                     "-fx-alignment: center;" +
                     "-fx-spacing: 12;");
-            if(gameTimeline != null) {
+            if(gameTimeline != null && isSingleplayer) {
                 gameTimeline.pause();
             }
             audioplayer.pause();
@@ -445,7 +494,17 @@ public class GameController extends Scene {
             Button button = new Button("Save and Exit");
             button.setOnAction(e -> {
                 //Save first
-                saveGame();
+                if(isSingleplayer) {
+                    saveGame();
+                } else {
+                    try {
+                        client.savePlayerData(camera.getPlayerData());
+//                        client.closeClient();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+
                 Main.setScene(new MainMenuController());
             });
             return button;
@@ -634,6 +693,16 @@ public class GameController extends Scene {
         hbox.setTranslateY(500);
         return hbox;
     }
+
+    public void setClient(Client client) {
+        this.client = client;
+        camera.setClient(client);
+    }
+
+    public void updatePositionOnServer(int[] pos) throws IOException {
+        client.updatePositionOnServer(pos);
+    }
+
 
 
 

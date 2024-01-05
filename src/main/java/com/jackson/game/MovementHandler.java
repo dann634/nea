@@ -11,6 +11,7 @@ import javafx.animation.Timeline;
 import javafx.geometry.NodeOrientation;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public class MovementHandler {
         this.camera = camera;
     }
 
-    public void calculateYProperties(boolean isWPressed) {
+    public void calculateYProperties(boolean isWPressed) throws IOException {
         boolean isCharacterTouchingFloor = camera.isEntityTouchingBlock(character.getFeetCollision(), true); //Is character touching floor
         if(isCharacterTouchingFloor && !isWPressed && jumpAcceleration >= 0) { //Not jumping and on floor
             return;
@@ -62,7 +63,7 @@ public class MovementHandler {
 
     }
 
-    private void updateYOffset(int offset, boolean isCharacterMovingDown) {
+    private void updateYOffset(int offset, boolean isCharacterMovingDown) throws IOException {
         camera.translateBlocksByY(offset); //Move world by a value
         boolean condition = isCharacterMovingDown ? camera.getyOffset() < -32 : camera.getyOffset() > 32;
         if(!condition) return;
@@ -81,7 +82,7 @@ public class MovementHandler {
 
 
 
-    public void calculateXProperties(boolean isAPressed, boolean isDPressed, Player player) {
+    public void calculateXProperties(boolean isAPressed, boolean isDPressed, Player player) throws IOException {
 
         if(!isAPressed && !isDPressed) { //For optimization
             return;

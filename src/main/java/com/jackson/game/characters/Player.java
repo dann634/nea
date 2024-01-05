@@ -24,11 +24,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
-public class Player extends Character {
+public class Player extends Character implements PlayerInterface {
 
     private int xPos;
     private int yPos;
-    private Label displayNameLabel;
     private final Line aimingLine;
     private ImageView handImageView;
     private final SimpleBooleanProperty isHoldingGun;
@@ -51,7 +50,6 @@ public class Player extends Character {
         setX(484); //Half Screen size (512) - Character Width (48) + Some Value(22)
         setY(180);
 
-        initDisplayNameLabel();
         this.aimingLine = initAimingLine();
         currentItemOffsets = new int[]{0, 0, 0};
 
@@ -138,17 +136,11 @@ public class Player extends Character {
         //Offsets
 
         currentItemOffsets = getOffsets(itemName);
-        handImageView.yProperty().bind(yProperty().add(currentItemOffsets[2]));
+        handImageView.yProperty().bind(yProperty().add(currentItemOffsets[2]).add(5));
         handImageView.xProperty().bind(xProperty().add(isModelFacingRight.get() ? currentItemOffsets[1] : currentItemOffsets[0]));
     }
 
-    private void initDisplayNameLabel() {
-        displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
-        displayNameLabel.translateXProperty().bind(xProperty().subtract(displayNameLabel.getWidth() / 2));
-        displayNameLabel.translateYProperty().bind(yProperty().subtract(15));
-        displayNameLabel.setStyle("-fx-font-weight: bold");
-        displayNameLabel.setVisible(false); // not for singleplayer
-    }
+
 
     private Line initAimingLine() {
         Line line = new Line();
@@ -187,10 +179,6 @@ public class Player extends Character {
 
     public ImageView getHandRectangle() {
         return handImageView;
-    }
-
-    public Label getDisplayNameLabel() {
-        return displayNameLabel;
     }
 
     public void setIsModelFacingRight(boolean isModelFacingRight) {
@@ -390,4 +378,7 @@ public class Player extends Character {
     public void setAmmo(int ammo) {
         this.ammo.set(ammo);
     }
+
+
+
 }

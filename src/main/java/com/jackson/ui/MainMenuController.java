@@ -3,13 +3,17 @@ package com.jackson.ui;
 import com.jackson.game.Difficulty;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import com.jackson.network.connections.Client;
+import javafx.application.Platform;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -66,16 +70,71 @@ public class MainMenuController extends Scene implements Initializable {
                 return;
             }
 
-            Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9))));
+            Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9)), true));
         });
 
-        multiplayerButton.setOnAction(e -> Main.setScene(new LobbyController()));
+
+        multiplayerButton.setOnAction(e -> {
+            //Does multiplayer world already exist
+            try {
+                Client client = new Client();
+                if(!client.doesWorldExist()) {
+                    CreateWorldController createWorldController = new CreateWorldController();
+                    createWorldController.multiplayer();
+                    Platform.runLater(() -> Main.setScene(createWorldController));
+                } else {
+                    if(!client.isUsernameUnique()) {
+                        Main.setScene(new ErrorScreen("Username already in use. Please Change"));
+                    } else {
+                        client.joinGame();
+                        client.startListening();
+                    }
+
+                }
+            } catch (IOException | ClassNotFoundException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
 
         settingsButton.setOnAction(e -> Main.setScene(new SettingsController())); //Goes to settings scene
         helpButton.setOnAction(e -> {}); //Goes to help scene
         exitButton.setOnAction(e -> System.exit(0)); //Exits Game
 
 
+    }
+
+    private class ErrorScreen extends Scene {
+
+        public ErrorScreen(String errorMessage) {
+            super(new VBox());
+            VBox root = new VBox();
+            root.setStyle("-fx-alignment: center;" +
+                    "-fx-spacing: 40;" +
+                    "-fx-pref-height: 544;" +
+                    "-fx-pref-width: 1024;");
+
+            //Title
+            Label title = new Label("Error");
+            title.setStyle("-fx-font-size: 42;" +
+                    "-fx-font-weight: bold");
+
+            //Error Message
+            Label errorText = new Label(errorMessage);
+            errorText.setStyle("-fx-font-size: 24;" +
+                    "-fx-text-fill: red;");
+
+            //Back Button
+            Button backButton = new Button("Back");
+            backButton.setStyle("-fx-pref-width: 150;" +
+                    "-fx-pref-height: 40;" +
+                    "-fx-font-size: 18");
+            backButton.setOnAction(e -> Main.setScene(new MainMenuController()));
+
+            root.getChildren().addAll(title, errorText, backButton);
+
+
+            setRoot(root);
+        }
     }
 
 

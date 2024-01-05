@@ -9,6 +9,8 @@ import com.jackson.game.characters.Player;
 import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
+import com.jackson.network.connections.Client;
+import com.jackson.network.connections.PseudoPlayer;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.PathTransition;
@@ -26,6 +28,7 @@ import javafx.scene.shape.*;
 import javafx.scene.transform.Translate;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +47,7 @@ public class Camera {
     private List<ImageView> rocks;
     private final List<ItemStack> droppedBlocks;
     private final List<Zombie> zombies;
+    private final List<PseudoPlayer> onlinePlayers;
     private final Inventory inventory;
     private int xOffset;
     private int yOffset;
@@ -54,6 +58,7 @@ public class Camera {
     private final Image rockImage = new Image("file:src/main/resources/images/rock.png");
     private final SimpleBooleanProperty isRainingRocks;
     private final SimpleIntegerProperty killCounter;
+    private Client client;
 
     // TODO: 19/12/2023 LOAD IMAGES ONCE IN CONSTRUCTOR
 
@@ -67,6 +72,7 @@ public class Camera {
         this.rock = initRock();
         xOffset = 0;
         yOffset = 0;
+        this.onlinePlayers = new ArrayList<>(); //Won't be used in singleplayer
         this.isBloodMoonActive = isBloodMoonActive;
         this.killCounter = killCounter;
         droppedBlocks = new ArrayList<>();
@@ -181,7 +187,7 @@ public class Camera {
         }
     }
 
-    public void translateBlocksByX(int offset) {
+    public void translateBlocksByX(int offset) throws IOException {
         xOffset += offset; //Add to global offset
         //Move all blocks
         for (List<Block> blocks : blocks) {
@@ -202,9 +208,15 @@ public class Camera {
         for(ImageView rock1 : rocks) {
             rock1.setTranslateX(rock1.getTranslateX() + offset);
         }
+        //Multiplayer only
+        for(PseudoPlayer player : onlinePlayers) {
+            player.getImageView().setTranslateX(player.getImageView().getTranslateX() + offset);
+        }
+        if(client == null) return;
+        client.updatePositionOnServer(new int[]{character.getXPos(), character.getYPos(), offset, 0});
     }
 
-    public void translateBlocksByY(int offset) {
+    public void translateBlocksByY(int offset) throws IOException {
         yOffset += offset; //Add to global offset
         //Move all blocks
         for (List<Block> blocks : blocks) {
@@ -225,6 +237,13 @@ public class Camera {
         for(ImageView rock1 : rocks) {
             rock1.setTranslateY(rock1.getTranslateY() + offset);
         }
+        //Multiplayer only
+        for(PseudoPlayer player : onlinePlayers) {
+            player.getImageView().setTranslateY(player.getImageView().getTranslateY() + offset);
+        }
+        if(client == null) return;
+
+        client.updatePositionOnServer(new int[]{character.getXPos(), character.getYPos(), 0, offset});
     }
 
     public void initWorld() { // FIXME: 30/10/2023 issue on creating -> two lines are overlapping
@@ -703,5 +722,17 @@ public class Camera {
 
     public void setKillCounter(int killCounter) {
         this.killCounter.set(killCounter);
+    }
+
+    public List<List<Block>> getBlocks() {
+        return blocks;
+    }
+
+    public void addOnlinePlayer(PseudoPlayer player) {
+        onlinePlayers.add(player);
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
     }
 }

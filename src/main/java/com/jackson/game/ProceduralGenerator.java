@@ -38,7 +38,7 @@ public class ProceduralGenerator {
 
 
 
-    public static void createMapFile(boolean isSingleplayer) {
+    public static String[][] createMapArray() {
         List<Integer> fullHeightMap = new ArrayList<>();
 
         for (int i = 0; i < NUMBER_OF_CHUNKS; i++) {
@@ -49,8 +49,7 @@ public class ProceduralGenerator {
 
         spawnTrees(fullHeightMap, heightMapArray);
         spawnOres(heightMapArray);
-
-        saveMapToFile(heightMapArray, isSingleplayer);
+        return heightMapArray;
     }
 
 
@@ -83,9 +82,8 @@ public class ProceduralGenerator {
         return heightMapArray;
     }
 
-    private static void saveMapToFile(String[][] heightMapArray, boolean isSingleplayer) {
-        String dir = "src/main/resources/saves/";
-        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt";
+    public static void saveMapToFile(String[][] heightMapArray) {
+        String dir = "src/main/resources/saves/singleplayer.txt";
 
         try {
             Files.createFile(Paths.get(dir));

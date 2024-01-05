@@ -4,35 +4,36 @@ import com.jackson.game.Difficulty;
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import com.jackson.network.connections.Client;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class CreateWorldController extends Scene {
 
     private static final String EASY_DESCRIPTION = "A relaxed experience, mobs have lowered HP and deal less damage (Recommended for Casual Players)";
     private static final String MEDIUM_DESCRIPTION = "A balanced experience, mobs have a fair amount of HP and deal some damage (Recommended for Intermediate Players)";
     private static final String HARD_DESCRIPTION = "A challenging experience, mobs have lots of HP and deal insane damage (Recommended for Veteran Players)";
+    private final VBox root;
+    private final Label title;
+    private final Button generateWorldButton;
 
 
     // TODO: 21/08/2023 Maybe break this down into methods
     public CreateWorldController() {
         super(new VBox()); //Super constructor with placeholder pane
 
-        VBox root = new VBox(); //Actual pane for this scene
+        root = new VBox(); //Actual pane for this scene
+        root.setSpacing(120);
         setRoot(root); //Pane is added to scene
         root.setId("root");
         Main.applyWindowSize(root); //Standard window size is applied
 
-        var title = new Label("Create World"); //Title of scene
+        title = new Label("Create World"); //Title of scene
         title.setId("title");
 
         var difficultyLabel = new Label("Difficulty:"); //Label for combobox
@@ -61,16 +62,16 @@ public class CreateWorldController extends Scene {
         difficultyVbox.getChildren().addAll(difficultyHbox, description);
 
         //Generate world button
-        var generateWorldButton = new Button("Generate World");
+        generateWorldButton = new Button("Generate World");
         generateWorldButton.setId("generateWorldButton");
         generateWorldButton.setOnAction(e -> {
-            ProceduralGenerator.createMapFile(true);
+            ProceduralGenerator.saveMapToFile(ProceduralGenerator.createMapArray());
             try {
                 new File("src/main/resources/saves/single_data.txt").createNewFile();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toString().toUpperCase())));
+            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toString().toUpperCase()), true));
         });
 
         //Back button (back to main menu)
@@ -87,6 +88,32 @@ public class CreateWorldController extends Scene {
 
         //Css stylesheet added
         getStylesheets().add("file:src/main/resources/stylesheets/createWorld.css");
+    }
+
+    public void multiplayer() {
+        title.setText("Host Game");
+        root.setSpacing(40);
+
+        //Password Stuff
+        Label passwordLabel = new Label("Password:");
+        PasswordField passwordField = new PasswordField();
+
+        //hbox
+        HBox hBox = new HBox();
+        hBox.getStyleClass().add("hbox");
+        hBox.getChildren().addAll(passwordLabel, passwordField);
+        root.getChildren().add(2, hBox);
+        generateWorldButton.disableProperty().bind(passwordField.lengthProperty().lessThan(5).or(passwordField.lengthProperty().greaterThan(20)));
+        generateWorldButton.setOnAction(e -> {
+            try {
+                Client client = new Client();
+                client.send("map", ProceduralGenerator.createMapArray());
+                client.joinGame();
+                client.startListening();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
 

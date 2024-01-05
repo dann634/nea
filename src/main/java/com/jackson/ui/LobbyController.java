@@ -2,7 +2,7 @@ package com.jackson.ui;
 
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
-import com.jackson.network.connections.GlobalServerConnection;
+import com.jackson.network.connections.Client;
 import com.jackson.network.shared.Lobby;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -144,21 +144,20 @@ public class LobbyController extends Scene {
     }
 
     private void updateUI(String filter) {
-        this.updatableGrid.getChildren().clear();
-        try {
-            setConnectedToServerLabel(true);
-            this.lobbyList = GlobalServerConnection.getLobbyList();
-        } catch (IOException | InterruptedException e) {
-            setConnectedToServerLabel(false);
-            this.lobbyList = new ArrayList<>();
-        }
+//        this.updatableGrid.getChildren().clear();
+//        try {
+//            setConnectedToServerLabel(true);
+//        } catch (IOException | InterruptedException e) {
+//            setConnectedToServerLabel(false);
+//            this.lobbyList = new ArrayList<>();
+//        }
 
         if(filter.equals("none")) {
-            try {
-                this.pingLabel.setText("Ping: " + GlobalServerConnection.pingServer() + "ms");
-                this.lobbiesActiveLabel.setText("Lobbies Active: " + this.lobbyList.size());
-            } catch (IOException | InterruptedException ignored) {
-            }
+//            try {
+////                this.pingLabel.setText("Ping: " + Client.pingServer() + "ms");
+//                this.lobbiesActiveLabel.setText("Lobbies Active: " + this.lobbyList.size());
+//            } catch (IOException | InterruptedException ignored) {
+//            }
         }
 
         for(int i = 0; i < this.lobbyList.size(); i++) {
