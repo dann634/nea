@@ -1,5 +1,6 @@
 package com.jackson.network.connections;
 
+import com.jackson.game.characters.Player;
 import com.jackson.game.characters.PlayerInterface;
 import com.jackson.io.TextIO;
 import javafx.beans.value.ChangeListener;
@@ -19,6 +20,7 @@ public class PseudoPlayer implements PlayerInterface {
     private final Image image2;
     private Label displayNameLabel;
     private final String displayName;
+    private int oldX;
 
 
     public PseudoPlayer(String displayName) {
@@ -29,14 +31,17 @@ public class PseudoPlayer implements PlayerInterface {
         imageView.setPreserveRatio(true);
         imageView.setFitWidth(32);
         initDisplayNameLabel();
-
+        oldX = 16;
     }
 
     private void initDisplayNameLabel() {
         displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
-        displayNameLabel.translateXProperty().bind(this.imageView.xProperty().subtract(displayNameLabel.getWidth() / 2));
-        displayNameLabel.translateYProperty().bind(this.imageView.yProperty().subtract(15));
-        displayNameLabel.setStyle("-fx-font-weight: bold");
+        displayNameLabel.translateXProperty().bind(this.imageView.translateXProperty().subtract((displayNameLabel.getWidth() / 2) + 32));
+        displayNameLabel.translateYProperty().bind(this.imageView.translateYProperty().subtract(20));
+        displayNameLabel.setStyle("-fx-font-weight: bold;" +
+                "-fx-min-width: 86;" +
+                "-fx-text-alignment: center;" +
+                "-fx-alignment: center;");
     }
 
     public void translateX(int value) {
@@ -46,12 +51,26 @@ public class PseudoPlayer implements PlayerInterface {
         } else {
             this.imageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         }
+
+        //Walking Animation
+        oldX -= Math.abs(value);
+        if(oldX <= 0) {
+            if(this.imageView.getImage() == image1) {
+                this.imageView.setImage(image2);
+            } else {
+                this.imageView.setImage(image1);
+            }
+            oldX = 16;
+        }
     }
 
     public void translateY(int value) {
         this.imageView.setTranslateY(this.imageView.getTranslateY() + value);
     }
 
+    public Label getDisplayNameLabel() {
+        return displayNameLabel;
+    }
 
     @Override
     public void setXPos(int value) {

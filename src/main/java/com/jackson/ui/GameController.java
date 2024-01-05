@@ -337,7 +337,7 @@ public class GameController extends Scene {
                 }
             }
         }
-        root.getChildren().add(player.getImageView());
+        root.getChildren().addAll(player.getImageView(), player.getDisplayNameLabel());
         camera.addOnlinePlayer(player);
     }
 
