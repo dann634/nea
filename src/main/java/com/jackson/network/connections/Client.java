@@ -26,9 +26,9 @@ public class Client {
     private final ObjectOutputStream outStream;
     private final ObjectInputStream inStream;
     private GameController gameController;
-    private List<PseudoPlayer> players;
+    private final List<PseudoPlayer> players;
     private List<String> playerData;
-    private String displayName;
+    private final String displayName;
     private Thread thread;
     private static final int PORT = 4234;
     private static final String LAPTOP_IP = "192.168.0.36";
@@ -44,20 +44,17 @@ public class Client {
 
 
     public void startListening() {
-        thread = new Thread(() -> {
+        Runnable runnable = () -> {
             try {
                 while(true) {
                     Packet packet = (Packet) inStream.readObject();
                     processPacket(packet);
                 }
-
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-        });
-        thread.setDaemon(true);
-        thread.start();
-
+        };
+        thread = Thread.ofVirtual().start(runnable);
 
     }
 
@@ -101,13 +98,14 @@ public class Client {
                 int[] posData = (int[]) packet.getObject();
                 for(PseudoPlayer player : players) {
                     if(player.getDisplayName().equals(targetName)) {
-                        player.translateX(-posData[2]);
-                        player.translateY(-posData[3]);
-                        player.setXPos(posData[0]);
-                        player.setYPos(posData[1]);
-//                        player.setxOffset();
-//                        player.setyOffset(posData[3]);
-
+                        Platform.runLater(() -> {
+                            gameController.addOnlinePlayerIfOnScreen(player);
+                            player.translateX(-posData[2]);
+                            player.translateY(-posData[3]);
+                            player.setXPos(posData[0]);
+                            player.setYPos(posData[1]);
+                        });
+                        return;
                     }
                 }
             }

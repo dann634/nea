@@ -318,27 +318,35 @@ public class GameController extends Scene {
     }
 
     public void addPlayer(PseudoPlayer player) {
+        addOnlinePlayerIfOnScreen(player);
+        root.getChildren().addAll(player.getImageView(), player.getDisplayNameLabel());
+        camera.addOnlinePlayer(player);
+    }
+
+    public void addOnlinePlayerIfOnScreen(PseudoPlayer player) {
+
+        if(player.isOnScreen()) return;
+
         List<List<Block>> blocks = camera.getBlocks();
         int leftBorder = blocks.get(0).get(0).getXPos();
         int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
         int topBorder = blocks.get(0).get(0).getYPos();
         int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
         if(player.getXPos() < leftBorder || player.getXPos() > rightBorder || player.getYPos() < topBorder || player.getYPos() > bottomBorder) {
-            System.out.println("non on screen");
+            player.setOnScreen(false);
             return; //Not on screen
         }
+        player.setOnScreen(true);
         for(List<Block> line : blocks) {
             if(line.get(0).getXPos() == player.getXPos()) {
                 for(Block block : line) {
                     if(block.getYPos() == player.getYPos()) {
-                        player.getImageView().setTranslateY(block.getTranslateY() - 48 - 62);
-                        player.getImageView().setTranslateX(block.getTranslateX() - 32);
+                        player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset() - 48);
+                        player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset() - 32);
                     }
                 }
             }
         }
-        root.getChildren().addAll(player.getImageView(), player.getDisplayNameLabel());
-        camera.addOnlinePlayer(player);
     }
 
 

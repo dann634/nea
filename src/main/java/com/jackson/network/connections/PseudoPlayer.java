@@ -21,6 +21,7 @@ public class PseudoPlayer implements PlayerInterface {
     private Label displayNameLabel;
     private final String displayName;
     private int oldX;
+    private boolean isOnScreen;
 
 
     public PseudoPlayer(String displayName) {
@@ -32,10 +33,11 @@ public class PseudoPlayer implements PlayerInterface {
         imageView.setFitWidth(32);
         initDisplayNameLabel();
         oldX = 16;
+        isOnScreen = false;
     }
 
     private void initDisplayNameLabel() {
-        displayNameLabel = new Label(TextIO.readFile("src/main/resources/settings/settings.txt").get(0));
+        displayNameLabel = new Label(this.displayName);
         displayNameLabel.translateXProperty().bind(this.imageView.translateXProperty().subtract((displayNameLabel.getWidth() / 2) + 32));
         displayNameLabel.translateYProperty().bind(this.imageView.translateYProperty().subtract(20));
         displayNameLabel.setStyle("-fx-font-weight: bold;" +
@@ -44,8 +46,10 @@ public class PseudoPlayer implements PlayerInterface {
                 "-fx-alignment: center;");
     }
 
-    public void translateX(int value) {
+    public void translateX(int value) { //This is being run as the legs are moving (person is not being translated with it)
+        // FIXME: 05/01/2024 TRANSLATE X IS CHANGING BUT IMAGEVIEW ISNT MOVING
         this.imageView.setTranslateX(this.imageView.getTranslateX() + value);
+        System.out.println(imageView.getTranslateX());
         if(value > 0) {
             this.imageView.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
         } else {
@@ -114,5 +118,13 @@ public class PseudoPlayer implements PlayerInterface {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public boolean isOnScreen() {
+        return isOnScreen;
+    }
+
+    public void setOnScreen(boolean onScreen) {
+        isOnScreen = onScreen;
     }
 }
