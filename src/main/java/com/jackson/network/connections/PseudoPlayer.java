@@ -47,9 +47,7 @@ public class PseudoPlayer implements PlayerInterface {
     }
 
     public void translateX(int value) { //This is being run as the legs are moving (person is not being translated with it)
-        // FIXME: 05/01/2024 TRANSLATE X IS CHANGING BUT IMAGEVIEW ISNT MOVING
         this.imageView.setTranslateX(this.imageView.getTranslateX() + value);
-        System.out.println(imageView.getTranslateX());
         if(value > 0) {
             this.imageView.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
         } else {

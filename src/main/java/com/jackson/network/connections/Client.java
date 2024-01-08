@@ -134,6 +134,12 @@ public class Client {
         outStream.writeObject(packet);
     }
 
+    private void send(String msg, String ext, Object object) throws IOException {
+        Packet packet = new Packet(msg, object);
+        packet.setExt(ext);
+        outStream.writeObject(packet);
+    }
+
     public boolean doesWorldExist() throws IOException, ClassNotFoundException {
         send("world_check", null);
         return (Boolean) ((Packet) inStream.readObject()).getObject(); //might cause errors
@@ -149,8 +155,7 @@ public class Client {
     }
 
     public void savePlayerData(List<String> data) throws IOException {
-        data.add(displayName);
-        send("save_player_data", data);
+        send("save_player_data", displayName, data);
     }
 
     public void updatePositionOnServer(int[] data) throws IOException {
