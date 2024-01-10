@@ -3,7 +3,8 @@ package com.jackson.io;
 import com.jackson.game.ProceduralGenerator;
 
 import java.io.*;
-import java.time.chrono.HijrahEra;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,34 +59,36 @@ public class TextIO {
 
 
 
-    public static boolean writeMap(String[][] bitmap, String dir) {
-        if(bitmap == null || bitmap.length == 0) { //Gatekeeping
-            return false;
+    public static void writeMap(String[][] bitmap, String dir) {
+        if(bitmap == null || bitmap.length == 0) { //Gate keeping
+            return;
         }
 
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(dir, false));
             for (int i = 0; i < 300; i++) {
+                //From top to bottom of map
                 StringBuilder line = new StringBuilder();
                 for (int j = 0; j < 1000; j++) {
+                    //Adds characters to line
                     line.append(bitmap[j][i]);
                 }
+                //Writes whole line to file
                 writer.write(line.toString());
-                writer.write("\n");
+                writer.newLine(); //New Line
             }
-            writer.close();
+            writer.close(); //CLose writer
         } catch (IOException e) {
-            return false;
+            System.err.println("Error: Saving Map File Failed");
         }
-        return true;
     }
 
-    public static String[][] readMapFile(boolean isSingleplayer) {
-        String dir = "src/main/resources/saves/";
-        dir += isSingleplayer ? "singleplayer.txt" : "multiplayer.txt";
+    public static String[][] readMapFile() {
+        String dir = "src/main/resources/saves/singleplayer.txt";
 
-        if(!new File(dir).exists()) {
+        if(Files.notExists(Path.of(dir))) {
             System.err.println("Save file not found");
+            return null;
         }
 
         String[][] mapFile = new String[ProceduralGenerator.getWidth()][ProceduralGenerator.getHeight()];

@@ -71,7 +71,7 @@ public class CreateWorldController extends Scene {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toString().toUpperCase()), true));
+            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toString().toUpperCase()), true, null));
         });
 
         //Back button (back to main menu)

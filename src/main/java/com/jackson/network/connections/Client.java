@@ -1,10 +1,8 @@
 package com.jackson.network.connections;
 
 import com.jackson.game.Difficulty;
-import com.jackson.game.characters.Player;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
-import com.jackson.network.shared.Lobby;
 import com.jackson.network.shared.Packet;
 import com.jackson.ui.GameController;
 import javafx.application.Platform;
@@ -13,8 +11,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,67 +26,68 @@ public class Client {
     private List<String> playerData;
     private final String displayName;
     private Thread thread;
+    private String[][] map;
     private static final int PORT = 4234;
     private static final String LAPTOP_IP = "192.168.0.36";
     private static final String SERVER_IP = "192.168.50.98";
 
     public Client() throws IOException {
-        socket = new Socket("localhost", PORT); //initialises socket (localhost for testing only)
+        socket = new Socket("localhost", PORT); //initialises socket
         outStream = new ObjectOutputStream(socket.getOutputStream()); //initialises the outstream
         inStream = new ObjectInputStream(socket.getInputStream()); //initialises the instream
-        players = new ArrayList<>();
+        players = new ArrayList<>(); //Used to hold other players
         displayName = TextIO.readFile("src/main/resources/settings/settings.txt").get(0);
     }
 
 
     public void startListening() {
-        Runnable runnable = () -> {
-            try {
-                while(true) {
-                    Packet packet = (Packet) inStream.readObject();
-                    processPacket(packet);
-                }
-            } catch (IOException | ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-        };
-        thread = Thread.ofVirtual().start(runnable);
-
+          thread = new Thread(() -> {
+              try {
+                  while(true) {
+                      //Listen for object and pass it for processing
+                      Packet packet = (Packet) inStream.readObject();
+                      processPacket(packet);
+                  }
+              } catch (IOException | ClassNotFoundException e) {
+                  e.printStackTrace();
+              }
+          });
+          thread.setDaemon(true); //So thread closes with program
+          thread.start(); //Start thread
     }
 
     private void processPacket(Packet packet) throws IOException {
         switch (packet.getMsg()) {
             case "map" -> {
-                //Recieving multiplayer map
-                String dir = "src/main/resources/saves/multiplayer.txt";
-                Files.deleteIfExists(Path.of(dir));
-                Files.createFile(Path.of(dir));
-                TextIO.writeMap((String[][]) packet.getObject(), dir);
+                //Receiving multiplayer map
+                map = (String[][]) packet.getObject();
             }
             case "player_data" -> {
+                //Store Player Data
                 playerData = (ArrayList<String>) packet.getObject();
             }
 
             case "difficulty" -> {
                 Platform.runLater(() -> {
-                    gameController = new GameController((Difficulty) packet.getObject(), false);
-                    gameController.loadSaveData(playerData);
-                    gameController.setClient(this);
-                    Main.setScene(gameController);
+                    gameController = new GameController((Difficulty) packet.getObject(), false, this);
+                    gameController.loadSaveData(playerData); //Load Player Data
+                    gameController.setClient(this); //Set Client
+                    Main.setScene(gameController); //Update Screen
                 });
             }
 
             case "player_join" -> {
                 int[] data = (int[]) packet.getObject();
+                //Adds (fake) player that moves to show other players
                 PseudoPlayer player = new PseudoPlayer(packet.getExt());
-                players.add(player);
+                players.add(player); //Adds player to list
+                //Sets the players position
                 player.setXPos(data[0]);
                 player.setYPos(data[1]);
                 player.setxOffset(data[2]);
                 player.setyOffset(data[3]);
-                Platform.runLater(() -> {
-                    gameController.addPlayer(player);
-                });
+                //Adds player to screen
+                Platform.runLater(() -> gameController.addPlayer(player));
             }
 
             case "pos_update" -> {
@@ -135,9 +132,7 @@ public class Client {
     }
 
     private void send(String msg, String ext, Object object) throws IOException {
-        Packet packet = new Packet(msg, object);
-        packet.setExt(ext);
-        outStream.writeObject(packet);
+        outStream.writeObject(new Packet(msg, object, ext));
     }
 
     public boolean doesWorldExist() throws IOException, ClassNotFoundException {
@@ -169,5 +164,7 @@ public class Client {
         socket.close();
     }
 
-
+    public String[][] getMap() {
+        return map;
+    }
 }

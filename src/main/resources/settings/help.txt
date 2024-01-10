@@ -1,0 +1,5 @@
+Basic Pressing W,A,D keys will move the player and pressing SPACE will attack
+Crafting Press C to open the crafting menu and click on the icons to see the recipe
+Zombies Zombies will spawn periodically in different group sizes
+Building Blocks can be broken and placed anywhere. Planks can only be moved through by players.
+Boss Once 50 zombies have been killed. The boss will spawn and begin attacking the player.

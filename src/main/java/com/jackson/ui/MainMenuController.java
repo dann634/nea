@@ -70,7 +70,8 @@ public class MainMenuController extends Scene implements Initializable {
                 return;
             }
 
-            Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9)), true));
+
+            Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9)), true, null));
         });
 
 
@@ -97,7 +98,7 @@ public class MainMenuController extends Scene implements Initializable {
         });
 
         settingsButton.setOnAction(e -> Main.setScene(new SettingsController())); //Goes to settings scene
-        helpButton.setOnAction(e -> {}); //Goes to help scene
+        helpButton.setOnAction(e -> {Main.setScene(new HelpController());}); //Goes to help scene
         exitButton.setOnAction(e -> System.exit(0)); //Exits Game
 
 

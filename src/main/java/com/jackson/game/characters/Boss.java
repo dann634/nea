@@ -172,7 +172,7 @@ public class Boss extends Zombie {
             rightArm.setRotate(45);
             setArms(15);
             //Make crater on impact point
-            camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 4, 2);
+            camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 5, 2);
 
             //Player takes damage
             if(player.intersects(getBoundsInParent())) {

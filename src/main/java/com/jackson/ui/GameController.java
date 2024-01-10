@@ -4,7 +4,6 @@ import com.jackson.game.Difficulty;
 import com.jackson.game.MovementHandler;
 import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Player;
-import com.jackson.game.characters.PlayerInterface;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
@@ -20,8 +19,6 @@ import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -31,14 +28,14 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class GameController extends Scene {
 
@@ -61,6 +58,7 @@ public class GameController extends Scene {
     private final Random rand;
     private final PauseTransition bloodMoonTimer;
     private boolean blockDropped;
+    private boolean isGamePaused;
     private boolean isAPressed;
     private boolean isDPressed;
     private boolean isWPressed;
@@ -72,10 +70,10 @@ public class GameController extends Scene {
     // TODO: 24/10/2023 Add autosave feature -> on close and save
 
 
-    public GameController(Difficulty difficulty, boolean isSingleplayer) {
+    public GameController(Difficulty difficulty, boolean isSingleplayer, Client client) {
         super(new VBox());
 
-        client = null;
+        this.client = client;
         this.difficulty = difficulty;
         this.isSingleplayer = isSingleplayer;
 
@@ -86,8 +84,9 @@ public class GameController extends Scene {
         //Initialises fields
         zombies = new CopyOnWriteArrayList<>();
         rand = new Random();
-        String[][] map = TextIO.readMapFile(isSingleplayer);
+        String[][] map = isSingleplayer ? TextIO.readMapFile() : client.getMap(); //May produce NPE
         initLookupTable();
+        this.isGamePaused = false;
 
         //Sound
         audioplayer = new AudioPlayer("background");
@@ -179,23 +178,28 @@ public class GameController extends Scene {
             camera.checkBlockBorder();
             spawnZombiePack();
 
-            //Everything to front (maybe make a method for it)
-            inventory.getInventoryVbox().toFront();
-            inventory.getItemOnCursor().toFront();
-            character.toFront();
-            character.getHandRectangle().toFront();
-            healthBar.toFront();
-            statMenu.toFront();
-            eventMessage.toFront();
-            craftingMenu.toFront();
-            ammoHbox.toFront();
-            killCounterHBox.toFront();
+           pushElementsToFront(eventMessage, ammoHbox, killCounterHBox);
 
             // FIXME: 14/12/2023 maybe to block.toBack()
 
 
         }));
         gameTimeline.play();
+    }
+
+    private void pushElementsToFront(EventMessage eventMessage, HBox ammoHbox, HBox killCounterHBox) {
+        //Everything to front (maybe make a method for it)
+        if(isGamePaused) return;
+        inventory.getInventoryVbox().toFront();
+        inventory.getItemOnCursor().toFront();
+        character.toFront();
+        character.getHandRectangle().toFront();
+        healthBar.toFront();
+        statMenu.toFront();
+        eventMessage.toFront();
+        craftingMenu.toFront();
+        ammoHbox.toFront();
+        killCounterHBox.toFront();
     }
 
     private void spawnZombiePack() {
@@ -342,7 +346,7 @@ public class GameController extends Scene {
                 for(Block block : line) {
                     if(block.getYPos() == player.getYPos()) {
                         player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset() - 48);
-                        player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset() - 32);
+                        player.getImageView().setTranslateX(block.getTranslateX() - 32);
                     }
                 }
             }
@@ -358,15 +362,18 @@ public class GameController extends Scene {
             setOnKeyPressed(e -> {
                 switch (e.getCode()) {
                     case A -> {
+                        if(isGamePaused) return;
                         isAPressed = true;
                         character.setIsModelFacingRight(false);
                     }
                     case D -> {
+                        if(isGamePaused) return;
                         isDPressed = true;
                         character.setIsModelFacingRight(true);
                     }
 
                     case W -> {
+                        if(isGamePaused) return;
                         isWPressed = true;
                         character.setIdleImage();
                         jumpingEffects.playFromBeginning();
@@ -383,11 +390,14 @@ public class GameController extends Scene {
                     case C -> craftingMenu.toggleShown(gameTimeline);
 
                     case ESCAPE -> {
-                        if(gameTimeline.getStatus() != Animation.Status.PAUSED) {
+                        if(gameTimeline.getStatus() != Animation.Status.PAUSED && !this.isGamePaused) {
                             root.getChildren().add(new PauseMenuController(false));
                         }
                     }
-                    case SPACE -> isSpacePressed = true;
+                    case SPACE -> {
+                        if(isGamePaused) return;
+                        isSpacePressed = true;
+                    }
                 }
             });
 
@@ -465,6 +475,7 @@ public class GameController extends Scene {
                 gameTimeline.pause();
             }
             audioplayer.pause();
+            isGamePaused = true;
 
             Label title = new Label(isDead ? "You died" : "Paused");
             title.setStyle("-fx-font-weight: bold;" +
@@ -477,7 +488,6 @@ public class GameController extends Scene {
 
 
             if(isDead) {
-
                 //Stupid way of doing it (concurrency issue)
                 PauseTransition bringToFront = new PauseTransition();
                 bringToFront.setDuration(Duration.millis(10));
@@ -494,6 +504,7 @@ public class GameController extends Scene {
                 root.getChildren().remove(this);
                 gameTimeline.play();
                 audioplayer.play();
+                isGamePaused = false;
             });
             return button;
         }
@@ -527,6 +538,7 @@ public class GameController extends Scene {
                 root.getChildren().remove(this);
                 gameTimeline.play();
                 audioplayer.play();
+                isGamePaused = false;
             });
             button.toFront();
             return button;
