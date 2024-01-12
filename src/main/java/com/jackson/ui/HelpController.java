@@ -16,8 +16,8 @@ public class HelpController extends Scene {
 
     private final HashMap<String, String> map;
 
-    private Label sectionTitle;
-    private Label descriptionLabel;
+    private final Label sectionTitle;
+    private final Label descriptionLabel;
     public HelpController() {
         super(new VBox());
         BorderPane root = new BorderPane();

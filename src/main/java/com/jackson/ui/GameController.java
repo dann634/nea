@@ -53,6 +53,7 @@ public class GameController extends Scene {
     private final Timeline gameTimeline;
     private final AudioPlayer audioplayer;
     private final AudioPlayer levelUpSound;
+    private final AudioPlayer bossMusic;
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
     private final Random rand;
@@ -98,7 +99,7 @@ public class GameController extends Scene {
 
         walkingEffects = new AudioPlayer("walking");
         jumpingEffects = new AudioPlayer("jump");
-
+        bossMusic = new AudioPlayer("boss_music");
 
         //HUD
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
@@ -116,7 +117,7 @@ public class GameController extends Scene {
         inventory = new Inventory(ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter);
+        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter, bossMusic);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         EventMessage eventMessage = new EventMessage(character);
@@ -151,6 +152,7 @@ public class GameController extends Scene {
             if(isSingleplayer) saveGame();
         });
 
+        spawnBoss();
 
         movementHandler = new MovementHandler(character, camera);
         gameTimeline = new Timeline();
@@ -240,7 +242,7 @@ public class GameController extends Scene {
     }
 
     private void spawnBoss() {
-        Boss boss = new Boss(camera, character, 0, 0, difficulty);
+        Boss boss = new Boss(camera, character, rand.nextInt(400) + 300, 0, difficulty);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));
@@ -252,6 +254,10 @@ public class GameController extends Scene {
                 boss.attack(new Item("fist"));
             }
         });
+
+        //Start Boss Music
+        if(!bossMusic.isPlaying()) bossMusic.playFromBeginning();
+
         root.getChildren().addAll(boss.getNodes());
         boss.toFront();
         zombies.add(boss);
@@ -306,6 +312,8 @@ public class GameController extends Scene {
         character.healthProperty().addListener((observableValue, number, t1) -> {
             if(t1.doubleValue() <= 0) {
                 root.getChildren().add(new PauseMenuController(true));
+            } else if(t1.intValue() > 100) {
+                System.err.println("Error: Health cannot be set above 100");
             }
         });
 

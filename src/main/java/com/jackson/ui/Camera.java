@@ -59,13 +59,15 @@ public class Camera {
     private final SimpleBooleanProperty isRainingRocks;
     private final SimpleIntegerProperty killCounter;
     private Client client;
-
+    private final AudioPlayer bossMusic;
     // TODO: 19/12/2023 LOAD IMAGES ONCE IN CONSTRUCTOR
 
     public Camera(Player character, String[][] map, AnchorPane root, Inventory inventory, List<Zombie> zombies,
-                  SimpleBooleanProperty isBloodMoonActive, SimpleBooleanProperty isRainingRocks, SimpleIntegerProperty killCounter) {
+                  SimpleBooleanProperty isBloodMoonActive, SimpleBooleanProperty isRainingRocks, SimpleIntegerProperty killCounter,
+                  AudioPlayer bossMusic) {
         this.rand = new Random();
         this.character = character;
+        this.bossMusic = bossMusic;
         this.zombies = zombies;
         this.map = map;
         this.root = root;
@@ -380,6 +382,10 @@ public class Camera {
                             deadZombies.add(zombie);
                             zombieNodes.addAll(zombie.getNodes());
                             spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
+
+                            if(zombie instanceof Boss) {
+                                bossMusic.pause();
+                            }
                         }
                     }
                 }
