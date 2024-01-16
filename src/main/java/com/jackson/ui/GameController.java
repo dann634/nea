@@ -55,6 +55,7 @@ public class GameController extends Scene {
     private final AudioPlayer walkingEffects;
     private final AudioPlayer jumpingEffects;
     private final Random rand;
+    private final EventMessage eventMessage;
     private final PauseTransition bloodMoonTimer;
     private final Difficulty difficulty;
     private final boolean isSingleplayer;
@@ -120,7 +121,7 @@ public class GameController extends Scene {
         camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter, bossMusic);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
-        EventMessage eventMessage = new EventMessage(character);
+        eventMessage = new EventMessage(character);
 
         HBox ammoHbox = createCounterHBox(ammo, "bullet", false, 920);
         ammoHbox.visibleProperty().bind(character.isHoldingGunProperty());
@@ -736,8 +737,9 @@ public class GameController extends Scene {
             this.translate.play();
         }
     }
-
-    public Inventory getInventory() {
-        return inventory;
+    public void setEventMessage(String text) {
+        eventMessage.setText(text);
+        eventMessage.setVisible(true);
+        eventMessage.timer.play();
     }
 }

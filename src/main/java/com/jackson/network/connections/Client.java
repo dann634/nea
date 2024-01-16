@@ -92,7 +92,10 @@ public class Client {
                 player.setxOffset(data[2]);
                 player.setyOffset(data[3]);
                 //Adds player to screen
-                Platform.runLater(() -> gameController.addPlayer(player));
+                Platform.runLater(() -> {
+                    gameController.addPlayer(player);
+                    gameController.setEventMessage(player.getDisplayName() + " joined!");
+                });
             }
 
             case "pos_update" -> {
@@ -120,7 +123,10 @@ public class Client {
                         //If display name matches
                         playerIterator.remove(); //Remove from list
                         //remove player from screen
-                        Platform.runLater(() -> gameController.removePlayer(player));
+                        Platform.runLater(() -> {
+                            gameController.removePlayer(player);
+                            gameController.setEventMessage(player.getDisplayName() + "disconnected");
+                        });
                     }
                 }
             }
