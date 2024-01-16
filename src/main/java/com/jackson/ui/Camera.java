@@ -310,7 +310,7 @@ public class Camera {
     }
 
     //For breaking blocks
-    public void removeBlock(Block remBlock) { //Remove block and replaces with air block
+    public void removeBlock(Block remBlock) throws IOException { //Remove block and replaces with air block
         if(remBlock.getItemName().equals("air") || remBlock.getItemName().equals("bedrock")) return;
         int[] index = new int[2];
         Block newBlock = new Block("air", -1, -1, this, inventory);
@@ -327,15 +327,18 @@ public class Camera {
                 }
             }
         }
+        if(newBlock.getXPos() == -1) return; //Not a valid block (for multiplayer not on screen)
         spawnItem(remBlock.getItemName(), 1, remBlock.getTranslateX(), remBlock.getTranslateY());
         root.getChildren().remove(remBlock); //Removes old block
         root.getChildren().addAll(newBlock); //Adds air block in place to pane
         blocks.get(index[0]).set(index[1], newBlock); //Adds air block to blocks
         blockJustBroken = true; //Sets flag to true so blocks fall
         map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
+
+        if(client != null) client.removeBlock(remBlock);
     }
 
-    public void removeBlock(int xPos, int yPos) {
+    public void removeBlock(int xPos, int yPos) throws IOException {
         for (List<Block> blocks : blocks) {
             for (Block block : blocks) {
                 if(block.getXPos() == xPos && block.getYPos() == yPos) {
@@ -623,7 +626,7 @@ public class Camera {
         return data;
     }
 
-    public void makeCrater(double x, double y, int length, int depth) {
+    public void makeCrater(double x, double y, int length, int depth) throws IOException {
 
         //Find grass block
         Block block = null;
@@ -718,7 +721,11 @@ public class Camera {
         fallingAnimation.setOnFinished(e -> {
             rocks.remove(rock); //Remove rock from rock list
             root.getChildren().remove(rock); //Remove rock from root
-            makeCrater(rock.getTranslateX(), rock.getTranslateY(), 1, 1); //Make small crater
+            try {
+                makeCrater(rock.getTranslateX(), rock.getTranslateY(), 1, 1); //Make small crater
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             if(character.intersects(rock.getBoundsInParent())) {
                 character.takeDamage(10); //If touching player deal damage
             }

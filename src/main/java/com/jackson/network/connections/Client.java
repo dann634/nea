@@ -1,9 +1,11 @@
 package com.jackson.network.connections;
 
 import com.jackson.game.Difficulty;
+import com.jackson.game.items.Block;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.network.shared.Packet;
+import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
 import javafx.application.Platform;
 
@@ -23,6 +25,7 @@ public class Client {
     private final ObjectOutputStream outStream;
     private final ObjectInputStream inStream;
     private GameController gameController;
+    private Camera camera;
     private final List<PseudoPlayer> players;
     private List<String> playerData;
     private final String displayName;
@@ -73,6 +76,7 @@ public class Client {
                     gameController = new GameController((Difficulty) packet.getObject(), false, this);
                     gameController.loadSaveData(playerData); //Load Player Data
                     gameController.setClient(this); //Set Client
+                    camera = gameController.getGameCamera();
                     Main.setScene(gameController); //Update Screen
                 });
             }
@@ -120,25 +124,20 @@ public class Client {
                     }
                 }
             }
+
+            case "remove_block" -> {
+                int[] blockPos = (int[]) packet.getObject();
+                Platform.runLater(() -> {
+                    try {
+                        camera.removeBlock(blockPos[0], blockPos[1]);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         }
     }
 
-    public double pingServer() throws IOException, InterruptedException { //Returns ping time in ms
-        Date beforePacket = new Date();
-        outStream.writeObject("ping"); //Send Request#
-        AtomicLong ping = new AtomicLong(-1);
-        Thread thread = new Thread(() -> {
-            try {
-                inStream.readObject(); //We don't care about response packet
-            } catch (IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-            ping.set(new Date().getTime() - beforePacket.getTime());
-        });
-        thread.start();
-        thread.join(500);
-        return ping.get();
-    }
 
     public void send(String msg, Object object) throws IOException {
         Packet packet = new Packet(msg, object);
@@ -173,6 +172,14 @@ public class Client {
 
     public void disconnect() throws IOException {
         send("disconnect", null);
+    }
+
+    public void placeBlock(Block block) { // TODO: 16/01/2024 maybe change to xPos, yPos, blockName
+
+    }
+
+    public void removeBlock(Block block) throws IOException { // TODO: 16/01/2024 maybe change to xPos yPos
+        send("remove_block", new int[]{block.getXPos(), block.getYPos()});
     }
 
     public void closeClient() throws IOException {

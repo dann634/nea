@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -115,7 +116,11 @@ public class Block extends Entity {
             if(getOpacity() != 0) { //Not finished breaking so reset
                 setOpacity(1);
             } else {
-                drop();
+                try {
+                    drop();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
         });
     }
@@ -128,7 +133,7 @@ public class Block extends Entity {
     }
 
 
-    private void drop() {
+    private void drop() throws IOException {
         int blockHeight = 16;
         this.imageView.setFitHeight(blockHeight);
         this.imageView.setFitWidth(blockHeight);

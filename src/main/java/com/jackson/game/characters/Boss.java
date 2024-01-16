@@ -19,6 +19,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.transform.Rotate;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
@@ -172,7 +173,11 @@ public class Boss extends Zombie {
             rightArm.setRotate(45);
             setArms(15);
             //Make crater on impact point
-            camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 5, 2);
+            try {
+                camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 5, 2);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
 
             //Player takes damage
             if(player.intersects(getBoundsInParent())) {

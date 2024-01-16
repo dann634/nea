@@ -531,6 +531,10 @@ public class GameController extends Scene {
         client.updatePositionOnServer(pos);
     }
 
+    public Camera getGameCamera() {
+        return camera;
+    }
+
     private class PauseMenuController extends VBox {
 
         // TODO: 29/12/2023 remove all dropped blocks on death
