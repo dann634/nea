@@ -310,7 +310,7 @@ public class Camera {
     }
 
     //For breaking blocks
-    public void removeBlock(Block remBlock) throws IOException { //Remove block and replaces with air block
+    public void removeBlock(Block remBlock, boolean isPacket) throws IOException { //Remove block and replaces with air block
         if(remBlock.getItemName().equals("air") || remBlock.getItemName().equals("bedrock")) return;
         int[] index = new int[2];
         Block newBlock = new Block("air", -1, -1, this, inventory);
@@ -335,14 +335,14 @@ public class Camera {
         blockJustBroken = true; //Sets flag to true so blocks fall
         map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
 
-        if(client != null) client.removeBlock(remBlock);
+        if(client != null && isPacket) client.removeBlock(remBlock);
     }
 
-    public void removeBlock(int xPos, int yPos) throws IOException {
+    public void removeBlock(int xPos, int yPos, boolean isPacket) throws IOException {
         for (List<Block> blocks : blocks) {
             for (Block block : blocks) {
                 if(block.getXPos() == xPos && block.getYPos() == yPos) {
-                    removeBlock(block);
+                    removeBlock(block, isPacket);
                 }
             }
         }
@@ -351,7 +351,7 @@ public class Camera {
 
 
     //For Placing Blocks
-    public void placeBlock(Block block) { // TODO: 04/11/2023 doesnt update map file
+    public void placeBlock(Block block, String newBlockName, boolean isPacket) throws IOException {
 
         int[] index = new int[2];
         for (int i = 0; i < blocks.size(); i++) {
@@ -361,15 +361,17 @@ public class Camera {
                 }
             }
         }
-        Block placedBlock = new Block(inventory.getSelectedItemStack().getItemName() ,block.getXPos(), block.getYPos(), this, inventory);
+        Block placedBlock = new Block(newBlockName, block.getXPos(), block.getYPos(), this, inventory);
         map[placedBlock.getXPos()][placedBlock.getYPos()] = GameController.lookupTable.get(placedBlock.getItemName());
         placedBlock.setTranslateX(block.getTranslateX());
         placedBlock.setTranslateY(block.getTranslateY());
-        inventory.useBlockFromSelectedSlot();
         root.getChildren().remove(block);
         root.getChildren().add(placedBlock);
         blocks.get(index[0]).set(index[1], placedBlock);
+        if(client != null && isPacket) client.placeBlock(placedBlock);
 
+        if(!isPacket) return;
+        inventory.useBlockFromSelectedSlot();
         character.updateBlockInHand(inventory.getSelectedItemStack());
     }
 
@@ -649,7 +651,7 @@ public class Camera {
 
             for (int j = block.getYPos(); j < block.getYPos() + depth; j++) {
                 for (int k = block.getXPos() - (length / 2); k < block.getXPos() + (length / 2) + 1; k++) {
-                    removeBlock(k, j);
+                    removeBlock(k, j, true);
                 }
                 length--; //Must decrement for cone shape
             }
@@ -747,5 +749,16 @@ public class Camera {
 
     public void setClient(Client client) {
         this.client = client;
+    }
+
+    public Block getBlock(int xPos, int yPos) {
+        for(List<Block> line : blocks) {
+            for(Block block : line) {
+                if(block.getXPos() == xPos && block.getYPos() == yPos) {
+                    return block;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -67,7 +67,11 @@ public class Block extends Entity {
             if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null
                     && this.inventory.getItemStackOnCursor() == null && !this.inventory.getSelectedItemStack().isUsable()) {
                 //Place block
-                this.camera.placeBlock(this);
+                try {
+                    this.camera.placeBlock(this, inventory.getSelectedItemStackName(), true);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
                 return;
             }
 
@@ -139,7 +143,7 @@ public class Block extends Entity {
         this.imageView.setFitWidth(blockHeight);
         this.imageView.setRotate(new Random().nextDouble(360) + 1);
         this.setOpacity(1);
-        this.camera.removeBlock(this);
+        this.camera.removeBlock(this, true);
     }
 
 

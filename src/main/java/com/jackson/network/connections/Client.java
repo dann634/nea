@@ -129,7 +129,20 @@ public class Client {
                 int[] blockPos = (int[]) packet.getObject();
                 Platform.runLater(() -> {
                     try {
-                        camera.removeBlock(blockPos[0], blockPos[1]);
+                        camera.removeBlock(blockPos[0], blockPos[1], false);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+            case "place_block" -> {
+                int[] blockPos = (int[]) packet.getObject();
+                Platform.runLater(() -> {
+                    Block block = camera.getBlock(blockPos[0], blockPos[1]);
+                    if(block == null) return; //In case of invalid block
+                    try {
+                        camera.placeBlock(block, GameController.lookupTable.get(packet.getExt()), false);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -174,8 +187,8 @@ public class Client {
         send("disconnect", null);
     }
 
-    public void placeBlock(Block block) { // TODO: 16/01/2024 maybe change to xPos, yPos, blockName
-
+    public void placeBlock(Block block) throws IOException { // TODO: 16/01/2024 maybe change to xPos, yPos, blockName
+        send("place_block", GameController.lookupTable.get(block.getItemName()), new int[]{block.getXPos(), block.getYPos()});
     }
 
     public void removeBlock(Block block) throws IOException { // TODO: 16/01/2024 maybe change to xPos yPos

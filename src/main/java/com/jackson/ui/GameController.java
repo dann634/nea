@@ -737,5 +737,7 @@ public class GameController extends Scene {
         }
     }
 
-
+    public Inventory getInventory() {
+        return inventory;
+    }
 }
