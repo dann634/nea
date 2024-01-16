@@ -58,10 +58,7 @@ public class Player extends Character implements PlayerInterface {
         aimingLine.visibleProperty().bind(isHoldingGun);
 
         this.shootingPause = new PauseTransition();
-        shootingPause.setOnFinished(e -> {
-            aimingLine.setStroke(Color.RED);
-        });
-
+        shootingPause.setOnFinished(e -> aimingLine.setStroke(Color.RED));
 
         agilityLevel = new SimpleIntegerProperty(1);
         strengthLevel = new SimpleIntegerProperty(1);
@@ -102,11 +99,7 @@ public class Player extends Character implements PlayerInterface {
 
     public void updateBlockInHand(Entity item) {
         String itemName;
-        if(item == null) {
-            itemName = "fist";
-        } else {
-            itemName = item.getItemName();
-        }
+        itemName = item == null ? "fist" : item.getItemName();
         itemInHand = itemName;
 
         List<String> gunList = new ArrayList<>(List.of("rifle", "sniper", "pistol"));

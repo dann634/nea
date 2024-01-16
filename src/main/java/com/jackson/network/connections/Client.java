@@ -13,6 +13,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -106,6 +107,19 @@ public class Client {
                     }
                 }
             }
+
+            case "disconnect" -> {
+                Iterator<PseudoPlayer> playerIterator = players.listIterator();
+                while(playerIterator.hasNext()) {
+                    PseudoPlayer player = playerIterator.next();
+                    if(player.getDisplayName().equals(packet.getObject())) {
+                        //If display name matches
+                        playerIterator.remove(); //Remove from list
+                        //remove player from screen
+                        Platform.runLater(() -> gameController.removePlayer(player));
+                    }
+                }
+            }
         }
     }
 
@@ -157,6 +171,10 @@ public class Client {
         send("pos_update", data);
     }
 
+    public void disconnect() throws IOException {
+        send("disconnect", null);
+    }
+
     public void closeClient() throws IOException {
         thread.interrupt();
         inStream.close();
@@ -167,4 +185,6 @@ public class Client {
     public String[][] getMap() {
         return map;
     }
+
+
 }
