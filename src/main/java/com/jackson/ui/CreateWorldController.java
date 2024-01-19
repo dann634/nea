@@ -94,20 +94,11 @@ public class CreateWorldController extends Scene {
         title.setText("Host Game");
         root.setSpacing(40);
 
-        //Password Stuff
-        Label passwordLabel = new Label("Password:");
-        PasswordField passwordField = new PasswordField();
-
         //hbox
-        HBox hBox = new HBox();
-        hBox.getStyleClass().add("hbox");
-        hBox.getChildren().addAll(passwordLabel, passwordField);
-        root.getChildren().add(2, hBox);
-        generateWorldButton.disableProperty().bind(passwordField.lengthProperty().lessThan(5).or(passwordField.lengthProperty().greaterThan(20)));
         generateWorldButton.setOnAction(e -> {
             try {
                 Client client = new Client();
-                client.send("map", ProceduralGenerator.createMapArray());
+                client.sendMap(ProceduralGenerator.createMapArray());
                 client.joinGame();
                 client.startListening();
             } catch (IOException ex) {
@@ -115,6 +106,4 @@ public class CreateWorldController extends Scene {
             }
         });
     }
-
-
 }

@@ -158,7 +158,7 @@ public class Client {
     }
 
 
-    public void send(String msg, Object object) throws IOException {
+    private void send(String msg, Object object) throws IOException {
         Packet packet = new Packet(msg, object);
         outStream.writeObject(packet);
     }
@@ -199,6 +199,14 @@ public class Client {
 
     public void removeBlock(Block block) throws IOException { // TODO: 16/01/2024 maybe change to xPos yPos
         send("remove_block", new int[]{block.getXPos(), block.getYPos()});
+    }
+
+    public void sendMap(String[][] map) throws IOException {
+        send("map", map);
+    }
+
+    public void deleteSave() throws IOException {
+        send("delete_save", null);
     }
 
     public void closeClient() throws IOException {

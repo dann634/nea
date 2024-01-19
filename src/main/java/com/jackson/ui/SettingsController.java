@@ -2,6 +2,7 @@ package com.jackson.ui;
 
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
+import com.jackson.network.connections.Client;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
@@ -18,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,12 +80,11 @@ public class SettingsController extends Scene {
         title.setId("title");
         root.getChildren().add(title);
 
-        // TODO: 17/08/2023 remove title as a field
-
         addDisplayName(root);
         addMuteSoundEffects(root);
         addMuteBackground(root);
         deleteSinglePlayerSave(root);
+        deleteMultiplayerSave(root);
         addButtons(root);
     }
 
@@ -100,7 +101,7 @@ public class SettingsController extends Scene {
         this.displayNameTextField = new TextField();
         this.displayNameTextField.setPromptText("Display Name");
         this.displayNameTextField.textProperty().addListener((observableValue, number, t1) -> { //Changes color of circle
-            if(t1.length() < 1 || t1.length() > 15) {
+            if(t1.isEmpty() || t1.length() > 15) {
                 circle.setFill(Color.web("#c7200e"));
             } else {
                 circle.setFill(Color.web("#0aad07"));
@@ -147,6 +148,22 @@ public class SettingsController extends Scene {
 
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveBtn));
     } //Adds option to delete single-player save
+
+    private void deleteMultiplayerSave(VBox root) {
+        var deleteSaveLabel = new Label("Multiplayer Save:");
+        var deleteSaveButton = new Button("Delete");
+        deleteSaveButton.setId("redBtn");
+        deleteSaveButton.setOnAction(e -> {
+            try {
+                Client client = new Client();
+                client.deleteSave();
+            } catch (IOException ex) {
+                deleteSaveButton.setText("Error");
+            }
+        });
+
+        root.getChildren().addAll(deleteSaveLabel, deleteSaveButton);
+    }
 
     private void addButtons(VBox root) {
         var saveButton = new Button("Save");

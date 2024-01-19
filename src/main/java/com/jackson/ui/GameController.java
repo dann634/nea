@@ -118,7 +118,7 @@ public class GameController extends Scene {
         inventory = new Inventory(ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter, bossMusic);
+        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter, bossMusic, this);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         eventMessage = new EventMessage(character);
