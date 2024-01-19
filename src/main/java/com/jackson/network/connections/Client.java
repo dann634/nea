@@ -210,10 +210,10 @@ public class Client {
     }
 
     public void closeClient() throws IOException {
-        thread.interrupt();
         inStream.close();
         outStream.close();
         socket.close();
+        thread.interrupt();
     }
 
     public String[][] getMap() {

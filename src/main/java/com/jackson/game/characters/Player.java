@@ -369,6 +369,10 @@ public class Player extends Character implements PlayerInterface {
     }
 
     public void setAmmo(int ammo) {
+        if(ammo < 0) {
+            System.err.println("Error: Ammo must be greater than 0");
+            return;
+        }
         this.ammo.set(ammo);
     }
 

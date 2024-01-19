@@ -11,10 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -157,12 +154,14 @@ public class SettingsController extends Scene {
             try {
                 Client client = new Client();
                 client.deleteSave();
+                deleteSaveButton.setDisable(true);
+                deleteSaveButton.setOpacity(0.7);
             } catch (IOException ex) {
                 deleteSaveButton.setText("Error");
             }
         });
 
-        root.getChildren().addAll(deleteSaveLabel, deleteSaveButton);
+        root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveButton));
     }
 
     private void addButtons(VBox root) {

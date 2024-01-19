@@ -44,17 +44,17 @@ public class Camera {
     private final AnchorPane root;
     private boolean blockJustBroken;
     private List<List<Block>> blocks;
-    private List<ImageView> rocks;
+    private final List<ImageView> rocks;
     private final List<ItemStack> droppedBlocks;
     private final List<Zombie> zombies;
     private final List<PseudoPlayer> onlinePlayers;
     private final Inventory inventory;
     private int xOffset;
     private int yOffset;
-    private Random rand;
+    private final Random rand;
     private final List<String> backgroundBlocks; //Blocks the player can walk through
     private final SimpleBooleanProperty isBloodMoonActive;
-    private ImageView rock;
+    private final ImageView rock;
     private final Image rockImage = new Image("file:src/main/resources/images/rock.png");
     private final SimpleBooleanProperty isRainingRocks;
     private final SimpleIntegerProperty killCounter;
@@ -517,14 +517,20 @@ public class Camera {
         }
 
         //Zombie Despawn
-        Iterator<Zombie> zombieIterator = zombies.listIterator();
-        while(zombieIterator.hasNext()) {
-            Zombie zombie = zombieIterator.next();
+        for(Zombie zombie : zombies) {
             if(zombie.getTranslateX() < - 200 || zombie.getTranslateX() > 1224 || zombie.getTranslateY() < -200 || zombie.getTranslateY() > 764) {
                 root.getChildren().removeAll(zombie.getNodes());
-                zombieIterator.remove();
+                zombies.remove(zombie);
             }
         }
+//        Iterator<Zombie> zombieIterator = zombies.listIterator();
+//        while(zombieIterator.hasNext()) {
+//            Zombie zombie = zombieIterator.next();
+//            if(zombie.getTranslateX() < - 200 || zombie.getTranslateX() > 1224 || zombie.getTranslateY() < -200 || zombie.getTranslateY() > 764) {
+//                root.getChildren().removeAll(zombie.getNodes());
+//                zombieIterator.remove();
+//            }
+//        }
     }
 
     public void checkBlockPickup() {

@@ -88,8 +88,6 @@ public class MovementHandler {
             return;
         }
 
-//        walkingEffects.play();
-
         boolean canMoveLeft = !camera.isEntityTouchingBlock(character.getLeftCollision(), true);
         boolean canMoveRight = !camera.isEntityTouchingBlock(character.getRightCollision(), true);
 
@@ -110,7 +108,6 @@ public class MovementHandler {
         if((isAPressed && !canMoveLeft) || (isDPressed && !canMoveRight)) {
             return; //Trying to move but stuck
         }
-
 
         camera.translateBlocksByX(offset);
 
