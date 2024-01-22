@@ -83,15 +83,16 @@ public class ProceduralGenerator {
     }
 
     public static void saveMapToFile(String[][] heightMapArray) {
+        //Filepath
         String dir = "src/main/resources/saves/singleplayer.txt";
 
         try {
-            Files.createFile(Paths.get(dir));
+            Files.createFile(Paths.get(dir)); //Create file
         } catch (IOException e) {
-            System.err.println("Map file could not be created: " + e.getMessage());
+            System.err.println("Error: Map file could not be created");
         }
 
-        TextIO.writeMap(heightMapArray, dir);
+        TextIO.writeMap(heightMapArray, dir); //Write map to file
     }
 
 
@@ -123,7 +124,6 @@ public class ProceduralGenerator {
     }
 
     private static List<Integer> getChunk(List<Integer> heights) {
-
         int midpoint = heights.size() / 2; //Gets midpoint of two points
         int lowerbound = heights.get(0); //Gets the lowest point of line
         int upperbound = heights.get(heights.size() - 1); //Gets the highest point of line
@@ -132,9 +132,9 @@ public class ProceduralGenerator {
             //New offset is created from the difference of upper and lower bounds
             offset = random.nextInt(Math.abs(upperbound - lowerbound));
         }
-        int midpointY = isPositive ? offset + lowerbound : lowerbound - offset; //Adds offset depending on gradient
+        //Adds offset depending on gradient
+        int midpointY = isPositive ? offset + lowerbound : lowerbound - offset;
         midpointY = Math.max(11, Math.min(midpointY, 289)); // Range check
-
         heights.set(midpoint, midpointY); //Adds new value to list
 
         if (!isHeightsFull(heights)) { //Checks if all values are full

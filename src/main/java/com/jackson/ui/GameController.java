@@ -159,8 +159,6 @@ public class GameController extends Scene {
             }
         });
 
-        spawnBoss();
-
         movementHandler = new MovementHandler(character, camera);
         gameTimeline = new Timeline();
         gameTimeline.setCycleCount(Animation.INDEFINITE);
@@ -242,6 +240,21 @@ public class GameController extends Scene {
         }
         root.getChildren().addAll(nodes);
         zombies.addAll(pack);
+    }
+
+    public void spawnZombiePack(int[][] data) {
+
+        List<List<Block>> blocks = camera.getBlocks();
+        int leftBorder = blocks.get(0).get(0).getXPos();
+        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
+        int topBorder = blocks.get(0).get(0).getYPos();
+        int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
+
+        int xPos = data[0][0];
+        int yPos = data[0][1];
+        System.out.println("spawn");
+        if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return; //Offscreen
+        System.out.println("on screen");
     }
 
     private void spawnBoss() {

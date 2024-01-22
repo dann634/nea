@@ -154,6 +154,11 @@ public class Client {
                     }
                 });
             }
+
+            case "zombie_spawn" -> {
+                int[][] data = (int[][]) packet.getObject();
+                Platform.runLater(() -> gameController.spawnZombiePack(data));
+            }
         }
     }
 
