@@ -120,7 +120,6 @@ public class Inventory {
 
             //Item on cursor and full square
             //Swaps items
-            // TODO: 13/12/2023 swap item in hand
             if(itemStackOnCursor != null && itemArray[row][col] != null) {
                 ItemStack tempItemStack = itemArray[row][col];
                 itemArray[row][col] = itemStackOnCursor;

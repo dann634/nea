@@ -165,7 +165,6 @@ public class ProceduralGenerator {
                 //Does random number fall within range and is there no tree next to this
                 treeProximityFlag = true; //Set true for next block
                 //Spawn tree
-                //Wood
                 //Goes to top of grass and then gets a random truncated number from the normal distribution
                 int topOfTree = heightMap.get(i) - 1 - (int) rand.nextGaussian(5, 1);
                 for (int j = heightMap.get(i)-1; j > topOfTree; j--) { //Creates trunk

@@ -21,6 +21,8 @@ import static java.lang.Math.divideExact;
 
 public class MovementHandler {
 
+
+    private final int MAX_Y_SPEED = 3;
     private final Player character;
     private double jumpVelocity;
     private double jumpAcceleration;
@@ -33,19 +35,25 @@ public class MovementHandler {
     }
 
     public void calculateYProperties(boolean isWPressed) throws IOException {
-        boolean isCharacterTouchingFloor = camera.isEntityTouchingBlock(character.getFeetCollision(), true); //Is character touching floor
+        //Is character touching floor
+        boolean isCharacterTouchingFloor = camera.isEntityTouchingBlock(
+                character.getFeetCollision(), true);
+
         if(isCharacterTouchingFloor && !isWPressed && jumpAcceleration >= 0) { //Not jumping and on floor
             return;
         }
+
         if(jumpAcceleration < 0) { //In Mid air jumping
             jumpAcceleration += 0.15;
-            if(jumpVelocity < 3 && jumpVelocity > -3) {
+            if(jumpVelocity < MAX_Y_SPEED && jumpVelocity > -MAX_Y_SPEED) { //Max Speed
                 jumpVelocity += jumpAcceleration;
             }
-            if(camera.isEntityTouchingBlock(character.getHeadCollision(), true)) { //Get head collision
+            if(camera.isEntityTouchingBlock(character.getHeadCollision(), true)) {
+                //Is head touching block
                 jumpAcceleration = 0;
                 jumpVelocity = 0;
             } else {
+                //Moving upward
                 updateYOffset((int) -jumpVelocity, false);
             }
             return;
@@ -59,8 +67,7 @@ public class MovementHandler {
             jumpAcceleration = -2.5;
             return;
         }
-        updateYOffset(-4, true);
-
+        updateYOffset(-4, true); //Gravity
     }
 
     private void updateYOffset(int offset, boolean isCharacterMovingDown) throws IOException {
@@ -182,10 +189,12 @@ public class MovementHandler {
         //which way should zombie move
         double difference = character.getX() - zombie.getTranslateX();
         boolean needsToMoveRight = difference > 0;
-        zombie.setNodeOrientation(needsToMoveRight ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
+        zombie.setNodeOrientation(needsToMoveRight ? //Point image left or right
+                NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
 
         //Check collision
-        boolean canMove = !camera.isEntityTouchingBlock(needsToMoveRight ? zombie.getRightCollision() : zombie.getLeftCollision(), false);
+        boolean canMove = !camera.isEntityTouchingBlock(
+                needsToMoveRight ? zombie.getRightCollision() : zombie.getLeftCollision(), false);
 
         //Move
         if(canMove) {
@@ -200,7 +209,8 @@ public class MovementHandler {
     }
 
     private void calculateZombieY(Zombie zombie) {
-        boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(zombie.getFeetCollision(), false);
+        boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(
+                zombie.getFeetCollision(), false);
         if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) {
             //Not jumping and on floor
             return;
@@ -233,8 +243,7 @@ public class MovementHandler {
             zombie.setJumpAcceleration(0);
         }
 
-
-        if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump and maybe acceleration == 0
+        if(isZombieTouchingFloor && zombie.isNeedsToJump()) { //Start jump
             zombie.setJumpAcceleration(-2.5 * zombie.JUMPING_POWER());
             zombie.setNeedsToJump(false);
             return;

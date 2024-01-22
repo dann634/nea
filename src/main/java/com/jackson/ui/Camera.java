@@ -113,7 +113,9 @@ public class Camera {
         int nextXIndex = character.getXPos() + xLocalOffset; //Gets index of line to be loaded
         int blockIndex = 0; //To track position in line
         List<Block> line = new ArrayList<>();
-        for (int i = character.getYPos() - RENDER_HEIGHT; i < character.getYPos() + RENDER_HEIGHT; i++) { //top of screen to bottom
+
+        //top of screen to bottom
+        for (int i = character.getYPos() - RENDER_HEIGHT; i < character.getYPos() + RENDER_HEIGHT; i++) {
             //world looping
             if(nextXIndex < 0) {
                 //if on left side of world
@@ -122,7 +124,8 @@ public class Camera {
                 //if on right side of world
                 nextXIndex -= 1000;
             }
-            Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i, this, inventory);
+            Block block = new Block(GameController.lookupTable.get(map[nextXIndex][i]), nextXIndex, i,
+                    this, inventory);
             //Positions block on screen
             block.setPos(512 + (xLocalOffset * 32) + xOffset, (blockIndex - 1) * 32 + yOffset);
             line.add(block);
@@ -647,20 +650,20 @@ public class Camera {
         //Find grass block
         Block block = null;
         for (int i = 0; i < blocks.size() - 1; i++) {
-            Block b = blocks.get(i).get(0);
+            List<Block> line = blocks.get(i);
+            Block b = line.get(0);
             Block nextB = blocks.get(i + 1).get(0);
-            if (x > b.getTranslateX() && x < nextB.getTranslateX()) {
-                //Finds block within these values
-                for (int j = 0; j < blocks.get(i).size(); j++) {
-                    //Loops down list to find first solid block
-                    if (blocks.get(i).get(j).getTranslateY() > y &&
-                            !backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
-                        block = blocks.get(i).get(j);
-                        break;
-                    }
-                }
+            if (x < b.getTranslateX() || x > nextB.getTranslateX()) continue;
+            //Finds block within these values
+            for (Block block1 : line) {
+                //Loops down list to find first solid block
+                if (block1.getTranslateY() < y ||
+                        backgroundBlocks.contains(block1.getItemName())) continue;
+                block = block1;
+                break;
             }
         }
+
             if(block == null) return; //Null check
 
             for (int j = block.getYPos(); j < block.getYPos() + depth; j++) {
@@ -718,13 +721,17 @@ public class Camera {
         //Find target y - nearest solid block
         double y = 0;
         for (int i = 0; i < blocks.size() - 1; i++) {
-            if(spawnX > blocks.get(i).get(0).getTranslateX() && spawnX < blocks.get(i+1).get(0).getTranslateX()) {
-                for (int j = 0; j < blocks.get(i).size(); j++) {
-                    if(!backgroundBlocks.contains(blocks.get(i).get(j).getItemName())) {
-                        y = blocks.get(i).get(j).getTranslateY();
-                        break;
-                    }
-                }
+
+            List<Block> line = blocks.get(i);
+            List<Block> nextLine = blocks.get(i + 1);
+            if (spawnX < line.get(0).getTranslateX() || spawnX > nextLine.get(0).getTranslateX()) continue;
+
+            //Find block under rock spawn point
+            for (Block block : line) {
+                if (backgroundBlocks.contains(block.getItemName())) continue;
+                //Find the nearest solid block
+                y = block.getTranslateY();
+                break;
             }
         }
 

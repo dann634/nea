@@ -159,6 +159,8 @@ public class GameController extends Scene {
             }
         });
 
+        spawnBoss();
+
         movementHandler = new MovementHandler(character, camera);
         gameTimeline = new Timeline();
         gameTimeline.setCycleCount(Animation.INDEFINITE);

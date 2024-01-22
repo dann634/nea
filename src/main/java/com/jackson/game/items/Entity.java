@@ -38,6 +38,7 @@ public class Entity extends VBox {
         //Optimisation
         this.setCache(true);
         this.setCacheHint(CacheHint.SPEED);
+        this.imageView.setSmooth(false);
 
         //Add Nodes to Vbox
         this.getChildren().add(this.imageView);

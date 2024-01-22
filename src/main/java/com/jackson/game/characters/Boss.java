@@ -140,7 +140,7 @@ public class Boss extends Zombie {
 
 
     private void jumpAttack() {
-        canJump = false;
+        canJump = false; //Stops normal gravity
         //Point arms to sky
         leftArm.setRotate(90);
         rightArm.setRotate(-90);
