@@ -145,6 +145,7 @@ public class Client {
             case "place_block" -> {
                 int[] blockPos = (int[]) packet.getObject();
                 Platform.runLater(() -> {
+                    camera.updateMap(blockPos[0], blockPos[1], packet.getExt());
                     Block block = camera.getBlock(blockPos[0], blockPos[1]);
                     if(block == null) return; //In case of invalid block
                     try {

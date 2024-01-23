@@ -31,10 +31,7 @@ import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameController extends Scene {
@@ -207,8 +204,8 @@ public class GameController extends Scene {
 
     private void spawnZombiePack() {
         //Do check first
-        if(!isSingleplayer) return;
-        if(rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
+        if (!isSingleplayer) return;
+        if (rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
             return; //No spawn
         }
         //Spawn
@@ -218,9 +215,18 @@ public class GameController extends Scene {
         List<Zombie> pack = new ArrayList<>();
         List<Node> nodes = new ArrayList<>();
         for (int i = 0; i < packSize; i++) {
+            var zombie = getZombie(spawnTile * 32 + rand.nextDouble(25), camera.getBlockTranslateY(spawnTile) - 48);
+            pack.add(zombie);
+            nodes.addAll(zombie.getNodes());
+            root.getChildren().addAll(nodes);
+            zombies.addAll(pack);
+        }
+    }
+
+    private Zombie getZombie(double x, double y) {
             var zombie = new Zombie(difficulty);
-            zombie.setTranslateX(spawnTile * 32 + rand.nextDouble(25));
-            zombie.setTranslateY(camera.getBlockTranslateY(spawnTile) - 48);
+            zombie.setTranslateX(x);
+            zombie.setTranslateY(y);
             zombie.translateXProperty().addListener((observableValue, number, t1) -> {
                 if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
                     zombie.attack(new Item("fist"));
@@ -234,13 +240,9 @@ public class GameController extends Scene {
                     character.takeDamage(zombie.getAttack());
                 }
             });
-
-            pack.add(zombie);
-            nodes.addAll(zombie.getNodes());
-        }
-        root.getChildren().addAll(nodes);
-        zombies.addAll(pack);
+        return zombie;
     }
+
 
     public void spawnZombiePack(int[][] data) {
 
@@ -252,9 +254,31 @@ public class GameController extends Scene {
 
         int xPos = data[0][0];
         int yPos = data[0][1];
-        System.out.println("spawn");
         if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return; //Offscreen
-        System.out.println("on screen");
+
+        //Find x and y translate
+        List<Zombie> pack = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
+
+        //Find spawn tile
+        int index = 0;
+        for(int i = 0; i < blocks.size(); i++) {
+            List<Block> line = blocks.get(i);
+            if(line.get(0).getXPos() == xPos) {
+                index = i;
+                break;
+            }
+        }
+
+
+        for (int i = 1; i < data.length; i++) {
+            int offset = data[i][0];
+            var zombie = getZombie((index * 32) + offset, camera.getBlockTranslateY(index) - 48);
+            pack.add(zombie);
+            nodes.addAll(zombie.getNodes());
+        }
+        root.getChildren().addAll(nodes);
+        zombies.addAll(pack);
     }
 
     private void spawnBoss() {
@@ -374,7 +398,7 @@ public class GameController extends Scene {
                 for(Block block : line) {
                     if(block.getYPos() == player.getYPos()) {
                         player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset() - 48);
-                        player.getImageView().setTranslateX(block.getTranslateX() - 32);
+                        player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset() - 32);
                     }
                 }
             }

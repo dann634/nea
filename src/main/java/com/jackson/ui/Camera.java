@@ -344,6 +344,7 @@ public class Camera {
     }
 
     public void removeBlock(int xPos, int yPos, boolean isPacket) throws IOException {
+        map[xPos][yPos] = "0";
         for (List<Block> blocks : blocks) {
             for (Block block : blocks) {
                 if(block.getXPos() == xPos && block.getYPos() == yPos) {
@@ -781,5 +782,9 @@ public class Camera {
             }
         }
         return null;
+    }
+
+    public void updateMap(int xPos, int yPos, String block) {
+        map[xPos][yPos] = block;
     }
 }
