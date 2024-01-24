@@ -147,16 +147,16 @@ public class CraftingMenu extends BorderPane {
 
     }
 
-    public void toggleShown(Timeline gameTimeline) {
+    public void toggleShown(Timeline gameTimeline, boolean isSingleplayer) {
         if(getTranslateX() == 2000) {
             setTranslateX((1024 / 2) - (800 / 2));
-            gameTimeline.pause();
+            if(isSingleplayer) gameTimeline.pause();
             setNodeDisable(false);
             return;
         }
         setTranslateX(2000);
         setNodeDisable(true);
-        gameTimeline.play();
+        if(isSingleplayer) gameTimeline.play();
     }
 
     private void setNodeDisable(boolean disable) {

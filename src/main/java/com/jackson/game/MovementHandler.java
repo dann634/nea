@@ -4,6 +4,7 @@ import com.jackson.game.characters.Boss;
 import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.ItemStack;
+import com.jackson.network.connections.Client;
 import com.jackson.ui.Camera;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -28,10 +29,12 @@ public class MovementHandler {
     private double jumpAcceleration;
     private final Camera camera;
     private double oldX;
+    private final Client client;
 
-    public MovementHandler(Player character, Camera camera) {
+    public MovementHandler(Player character, Camera camera, Client client) {
         this.character = character;
         this.camera = camera;
+        this.client = client;
     }
 
     public void calculateYProperties(boolean isWPressed) throws IOException {
@@ -181,12 +184,15 @@ public class MovementHandler {
                 calculateZombieX(zombie);
                 calculateZombieY(zombie);
             }
-        } catch (ConcurrentModificationException ignored) {}
+        } catch (ConcurrentModificationException | IOException ignored) {}
 
     }
 
-    private void calculateZombieX(Zombie zombie) {
+    private void calculateZombieX(Zombie zombie) throws IOException {
         //which way should zombie move
+
+        if(!zombie.isClientResponsible()) return;
+
         double difference = character.getX() - zombie.getTranslateX();
         boolean needsToMoveRight = difference > 0;
         zombie.setNodeOrientation(needsToMoveRight ? //Point image left or right
@@ -199,6 +205,7 @@ public class MovementHandler {
         //Move
         if(canMove) {
             zombie.addTranslateX((needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED);
+            if(client != null) client.updateZombiePos(zombie.getGameId(), (needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED, 0);
         }
 
         //Needs to go in a direction but a wall is blocking
@@ -208,7 +215,9 @@ public class MovementHandler {
         }
     }
 
-    private void calculateZombieY(Zombie zombie) {
+    private void calculateZombieY(Zombie zombie) throws IOException {
+        if(!zombie.isClientResponsible()) return;
+
         boolean isZombieTouchingFloor = camera.isEntityTouchingBlock(
                 zombie.getFeetCollision(), false);
         if(isZombieTouchingFloor && zombie.getJumpAcceleration() >= 0 && !zombie.isNeedsToJump()) {
@@ -235,6 +244,7 @@ public class MovementHandler {
             } else {
                 //Keep climbing
                 zombie.addTranslateY(zombie.getJumpVelocity());
+                if(client != null) client.updateZombiePos(zombie.getGameId(), 0, zombie.getJumpVelocity());
             }
             return;
         }
@@ -250,6 +260,7 @@ public class MovementHandler {
 
         }
         zombie.addTranslateY(3 * zombie.JUMPING_POWER()); //Falling
+        if(client != null) client.updateZombiePos(zombie.getGameId(), 0, 3 * zombie.JUMPING_POWER());
     }
 
 

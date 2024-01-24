@@ -30,6 +30,10 @@ public class Zombie extends Character {
     protected final ProgressBar healthBar;
     protected Difficulty difficulty;
 
+    //Multiplayer
+    private int id;
+    private boolean isClientResponsible;
+
     public Zombie(Difficulty difficulty) {
         super();
         //Movement Values
@@ -38,6 +42,7 @@ public class Zombie extends Character {
         this.needsToJump = false;
         this.xCounter = 30;
         this.difficulty = difficulty;
+        this.isClientResponsible = true;
 
         //Attack Cooldown
         this.attackCooldown = new PauseTransition();
@@ -159,5 +164,21 @@ public class Zombie extends Character {
         }
         //Easy
         return 3 * multiplier;
+    }
+
+    public int getGameId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public boolean isClientResponsible() {
+        return isClientResponsible;
+    }
+
+    public void setClientResponsible(boolean clientResponsible) {
+        isClientResponsible = clientResponsible;
     }
 }

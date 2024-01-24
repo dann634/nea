@@ -13,6 +13,10 @@ public class ItemStack extends Entity { //Child of Entity
     private Label stackSizeLabel;
 
 
+    //Multiplayer
+    private int id;
+
+
     public ItemStack(Entity item) {
         super(item.getItemName(), item.getTranslateX(), item.getTranslateY()); //Parent constructor
         this.setMouseTransparent(true); //Needs to not block mouse events
@@ -70,8 +74,11 @@ public class ItemStack extends Entity { //Child of Entity
         this.stackSize.set(this.stackSize.get() + value);
     }
 
+    public int getGameId() {
+        return id;
+    }
 
-
-
-
+    public void setId(int id) {
+        this.id = id;
+    }
 }

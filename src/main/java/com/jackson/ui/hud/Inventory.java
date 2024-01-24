@@ -257,7 +257,6 @@ public class Inventory {
             itemArray[selectedSlotIndex.get()][0] = null;
             inventoryArr[selectedSlotIndex.get()][0].getChildren().clear();
         }
-
     }
 
     public ImageView getItemOnCursor() {

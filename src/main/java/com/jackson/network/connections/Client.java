@@ -13,11 +13,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.*;
 
 public class Client {
 
@@ -34,8 +30,12 @@ public class Client {
     private static final int PORT = 4234;
     private static final String LAPTOP_IP = "192.168.0.36";
     private static final String SERVER_IP = "192.168.50.98";
+    private final Set<Integer> zombieIDs;
+    private final Set<Integer> droppedItemIDs;
 
     public Client() throws IOException {
+        zombieIDs = new HashSet<>();
+        droppedItemIDs = new HashSet<>();
         socket = new Socket("localhost", PORT); //initialises socket
         outStream = new ObjectOutputStream(socket.getOutputStream()); //initialises the outstream
         inStream = new ObjectInputStream(socket.getInputStream()); //initialises the instream
@@ -158,7 +158,24 @@ public class Client {
 
             case "zombie_spawn" -> {
                 int[][] data = (int[][]) packet.getObject();
-                Platform.runLater(() -> gameController.spawnZombiePack(data));
+                for (int i = 1; i < data.length; i++) {
+                    zombieIDs.add(data[i][1]);
+                }
+                Platform.runLater(() -> gameController.spawnZombiePack(data, packet.getExt().equals(displayName)));
+            }
+
+            case "damage_zombie" -> {
+                Platform.runLater(() -> gameController.damageZombie(Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
+            }
+
+            case "update_zombie_pos" -> {
+                Platform.runLater(() -> gameController.updateZombiePos(Integer.parseInt(packet.getExt()), (double[]) packet.getObject()));
+            }
+
+            case "create_dropped_item" -> {
+                int[] data = (int[]) packet.getObject();
+                droppedItemIDs.add(data[3]); //Add id
+                Platform.runLater(() -> gameController.createDroppedBlock(data[3], packet.getExt(), data[2], data[0], data[1]));
             }
         }
     }
@@ -215,11 +232,16 @@ public class Client {
         send("delete_save", null);
     }
 
-    public void closeClient() throws IOException {
-        inStream.close();
-        outStream.close();
-        socket.close();
-        thread.interrupt();
+    public void damageZombie(int id, int damage) throws IOException {
+        send("damage_zombie", String.valueOf(id), damage);
+    }
+
+    public void updateZombiePos(int id, double x, double y) throws IOException {
+        send("update_zombie_pos", String.valueOf(id), new double[]{x,y});
+    }
+
+    public void createDroppedItem(String itemName, int amount, int x, int y) throws IOException {
+        send("create_dropped_item", itemName, new int[]{x, y, amount, 0});
     }
 
     public String[][] getMap() {

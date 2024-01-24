@@ -156,7 +156,7 @@ public class GameController extends Scene {
             }
         });
 
-        movementHandler = new MovementHandler(character, camera);
+        movementHandler = new MovementHandler(character, camera, client);
         gameTimeline = new Timeline();
         gameTimeline.setCycleCount(Animation.INDEFINITE);
         gameTimeline.getKeyFrames().add(new KeyFrame(Duration.millis(17), e -> {
@@ -208,6 +208,7 @@ public class GameController extends Scene {
         if (rand.nextDouble() > ZOMBIE_SPAWN_RATE) {
             return; //No spawn
         }
+
         //Spawn
         int packSize = (int) rand.nextGaussian(3, 1);
         int spawnTile = rand.nextInt(32) + 1;
@@ -218,9 +219,9 @@ public class GameController extends Scene {
             var zombie = getZombie(spawnTile * 32 + rand.nextDouble(25), camera.getBlockTranslateY(spawnTile) - 48);
             pack.add(zombie);
             nodes.addAll(zombie.getNodes());
-            root.getChildren().addAll(nodes);
-            zombies.addAll(pack);
         }
+        root.getChildren().addAll(nodes);
+        zombies.addAll(pack);
     }
 
     private Zombie getZombie(double x, double y) {
@@ -244,7 +245,7 @@ public class GameController extends Scene {
     }
 
 
-    public void spawnZombiePack(int[][] data) {
+    public void spawnZombiePack(int[][] data, boolean isResponsible) {
 
         List<List<Block>> blocks = camera.getBlocks();
         int leftBorder = blocks.get(0).get(0).getXPos();
@@ -274,11 +275,30 @@ public class GameController extends Scene {
         for (int i = 1; i < data.length; i++) {
             int offset = data[i][0];
             var zombie = getZombie((index * 32) + offset, camera.getBlockTranslateY(index) - 48);
+            zombie.setId(data[i][1]);
+            zombie.setClientResponsible(isResponsible);
             pack.add(zombie);
             nodes.addAll(zombie.getNodes());
         }
         root.getChildren().addAll(nodes);
         zombies.addAll(pack);
+    }
+
+    public void damageZombie(int id, int damage) {
+        for(Zombie zombie : zombies) {
+            if(zombie.getGameId() != id) continue;
+            if(zombie.takeDamage(damage)) {
+                root.getChildren().removeAll(zombie.getNodes());
+            }
+        }
+    }
+
+    public void updateZombiePos(int id, double[] move) {
+        for(Zombie zombie : zombies) {
+            if(zombie.getGameId() != id) continue;
+            zombie.addTranslateX((int) move[0]);
+            zombie.addTranslateY(move[1]);
+        }
     }
 
     private void spawnBoss() {
@@ -397,6 +417,7 @@ public class GameController extends Scene {
             if(line.get(0).getXPos() == player.getXPos()) {
                 for(Block block : line) {
                     if(block.getYPos() == player.getYPos()) {
+                        //camera offsets are added through getTranslate()
                         player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset() - 48);
                         player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset() - 32);
                     }
@@ -435,7 +456,7 @@ public class GameController extends Scene {
 
                     case I -> inventory.toggleInventory();
                     case K -> statMenu.toggleShown();
-                    case C -> craftingMenu.toggleShown(gameTimeline);
+                    case C -> craftingMenu.toggleShown(gameTimeline, isSingleplayer);
 
                     case ESCAPE -> {
                         if(gameTimeline.getStatus() != Animation.Status.PAUSED && !this.isGamePaused) {
@@ -474,9 +495,18 @@ public class GameController extends Scene {
             && !inventory.isCellHovered()) {
                 //Drop item
                 camera.createDroppedBlock(inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
-                inventory.clearCursor();
                 blockDropped = true;
                 character.updateBlockInHand(inventory.getSelectedItemStack());
+                if(client != null) {
+                    ItemStack itemStack = inventory.getItemStackOnCursor();
+                    int[] worldPos = findWorldPos(itemStack.getTranslateX(), itemStack.getTranslateY());
+                    try {
+                        client.createDroppedItem(itemStack.getItemName(), itemStack.getStackSize(), worldPos[0], worldPos[1]);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+                inventory.clearCursor();
             }
         });
 
@@ -778,14 +808,33 @@ public class GameController extends Scene {
         camera.setClient(client);
     }
 
-    public void updatePositionOnServer(int[] pos) throws IOException {
-        client.updatePositionOnServer(pos);
+
+
+    public void createDroppedBlock(int id, String itemName, int amount, int xPos, int yPos) {
+        ItemStack item = new ItemStack(new Entity(itemName));
+        item.addStackValue(amount);
+        item.setId(id);
+        Block block = camera.getBlock(xPos, yPos);
+        camera.createDroppedBlock(item, block.getTranslateX(), block.getTranslateY());
     }
 
-
-
-
-
+    public int[] findWorldPos(double screenX, double screenY) { // FIXME: 24/01/2024
+        List<List<Block>> blocks = camera.getBlocks();
+        for (int i = 0; i < blocks.size() - 1; i++) {
+            List<Block> line = blocks.get(i);
+            List<Block> nextLine = blocks.get(i + 1);
+            if(line.isEmpty() || nextLine.isEmpty()) continue;
+            Block block = line.get(0);
+            Block nextBlock = nextLine.get(0);
+            if(screenX < block.getTranslateX() || screenX > nextBlock.getTranslateX()) continue;
+            System.out.println(block.getXPos());
+            for (int j = 0; j < line.size() - 1; j++) {
+                if(screenY < line.get(j).getTranslateY() || screenY > line.get(j + 1).getTranslateY()) continue;
+                return new int[]{line.get(i).getXPos(), line.get(i).getYPos()};
+            }
+        }
+        return new int[]{-1, -1};
+    }
 
 
 

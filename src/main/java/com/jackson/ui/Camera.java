@@ -333,14 +333,18 @@ public class Camera {
             }
         }
         if(newBlock.getXPos() == -1) return; //Not a valid block (for multiplayer not on screen)
-        spawnItem(remBlock.getItemName(), 1, remBlock.getTranslateX(), remBlock.getTranslateY());
         root.getChildren().remove(remBlock); //Removes old block
         root.getChildren().addAll(newBlock); //Adds air block in place to pane
         blocks.get(index[0]).set(index[1], newBlock); //Adds air block to blocks
         blockJustBroken = true; //Sets flag to true so blocks fall
         map[remBlock.getXPos()][remBlock.getYPos()] = "0"; //Update map to an air block
 
-        if(client != null && isPacket) client.removeBlock(remBlock);
+        if(client != null && isPacket) {
+            client.removeBlock(remBlock);
+            client.createDroppedItem(remBlock.getItemName(), 1, remBlock.getXPos(), remBlock.getYPos());
+        } else if(client == null) {
+            spawnItem(remBlock.getItemName(), 1, remBlock.getTranslateX(), remBlock.getTranslateY());
+        }
     }
 
     public void removeBlock(int xPos, int yPos, boolean isPacket) throws IOException {
@@ -388,16 +392,10 @@ public class Camera {
                 List<Node> zombieNodes = new ArrayList<>();
                 for(Zombie zombie : zombies) {
                     if(character.getHandRectangle().intersects(zombie.getTranslateX(), zombie.getTranslateY(), 48, 72)) { // FIXME: 21/11/2023 could make this bound more precise
-                        //Zombie touching weapon
-                        if(zombie.takeDamage((int)character.getAttackDamage())) { //Returns true if dead
-                            deadZombies.add(zombie);
-                            zombieNodes.addAll(zombie.getNodes());
-                            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
-
-                            if(zombie instanceof Boss) {
-                                bossMusic.pause();
-                                gameController.setEventMessage("Boss Defeated!");
-                            }
+                        try {
+                            checkZombieDamage(zombie, deadZombies, zombieNodes);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 }
@@ -412,15 +410,10 @@ public class Camera {
                 List<Node> zombieNodes = new ArrayList<>();
                 for(Zombie zombie : zombies) {
                     if(character.getAimingLine().intersects(zombie.getTranslateX() + 24, zombie.getTranslateY(), 48, 72)) {
-                        if(zombie.takeDamage((int) character.getAttackDamage())) {
-                            deadZombies.add(zombie);
-                            zombieNodes.addAll(zombie.getNodes());
-                            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
-
-                            if(zombie instanceof Boss) {
-                                bossMusic.pause();
-                                gameController.setEventMessage("Boss Defeated!");
-                            }
+                        try {
+                            checkZombieDamage(zombie, deadZombies, zombieNodes);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
                     }
                 }
@@ -428,6 +421,22 @@ public class Camera {
                 zombies.removeAll(deadZombies);
             }
         });
+    }
+
+    private void checkZombieDamage(Zombie zombie, List<Zombie> deadZombies, List<Node> zombieNodes) throws IOException {
+        int damage = (int) character.getAttackDamage();
+        if(zombie.takeDamage(damage)) {
+            deadZombies.add(zombie);
+            zombieNodes.addAll(zombie.getNodes());
+            spawnZombieDrop(zombie.getTranslateX(), zombie.getTranslateY());
+
+            if(zombie instanceof Boss) {
+                bossMusic.pause();
+                gameController.setEventMessage("Boss Defeated!");
+            }
+        }
+        if(client != null) client.damageZombie(zombie.getGameId(), damage);
+
     }
 
     private void spawnZombieDrop(double x, double y) {
@@ -527,14 +536,6 @@ public class Camera {
                 zombies.remove(zombie);
             }
         }
-//        Iterator<Zombie> zombieIterator = zombies.listIterator();
-//        while(zombieIterator.hasNext()) {
-//            Zombie zombie = zombieIterator.next();
-//            if(zombie.getTranslateX() < - 200 || zombie.getTranslateX() > 1224 || zombie.getTranslateY() < -200 || zombie.getTranslateY() > 764) {
-//                root.getChildren().removeAll(zombie.getNodes());
-//                zombieIterator.remove();
-//            }
-//        }
     }
 
     public void checkBlockPickup() {
@@ -559,7 +560,7 @@ public class Camera {
         itemStack.setPos(x, y);
         droppedBlocks.add(itemStack);
         root.getChildren().add(itemStack);
-        character.updateBlockInHand(itemStack);
+        character.updateBlockInHand(itemStack); // TODO: 24/01/2024 remove this?
     }
 
     public void checkBlockBorder() {
