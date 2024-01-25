@@ -138,6 +138,7 @@ public class GameController extends Scene {
         bloodMoonTimer.setOnFinished(e -> setBloodMoon(false));
         setBloodMoon(false);
 
+        //Multiplayer stuff
 
         setRoot(root);
         root.setId("root");
@@ -325,7 +326,7 @@ public class GameController extends Scene {
 
     public void loadSaveData(List<String> playerData) {
         if (playerData.isEmpty()) {
-            camera.sendToSpawn();
+            camera.sendToSpawn(true);
         } else {
             character.setXPos(Integer.parseInt(playerData.get(0)));
             character.setYPos(Integer.parseInt(playerData.get(1)));
@@ -401,29 +402,36 @@ public class GameController extends Scene {
 
     public void addOnlinePlayerIfOnScreen(PseudoPlayer player) {
 
+        // TODO: 25/01/2024 CHANGE HOW THIS WORKS
+        //use the players x pos and y pos and just times by 32 and add the offset
         if(player.isOnScreen()) return;
 
-        List<List<Block>> blocks = camera.getBlocks();
-        int leftBorder = blocks.get(0).get(0).getXPos();
-        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
-        int topBorder = blocks.get(0).get(0).getYPos();
-        int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
-        if(player.getXPos() < leftBorder || player.getXPos() > rightBorder || player.getYPos() < topBorder || player.getYPos() > bottomBorder) {
-            player.setOnScreen(false);
-            return; //Not on screen
-        }
+        setPseudoPlayerPos(player);
+//        System.out.println(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset());
+//        System.out.println(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset());
+
+
+//        int leftBorder = blocks.get(0).get(0).getXPos();
+//        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
+//        int topBorder = blocks.get(0).get(0).getYPos();
+//        int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
+//        if(player.getXPos() < leftBorder || player.getXPos() > rightBorder || player.getYPos() < topBorder || player.getYPos() > bottomBorder) {
+//            player.setOnScreen(false);
+//            return; //Not on screen
+//        }
         player.setOnScreen(true);
-        for(List<Block> line : blocks) {
-            if(line.get(0).getXPos() == player.getXPos()) {
-                for(Block block : line) {
-                    if(block.getYPos() == player.getYPos()) {
-                        //camera offsets are added through getTranslate()
-                        player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset() - 48);
-                        player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset() - 32);
-                    }
-                }
-            }
-        }
+//        for(List<Block> line : blocks) {
+//            if(line.get(0).getXPos() == player.getXPos()) {
+//                for(Block block : line) {
+//                    if(block.getYPos() == player.getYPos()) {
+//                        System.out.println("add: " + block.getXPos() + "," + block.getYPos());
+//                        //camera offsets are added through getTranslate()
+//                        player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset());
+//                        player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset());
+//                    }
+//                }
+//            }
+//        }
     }
 
 
@@ -818,6 +826,19 @@ public class GameController extends Scene {
         camera.createDroppedBlock(item, block.getTranslateX(), block.getTranslateY());
     }
 
+    public void setPseudoPlayerPos(PseudoPlayer player) {
+
+        List<List<Block>> blocks = camera.getBlocks();
+        Block block = blocks.get(0).get(0);
+        double leftXTranslate = block.getTranslateX();
+        double leftYTranslate = block.getTranslateY();
+        int blockXPos = block.getXPos();
+        int blockYPos = block.getYPos();
+
+        player.getImageView().setTranslateX(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset());
+        player.getImageView().setTranslateY(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset() - 64 + ((character.getYPos() - player.getYPos()) * 32));
+    }
+
     public int[] findWorldPos(double screenX, double screenY) { // FIXME: 24/01/2024
         List<List<Block>> blocks = camera.getBlocks();
         for (int i = 0; i < blocks.size() - 1; i++) {
@@ -837,8 +858,7 @@ public class GameController extends Scene {
     }
 
 
-
-
-
-
+    public Player getCharacter() {
+        return character;
+    }
 }

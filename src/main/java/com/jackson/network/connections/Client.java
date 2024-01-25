@@ -1,6 +1,7 @@
 package com.jackson.network.connections;
 
 import com.jackson.game.Difficulty;
+import com.jackson.game.characters.Player;
 import com.jackson.game.items.Block;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
@@ -91,6 +92,7 @@ public class Client {
                 player.setYPos(data[1]);
                 player.setxOffset(data[2]);
                 player.setyOffset(data[3]);
+
                 //Adds player to screen
                 Platform.runLater(() -> {
                     gameController.addPlayer(player);
@@ -125,7 +127,7 @@ public class Client {
                         //remove player from screen
                         Platform.runLater(() -> {
                             gameController.removePlayer(player);
-                            gameController.setEventMessage(player.getDisplayName() + "disconnected");
+                            gameController.setEventMessage(player.getDisplayName() + " disconnected");
                         });
                     }
                 }
@@ -177,7 +179,10 @@ public class Client {
                 droppedItemIDs.add(data[3]); //Add id
                 Platform.runLater(() -> gameController.createDroppedBlock(data[3], packet.getExt(), data[2], data[0], data[1]));
             }
-        }
+
+
+            }
+
     }
 
 

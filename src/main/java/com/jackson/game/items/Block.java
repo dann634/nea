@@ -64,6 +64,8 @@ public class Block extends Entity {
 
         setOnMousePressed(e -> {
 
+            System.out.println(xPos + "," + yPos);
+
             if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null
                     && this.inventory.getItemStackOnCursor() == null && !this.inventory.getSelectedItemStack().isUsable()) {
                 //Place block

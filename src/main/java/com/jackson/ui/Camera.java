@@ -570,7 +570,7 @@ public class Camera {
 
     public void respawn() {
         character.setHealth(100);
-        sendToSpawn();
+        sendToSpawn(false);
 
         List<Node> nodes = new ArrayList<>();
         zombies.forEach(n -> nodes.addAll(n.getNodes()));
@@ -600,9 +600,10 @@ public class Camera {
         return 0;
     }
 
-    public void sendToSpawn() {
+    public void sendToSpawn(boolean isMultiplayer) {
         character.setXPos(500);
         character.setYPos(findStartingY(map));
+        if(isMultiplayer) addYOffset(-46);
 
         //Reset World
         if(blocks != null) {
