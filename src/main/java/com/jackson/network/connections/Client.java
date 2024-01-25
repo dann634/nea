@@ -90,7 +90,7 @@ public class Client {
                 //Sets the players position
                 player.setXPos(data[0]);
                 player.setYPos(data[1]);
-                player.setxOffset(data[2]);
+                player.setxOffset(-data[2]);
                 player.setyOffset(data[3]);
 
                 //Adds player to screen
