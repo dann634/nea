@@ -106,11 +106,12 @@ public class Client {
                 for(PseudoPlayer player : players) {
                     if(player.getDisplayName().equals(targetName)) {
                         Platform.runLater(() -> {
-                            gameController.addOnlinePlayerIfOnScreen(player);
                             player.translateX(-posData[2]);
                             player.translateY(-posData[3]);
                             player.setXPos(posData[0]);
                             player.setYPos(posData[1]);
+                            gameController.addOnlinePlayerIfOnScreen(player);
+//                            gameController.setPseudoPlayerPos(player);
                         });
                         return;
                     }

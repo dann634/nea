@@ -86,7 +86,6 @@ public class MovementHandler {
         camera.drawHorizontalLine(!isCharacterMovingDown); //Add new line
         camera.deleteHorizontal(isCharacterMovingDown); //Delete opposite line
         character.addYPos(newYPos); //Update y position of player
-        System.out.println("character:" + character.getYPos());
         camera.addYOffset(newYOffset); //Reset offset of blocks
 
     }

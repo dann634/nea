@@ -835,8 +835,8 @@ public class GameController extends Scene {
         int blockXPos = block.getXPos();
         int blockYPos = block.getYPos();
 
-        player.getImageView().setTranslateX(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset());
-        player.getImageView().setTranslateY(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset() - 64 + ((character.getYPos() - player.getYPos()) * 32));
+        player.getImageView().setTranslateX(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset() - 32);
+        player.getImageView().setTranslateY(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset() - 64);
     }
 
     public int[] findWorldPos(double screenX, double screenY) { // FIXME: 24/01/2024

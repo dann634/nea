@@ -220,7 +220,7 @@ public class Camera {
             player.getImageView().setTranslateX(player.getImageView().getTranslateX() + offset);
         }
         if(client == null) return;
-        client.updatePositionOnServer(new int[]{character.getXPos(), character.getYPos(), offset, 0});
+        client.updatePositionOnServer(new int[]{character.getXPos(), character.getYPos(), offset, 0, getxOffset(), getyOffset()});
     }
 
     public void translateBlocksByY(int offset) throws IOException {
@@ -250,7 +250,7 @@ public class Camera {
         }
         if(client == null) return;
 
-        client.updatePositionOnServer(new int[]{character.getXPos(), character.getYPos(), 0, offset});
+        client.updatePositionOnServer(new int[]{character.getXPos(), character.getYPos(), 0, offset, getxOffset(), getyOffset()});
     }
 
     public void initWorld() { // FIXME: 30/10/2023 issue on creating -> two lines are overlapping
