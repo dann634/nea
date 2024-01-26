@@ -135,8 +135,6 @@ public class Inventory {
             inventoryArr[row][col].getChildren().clear();
             itemOnCursor.setVisible(true);
             itemArray[row][col] = null;
-
-
         });
         return pane;
     }

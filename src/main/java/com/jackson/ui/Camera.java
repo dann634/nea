@@ -296,7 +296,7 @@ public class Camera {
     }
 
     public void spawnItem(String itemName, int amount, double x, double y) {
-        // TODO: 19/11/2023 get from database in future
+        if(client != null) return;
         Entity item;
         if(GameController.lookupTable.containsKey(itemName)) {
             item = new Block(itemName, character.getXPos(), character.getYPos(), this, inventory);
@@ -538,20 +538,22 @@ public class Camera {
         }
     }
 
-    public void checkBlockPickup() {
+    public void checkBlockPickup() throws IOException {
         Iterator<ItemStack> droppedBlocksIterator = droppedBlocks.listIterator();
         while(droppedBlocksIterator.hasNext()) {
             ItemStack itemStack = droppedBlocksIterator.next();
             if(character.intersects(itemStack.getBoundsInParent())) {
                 //Touching
-                if(!inventory.addItem(itemStack)) {
-                    continue;
-                }
+                if(!inventory.addItem(itemStack)) continue;
+
                 root.getChildren().remove(itemStack);
                 droppedBlocksIterator.remove();
 
                 //Check hand
                 character.updateBlockInHand(inventory.getSelectedItemStack());
+
+                if(client != null) client.pickupItem(itemStack);
+
             }
         }
     }
@@ -560,7 +562,8 @@ public class Camera {
         itemStack.setPos(x, y);
         droppedBlocks.add(itemStack);
         root.getChildren().add(itemStack);
-        character.updateBlockInHand(itemStack); // TODO: 24/01/2024 remove this?
+        character.updateBlockInHand(inventory.getSelectedItemStack());
+        blockJustBroken = true;
     }
 
     public void checkBlockBorder() {

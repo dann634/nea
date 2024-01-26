@@ -11,7 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
 public class PseudoPlayer implements PlayerInterface {
-    private ImageView imageView;
+    private final ImageView imageView;
     private int xPos;
     private int yPos;
     private int xOffset;
@@ -21,8 +21,6 @@ public class PseudoPlayer implements PlayerInterface {
     private Label displayNameLabel;
     private final String displayName;
     private int oldX;
-    private boolean isOnScreen;
-
 
     public PseudoPlayer(String displayName) {
         this.displayName = displayName;
@@ -33,7 +31,6 @@ public class PseudoPlayer implements PlayerInterface {
         imageView.setFitWidth(32);
         initDisplayNameLabel();
         oldX = 16;
-        isOnScreen = false;
     }
 
     private void initDisplayNameLabel() {
@@ -118,11 +115,4 @@ public class PseudoPlayer implements PlayerInterface {
         return displayName;
     }
 
-    public boolean isOnScreen() {
-        return isOnScreen;
-    }
-
-    public void setOnScreen(boolean onScreen) {
-        isOnScreen = onScreen;
-    }
 }

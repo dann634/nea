@@ -138,7 +138,7 @@ public class GameController extends Scene {
         bloodMoonTimer.setOnFinished(e -> setBloodMoon(false));
         setBloodMoon(false);
 
-        //Multiplayer stuff
+        character.updateBlockInHand(inventory.getSelectedItemStack());
 
         setRoot(root);
         root.setId("root");
@@ -179,7 +179,11 @@ public class GameController extends Scene {
                 character.attack(inventory.getSelectedItemStack());
             }
 
-            camera.checkBlockPickup();
+            try {
+                camera.checkBlockPickup();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             camera.checkBlockBorder();
             spawnZombiePack();
 
@@ -391,47 +395,13 @@ public class GameController extends Scene {
     }
 
     public void addPlayer(PseudoPlayer player) {
-        addOnlinePlayerIfOnScreen(player);
+        setPseudoPlayerPos(player);
         root.getChildren().addAll(player.getImageView(), player.getDisplayNameLabel());
         camera.addOnlinePlayer(player);
     }
 
     public void removePlayer(PseudoPlayer player) {
         root.getChildren().removeAll(player.getImageView(), player.getDisplayNameLabel());
-    }
-
-    public void addOnlinePlayerIfOnScreen(PseudoPlayer player) {
-
-        // TODO: 25/01/2024 CHANGE HOW THIS WORKS
-        //use the players x pos and y pos and just times by 32 and add the offset
-        if(player.isOnScreen()) return;
-
-        setPseudoPlayerPos(player);
-//        System.out.println(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset());
-//        System.out.println(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset());
-
-
-//        int leftBorder = blocks.get(0).get(0).getXPos();
-//        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
-//        int topBorder = blocks.get(0).get(0).getYPos();
-//        int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
-//        if(player.getXPos() < leftBorder || player.getXPos() > rightBorder || player.getYPos() < topBorder || player.getYPos() > bottomBorder) {
-//            player.setOnScreen(false);
-//            return; //Not on screen
-//        }
-        player.setOnScreen(true);
-//        for(List<Block> line : blocks) {
-//            if(line.get(0).getXPos() == player.getXPos()) {
-//                for(Block block : line) {
-//                    if(block.getYPos() == player.getYPos()) {
-//                        System.out.println("add: " + block.getXPos() + "," + block.getYPos());
-//                        //camera offsets are added through getTranslate()
-//                        player.getImageView().setTranslateY(block.getTranslateY() + player.getyOffset());
-//                        player.getImageView().setTranslateX(block.getTranslateX() + player.getxOffset());
-//                    }
-//                }
-//            }
-//        }
     }
 
 
@@ -502,12 +472,15 @@ public class GameController extends Scene {
             if(inventory.getItemStackOnCursor() != null
             && !inventory.isCellHovered()) {
                 //Drop item
-                camera.createDroppedBlock(inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
+                if(isSingleplayer) {
+                    camera.createDroppedBlock(inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
+                }
                 blockDropped = true;
                 character.updateBlockInHand(inventory.getSelectedItemStack());
                 if(client != null) {
                     ItemStack itemStack = inventory.getItemStackOnCursor();
-                    int[] worldPos = findWorldPos(itemStack.getTranslateX(), itemStack.getTranslateY());
+                    int[] worldPos = findWorldPos(e.getSceneX(), e.getSceneY());
+                    System.out.println(Arrays.toString(worldPos));
                     try {
                         client.createDroppedItem(itemStack.getItemName(), itemStack.getStackSize(), worldPos[0], worldPos[1]);
                     } catch (IOException ex) {
@@ -826,6 +799,16 @@ public class GameController extends Scene {
         camera.createDroppedBlock(item, block.getTranslateX(), block.getTranslateY());
     }
 
+    public void pickupItem(int id) {
+        Iterator<ItemStack> droppedBlocks = camera.getDroppedBlocks().listIterator();
+        while(droppedBlocks.hasNext()) {
+            ItemStack itemStack = droppedBlocks.next();
+            if(itemStack.getGameId() != id) continue;
+            droppedBlocks.remove();
+            root.getChildren().remove(itemStack);
+        }
+    }
+
     public void setPseudoPlayerPos(PseudoPlayer player) {
 
         List<List<Block>> blocks = camera.getBlocks();
@@ -848,17 +831,14 @@ public class GameController extends Scene {
             Block block = line.get(0);
             Block nextBlock = nextLine.get(0);
             if(screenX < block.getTranslateX() || screenX > nextBlock.getTranslateX()) continue;
-            System.out.println(block.getXPos());
             for (int j = 0; j < line.size() - 1; j++) {
                 if(screenY < line.get(j).getTranslateY() || screenY > line.get(j + 1).getTranslateY()) continue;
-                return new int[]{line.get(i).getXPos(), line.get(i).getYPos()};
+                return new int[]{line.get(j).getXPos(), line.get(j).getYPos()};
             }
         }
         return new int[]{-1, -1};
     }
 
 
-    public Player getCharacter() {
-        return character;
-    }
+
 }

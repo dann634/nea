@@ -7,6 +7,8 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -47,6 +49,10 @@ public class Block extends Entity {
         if(this.itemName.equals("air") || this.itemName.equals("bedrock")) {
             this.isBreakable = false;
         }
+
+        rotateProperty().addListener((observableValue, number, t1) -> {
+            System.out.println(t1.intValue());
+        });
 
         getStyleClass().add("block");
 
