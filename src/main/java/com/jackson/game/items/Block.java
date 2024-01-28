@@ -50,9 +50,6 @@ public class Block extends Entity {
             this.isBreakable = false;
         }
 
-        rotateProperty().addListener((observableValue, number, t1) -> {
-            System.out.println(t1.intValue());
-        });
 
         getStyleClass().add("block");
 
@@ -69,8 +66,6 @@ public class Block extends Entity {
         });
 
         setOnMousePressed(e -> {
-
-            System.out.println(xPos + "," + yPos);
 
             if(this.itemName.equals("air") && this.inventory.getSelectedItemStack() != null
                     && this.inventory.getItemStackOnCursor() == null && !this.inventory.getSelectedItemStack().isUsable()) {

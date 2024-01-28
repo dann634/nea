@@ -21,6 +21,7 @@ public class CreateWorldController extends Scene {
     private final VBox root;
     private final Label title;
     private final Button generateWorldButton;
+    private final ComboBox<String> difficultyComboBox;
 
 
     // TODO: 21/08/2023 Maybe break this down into methods
@@ -38,7 +39,7 @@ public class CreateWorldController extends Scene {
 
         var difficultyLabel = new Label("Difficulty:"); //Label for combobox
 
-        var difficultyComboBox = new ComboBox<>(); //Drop down menu for selecting difficulty
+        difficultyComboBox = new ComboBox<>(); //Drop down menu for selecting difficulty
         difficultyComboBox.getItems().addAll("Easy", "Medium", "Hard"); //Different difficulties added
         difficultyComboBox.getSelectionModel().selectFirst(); // Easy is the default choice
 
@@ -71,7 +72,7 @@ public class CreateWorldController extends Scene {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toString().toUpperCase()), true, null));
+            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toUpperCase()), true, null));
         });
 
         //Back button (back to main menu)
@@ -98,7 +99,7 @@ public class CreateWorldController extends Scene {
         generateWorldButton.setOnAction(e -> {
             try {
                 Client client = new Client();
-                client.sendMap(ProceduralGenerator.createMapArray());
+                client.sendMap(ProceduralGenerator.createMapArray(), Difficulty.valueOf(difficultyComboBox.getValue().toUpperCase()));
                 client.joinGame();
                 client.startListening();
             } catch (IOException ex) {

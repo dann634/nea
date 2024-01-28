@@ -480,7 +480,6 @@ public class GameController extends Scene {
                 if(client != null) {
                     ItemStack itemStack = inventory.getItemStackOnCursor();
                     int[] worldPos = findWorldPos(e.getSceneX(), e.getSceneY());
-                    System.out.println(Arrays.toString(worldPos));
                     try {
                         client.createDroppedItem(itemStack.getItemName(), itemStack.getStackSize(), worldPos[0], worldPos[1]);
                     } catch (IOException ex) {
@@ -626,6 +625,14 @@ public class GameController extends Scene {
                 gameTimeline.play();
                 audioplayer.play();
                 isGamePaused = false;
+
+                if(client != null && !isSingleplayer) {
+                    try {
+                        client.respawn();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
             });
             button.toFront();
             return button;

@@ -579,7 +579,6 @@ public class Camera {
         zombies.forEach(n -> nodes.addAll(n.getNodes()));
         root.getChildren().removeAll(nodes);
         zombies.clear();
-
     }
 
     private int findStartingY(String[][] map) {

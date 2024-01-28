@@ -176,6 +176,20 @@ public class Client {
                 Platform.runLater(() -> gameController.pickupItem((int) packet.getObject()));
             }
 
+            case "respawn" -> {
+                Platform.runLater(() -> {
+                    for(PseudoPlayer player : players) {
+                        if(!player.getDisplayName().equals(packet.getExt())) continue;
+                        player.setxOffset(0);
+                        player.setyOffset(0);
+                        player.setXPos(500);
+                        player.setYPos(((int[]) packet.getObject())[1]);
+                        gameController.setPseudoPlayerPos(player);
+                        return;
+                    }
+                });
+            }
+
 
             }
 
@@ -225,8 +239,9 @@ public class Client {
         send("remove_block", new int[]{block.getXPos(), block.getYPos()});
     }
 
-    public void sendMap(String[][] map) throws IOException {
+    public void sendMap(String[][] map, Difficulty difficulty) throws IOException {
         send("map", map);
+        send("difficulty", difficulty);
     }
 
     public void deleteSave() throws IOException {
@@ -247,6 +262,10 @@ public class Client {
 
     public void pickupItem(ItemStack itemStack) throws IOException {
         send("pickup_item", itemStack.getGameId());
+    }
+
+    public void respawn() throws IOException {
+        send("respawn", null);
     }
 
     public String[][] getMap() {
