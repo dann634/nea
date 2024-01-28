@@ -93,7 +93,7 @@ public class MainMenuController extends Scene implements Initializable {
 
                 }
             } catch (IOException | ClassNotFoundException ex) {
-                throw new RuntimeException(ex);
+                Main.setScene(new ErrorScreen("Couldn't Connect to Server. Please try again later."));
             }
         });
 
