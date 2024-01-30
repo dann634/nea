@@ -18,7 +18,7 @@ public abstract class Character extends ImageView {
     protected Rectangle headCollision;
     protected Rectangle leftCollision;
     protected Rectangle rightCollision;
-    private final int BASE_ATTACK_DAMAGE = 30;
+    protected int BASE_ATTACK_DAMAGE;
 
     public Character() {
         setPreserveRatio(true);
@@ -35,7 +35,7 @@ public abstract class Character extends ImageView {
         isModelFacingRight.addListener((observable, oldValue, newValue) -> {
             setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
         });
-
+        BASE_ATTACK_DAMAGE = 30;
     }
 
     private void initHeadCollision() {

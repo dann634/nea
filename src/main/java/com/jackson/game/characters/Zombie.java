@@ -52,9 +52,17 @@ public class Zombie extends Character {
         this.healthBar = initHealthBar();
         //Update Health for Difficulty
         switch(difficulty) {
+            case EASY -> health.set(100);
             case MEDIUM -> health.set(120);
             case HARD -> health.set(150);
         }
+
+        //Attack Damage
+        BASE_ATTACK_DAMAGE = switch (difficulty) {
+            case EASY -> 3;
+            case MEDIUM -> 5;
+            case HARD -> 8;
+        };
         rebindCollisions();
     }
 
@@ -154,16 +162,7 @@ public class Zombie extends Character {
         Random rand = new Random();
         //Multiplier between 1 and 2
         double multiplier = rand.nextDouble() + 1;
-        switch (difficulty) {
-            case MEDIUM -> {
-                return 5 * multiplier;
-            }
-            case HARD -> {
-                return 8 * multiplier;
-            }
-        }
-        //Easy
-        return 3 * multiplier;
+        return BASE_ATTACK_DAMAGE * multiplier;
     }
 
     public int getGameId() {

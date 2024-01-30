@@ -27,6 +27,7 @@ public class SettingsController extends Scene {
     private Slider backgroundSlider;
     private Slider soundEffectsSlider;
 
+    private Button saveButton;
 
     public SettingsController() {
         super(new VBox());
@@ -98,11 +99,9 @@ public class SettingsController extends Scene {
         this.displayNameTextField = new TextField();
         this.displayNameTextField.setPromptText("Display Name");
         this.displayNameTextField.textProperty().addListener((observableValue, number, t1) -> { //Changes color of circle
-            if(t1.isEmpty() || t1.length() > 15) {
-                circle.setFill(Color.web("#c7200e"));
-            } else {
-                circle.setFill(Color.web("#0aad07"));
-            }
+            boolean isInvalid = t1.length() < 3 || t1.length() > 15 || t1.contains("/") || t1.contains("\\");
+            circle.setFill(Color.web(isInvalid ? "#c7200e" : "#0aad07"));
+            saveButton.setDisable(isInvalid);
         });
         var hbox  = createHBox(displayNameLabel, this.displayNameTextField);
         hbox.getChildren().add(2, circle);
@@ -165,7 +164,7 @@ public class SettingsController extends Scene {
     }
 
     private void addButtons(VBox root) {
-        var saveButton = new Button("Save");
+        saveButton = new Button("Save");
         saveButton.setId("confirmButton");
         saveButton.setOnAction(e -> {
             //Update Settings Text File

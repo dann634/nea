@@ -70,7 +70,6 @@ public class MainMenuController extends Scene implements Initializable {
                 return;
             }
 
-
             Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9)), true, null));
         });
 

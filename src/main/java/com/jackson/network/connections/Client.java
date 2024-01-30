@@ -1,7 +1,6 @@
 package com.jackson.network.connections;
 
 import com.jackson.game.Difficulty;
-import com.jackson.game.characters.Player;
 import com.jackson.game.items.Block;
 import com.jackson.game.items.ItemStack;
 import com.jackson.io.TextIO;
@@ -9,17 +8,19 @@ import com.jackson.main.Main;
 import com.jackson.network.shared.Packet;
 import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
+import com.jackson.ui.MainMenuController;
 import javafx.application.Platform;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class Client {
 
-    private final Socket socket;
     private final ObjectOutputStream outStream;
     private final ObjectInputStream inStream;
     private GameController gameController;
@@ -27,14 +28,11 @@ public class Client {
     private final List<PseudoPlayer> players;
     private List<String> playerData;
     private final String displayName;
-    private Thread thread;
     private String[][] map;
     private static final int PORT = 4234;
-    private static final String LAPTOP_IP = "192.168.0.36";
-    private static final String SERVER_IP = "192.168.50.98";
 
     public Client() throws IOException {
-        socket = new Socket("localhost", PORT); //initialises socket
+        Socket socket = new Socket("localhost", PORT); //initialises socket
         outStream = new ObjectOutputStream(socket.getOutputStream()); //initialises the outstream
         inStream = new ObjectInputStream(socket.getInputStream()); //initialises the instream
         players = new ArrayList<>(); //Used to hold other players
@@ -43,17 +41,20 @@ public class Client {
 
 
     public void startListening() {
-          thread = new Thread(() -> {
-              try {
-                  while(true) {
-                      //Listen for object and pass it for processing
-                      Packet packet = (Packet) inStream.readObject();
-                      processPacket(packet);
-                  }
-              } catch (IOException | ClassNotFoundException e) {
-                  e.printStackTrace();
-              }
-          });
+        //Listen for object and pass it for processing
+        //Error
+        Thread thread = new Thread(() -> {
+            try {
+                while (true) {
+                    //Listen for object and pass it for processing
+                    Packet packet = (Packet) inStream.readObject();
+                    processPacket(packet);
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                //Error
+                Platform.runLater(() -> Main.setScene(new MainMenuController()));
+            }
+        });
           thread.setDaemon(true); //So thread closes with program
           thread.start(); //Start thread
     }
@@ -266,6 +267,11 @@ public class Client {
 
     public void respawn() throws IOException {
         send("respawn", null);
+    }
+
+    public void saveAndExit() throws IOException {
+        savePlayerData(camera.getPlayerData());
+        disconnect();
     }
 
     public String[][] getMap() {

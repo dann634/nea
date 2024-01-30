@@ -147,13 +147,6 @@ public class GameController extends Scene {
         Main.getStage().setOnCloseRequest(e -> {
             if (isSingleplayer) {
                 saveGame();
-            } else {
-                try {
-                    //Save multiplayer
-                    client.savePlayerData(camera.getPlayerData());
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
             }
         });
 
@@ -546,8 +539,6 @@ public class GameController extends Scene {
 
     private class PauseMenuController extends VBox {
 
-        // TODO: 29/12/2023 remove all dropped blocks on death
-
         public PauseMenuController(boolean isDead) {
             String colour  = isDead ? "247, 45, 0" : "209, 222, 227";
             setStyle("-fx-background-color: rgba(" + colour + ",.5);" +
@@ -602,9 +593,7 @@ public class GameController extends Scene {
                     saveGame();
                 } else {
                     try {
-                        client.savePlayerData(camera.getPlayerData());
-                        client.disconnect();
-//                        client.closeClient();
+                        client.saveAndExit();
                     } catch (IOException ex) {
                         throw new RuntimeException(ex);
                     }
@@ -829,7 +818,7 @@ public class GameController extends Scene {
         player.getImageView().setTranslateY(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset() - 64);
     }
 
-    public int[] findWorldPos(double screenX, double screenY) { // FIXME: 24/01/2024
+    public int[] findWorldPos(double screenX, double screenY) {
         List<List<Block>> blocks = camera.getBlocks();
         for (int i = 0; i < blocks.size() - 1; i++) {
             List<Block> line = blocks.get(i);

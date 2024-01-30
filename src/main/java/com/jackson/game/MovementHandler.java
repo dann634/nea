@@ -10,6 +10,7 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.NodeOrientation;
+import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -94,47 +95,28 @@ public class MovementHandler {
 
     public void calculateXProperties(boolean isAPressed, boolean isDPressed, Player player) throws IOException {
 
-        if(!isAPressed && !isDPressed) { //For optimization
+        if(isAPressed == isDPressed) { //For optimization
             return;
         }
 
-        boolean canMoveLeft = !camera.isEntityTouchingBlock(character.getLeftCollision(), true);
-        boolean canMoveRight = !camera.isEntityTouchingBlock(character.getRightCollision(), true);
+        Rectangle collision = isAPressed ? character.getLeftCollision() : character.getRightCollision();
+        if(camera.isEntityTouchingBlock(collision, true)) return;
 
-        int offset = 0;
-        boolean isCharacterMovingLeft = false;
-        if (isAPressed != isDPressed) {
-            if(canMoveRight && isDPressed) {
-                offset = -4;
-            }
-            if(isAPressed && canMoveLeft) {
-                offset = 4;
-                isCharacterMovingLeft = true;
-            }
-        } else {
-            return; //Pressing A and D at the same time
-        }
-
-        if((isAPressed && !canMoveLeft) || (isDPressed && !canMoveRight)) {
-            return; //Trying to move but stuck
-        }
-
-        camera.translateBlocksByX(offset);
-
+        camera.translateBlocksByX(isAPressed ? 4 : -4);
 
         //Condition Changes based on direction
-        boolean condition = isCharacterMovingLeft ? camera.getxOffset() > 32 : camera.getxOffset() < -32;
+        boolean condition = isAPressed ? camera.getxOffset() > 32 : camera.getxOffset() < -32;
         if (condition) {
             player.addAgilityXP(1); //Gain xp from moving
 
             //Get block x at edge and add one
-            int xLocalOffset = isCharacterMovingLeft ? -RENDER_WIDTH : RENDER_WIDTH;
-            int newXPos = isCharacterMovingLeft ? -1 : 1;
-            int newXOffset = isCharacterMovingLeft ? -32 : 32;
+            int xLocalOffset = isAPressed ? -RENDER_WIDTH : RENDER_WIDTH;
+            int newXPos = isAPressed ? -1 : 1;
+            int newXOffset = isAPressed ? -32 : 32;
 
             //Load new line into world
-            camera.addLine(camera.getVerticalLine(xLocalOffset), isCharacterMovingLeft);
-            camera.deleteVertical(!isCharacterMovingLeft); //Deletes line on opposite side
+            camera.addLine(camera.getVerticalLine(xLocalOffset), isAPressed);
+            camera.deleteVertical(!isAPressed); //Deletes line on opposite side
             character.addXPos(newXPos); //Updates x pos of character
             camera.addXOffset(newXOffset); //Resets camera offset
         }
