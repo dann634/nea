@@ -177,7 +177,6 @@ public class GameController extends Scene {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            camera.checkBlockBorder();
             spawnZombiePack();
 
             pushElementsToFront(eventMessage, ammoHbox, killCounterHBox);
@@ -245,15 +244,18 @@ public class GameController extends Scene {
 
     public void spawnZombiePack(int[][] data, boolean isResponsible) {
 
+        //Find bounds of screen
         List<List<Block>> blocks = camera.getBlocks();
         int leftBorder = blocks.get(0).get(0).getXPos();
         int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
         int topBorder = blocks.get(0).get(0).getYPos();
         int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
 
+        //Spawn Location of Zombies
         int xPos = data[0][0];
         int yPos = data[0][1];
-        if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return; //Offscreen
+        //Is off screen?
+        if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return;
 
         //Find x and y translate
         List<Zombie> pack = new ArrayList<>();
@@ -269,15 +271,16 @@ public class GameController extends Scene {
             }
         }
 
-
         for (int i = 1; i < data.length; i++) {
             int offset = data[i][0];
-            var zombie = getZombie((index * 32) + offset, camera.getBlockTranslateY(index) - 48);
-            zombie.setId(data[i][1]);
+            var zombie = getZombie((index * 32) + offset,
+                    camera.getBlockTranslateY(index) - 48);
+            zombie.setId(data[i][1]); //ID used by every client
             zombie.setClientResponsible(isResponsible);
             pack.add(zombie);
             nodes.addAll(zombie.getNodes());
         }
+        //Add pack to wider world
         root.getChildren().addAll(nodes);
         zombies.addAll(pack);
     }
@@ -329,7 +332,6 @@ public class GameController extends Scene {
             character.setYPos(Integer.parseInt(playerData.get(1)));
             camera.addXOffset(Integer.parseInt(playerData.get(2)));
             camera.addYOffset(Integer.parseInt(playerData.get(3)));
-            CopyOnWriteArrayList<Zombie> e = new CopyOnWriteArrayList<>();
 
             String[] strength = playerData.get(4).split(" ");
             String[] agility = playerData.get(5).split(" ");
@@ -376,9 +378,7 @@ public class GameController extends Scene {
         });
 
 
-        inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> {
-            character.updateBlockInHand(inventory.getSelectedItemStack());
-        });
+        inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> character.updateBlockInHand(inventory.getSelectedItemStack()));
 
         root.getChildren().addAll(character, character.getHandRectangle(), character.getAimingLine());
         root.getChildren().addAll(character.getCollisions());
@@ -663,7 +663,7 @@ public class GameController extends Scene {
         }
     }
 
-    private class HealthBar extends HBox {
+    private static class HealthBar extends HBox {
         public HealthBar(SimpleDoubleProperty healthProperty) {
             //Initialising Values
             ProgressBar healthBar = new ProgressBar(1);
@@ -682,7 +682,7 @@ public class GameController extends Scene {
         }
     }
 
-    private class StatMenu extends VBox {
+    private static class StatMenu extends VBox {
         private final TranslateTransition translate;
         private boolean isVisible;
 

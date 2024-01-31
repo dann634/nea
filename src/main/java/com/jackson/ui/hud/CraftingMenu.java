@@ -80,9 +80,7 @@ public class CraftingMenu extends BorderPane {
 
     private HBox getItemOption(String itemName) {
         HBox hBox = new HBox();
-        hBox.setOnMouseClicked(e -> {
-            updateCenterMenu(itemName);
-        });
+        hBox.setOnMouseClicked(e -> updateCenterMenu(itemName));
         hBox.getStyleClass().add("craftingHbox");
 
         Entity icon = new Entity(itemName);

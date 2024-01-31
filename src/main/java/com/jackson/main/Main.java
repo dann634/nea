@@ -1,17 +1,11 @@
 package com.jackson.main;
 
-import com.jackson.ui.GameController;
 import com.jackson.ui.MainMenuController;
 import javafx.application.Application;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
-import java.util.Random;
 
 public class Main extends Application {
 

@@ -1,10 +1,6 @@
 package com.jackson.network.connections;
 
-import com.jackson.game.characters.Player;
 import com.jackson.game.characters.PlayerInterface;
-import com.jackson.io.TextIO;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;

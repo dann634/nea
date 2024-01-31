@@ -20,7 +20,7 @@ public class TextIO {
         try {
             BufferedReader reader = new BufferedReader(new FileReader(dir));
 
-            String readLine = "";
+            String readLine;
             while(true) {
                 readLine = reader.readLine();
                 if(readLine == null) {
@@ -34,10 +34,10 @@ public class TextIO {
         return data;
     }
 
-    public static boolean updateFile(List<String> data, String dir) {
+    public static void updateFile(List<String> data, String dir) {
 
         if(data == null || data.isEmpty()) { //Gatekeeping
-            return false;
+            return;
         }
 
         try {
@@ -51,9 +51,7 @@ public class TextIO {
             writer.close(); //Closes bufferedWriter
         } catch (IOException e) {
             System.err.println("Error: File Writing Failed");
-            return false;
         }
-        return true; // returns true if file write was successful
     }
 
 

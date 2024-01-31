@@ -2,7 +2,6 @@ package com.jackson.ui;
 
 import com.jackson.game.Difficulty;
 import com.jackson.game.ProceduralGenerator;
-import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.network.connections.Client;
 import javafx.scene.Scene;
@@ -12,6 +11,8 @@ import javafx.scene.layout.VBox;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class CreateWorldController extends Scene {
 
@@ -68,7 +69,7 @@ public class CreateWorldController extends Scene {
         generateWorldButton.setOnAction(e -> {
             ProceduralGenerator.saveMapToFile(ProceduralGenerator.createMapArray());
             try {
-                new File("src/main/resources/saves/single_data.txt").createNewFile();
+                Files.createFile(Path.of("src/main/resources/saves/single_data.txt"));
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

@@ -6,7 +6,6 @@ import com.jackson.main.Main;
 import com.jackson.network.connections.Client;
 import javafx.application.Platform;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -97,13 +96,13 @@ public class MainMenuController extends Scene implements Initializable {
         });
 
         settingsButton.setOnAction(e -> Main.setScene(new SettingsController())); //Goes to settings scene
-        helpButton.setOnAction(e -> {Main.setScene(new HelpController());}); //Goes to help scene
+        helpButton.setOnAction(e -> Main.setScene(new HelpController())); //Goes to help scene
         exitButton.setOnAction(e -> System.exit(0)); //Exits Game
 
 
     }
 
-    private class ErrorScreen extends Scene {
+    private static class ErrorScreen extends Scene {
 
         public ErrorScreen(String errorMessage) {
             super(new VBox());

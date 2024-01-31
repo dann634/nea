@@ -1,28 +1,20 @@
 package com.jackson.game.characters;
 
 import com.jackson.game.items.Entity;
-import com.jackson.io.TextIO;
-import com.jackson.ui.Camera;
 import com.jackson.ui.GameController;
 import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.NodeOrientation;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.TimeoutException;
 
 public class Player extends Character implements PlayerInterface {
 
@@ -278,11 +270,8 @@ public class Player extends Character implements PlayerInterface {
             return false; //Dodge
         }
         addDefenceXP(10);
-        if(1 - (defenceLevel.get() * 0.005) <= 0.3) {
-            amount *= 0.3;
-        } else {
-            amount *= 1 - (defenceLevel.get() * 0.005); //reduce damage by 0.5% each level
-        }
+        //reduce damage by 0.5% each level
+        amount *= Math.max(1 - (defenceLevel.get() * 0.005), 0.3);
         if(health.get() - amount < 0) {
             health.set(0);
             return true;

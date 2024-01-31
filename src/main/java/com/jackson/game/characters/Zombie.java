@@ -28,7 +28,7 @@ public class Zombie extends Character {
     private double jumpVelocity;
     private boolean needsToJump;
     protected final ProgressBar healthBar;
-    protected Difficulty difficulty;
+    protected final Difficulty difficulty;
 
     //Multiplayer
     private int id;

@@ -19,10 +19,8 @@ import java.util.List;
 
 import static com.jackson.ui.Camera.RENDER_WIDTH;
 import static java.lang.Math.abs;
-import static java.lang.Math.divideExact;
 
 public class MovementHandler {
-
 
     private final int MAX_Y_SPEED = 3;
     private final Player character;
@@ -121,7 +119,7 @@ public class MovementHandler {
             camera.addXOffset(newXOffset); //Resets camera offset
         }
 
-        //for walking animation (change this later)
+        //for walking animation
         if(abs(oldX - camera.getxOffset()) > 31) {
             character.swapMovingImage();
             oldX = character.getX();

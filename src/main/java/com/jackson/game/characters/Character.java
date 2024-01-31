@@ -12,8 +12,8 @@ import java.util.List;
 
 public abstract class Character extends ImageView {
 
-    protected SimpleBooleanProperty isModelFacingRight;
-    protected SimpleDoubleProperty health;
+    protected final SimpleBooleanProperty isModelFacingRight;
+    protected final SimpleDoubleProperty health;
     protected Rectangle feetCollision;
     protected Rectangle headCollision;
     protected Rectangle leftCollision;
@@ -32,9 +32,7 @@ public abstract class Character extends ImageView {
         setIdleImage();
 
 
-        isModelFacingRight.addListener((observable, oldValue, newValue) -> {
-            setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
-        });
+        isModelFacingRight.addListener((observable, oldValue, newValue) -> setNodeOrientation((newValue) ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT));
         BASE_ATTACK_DAMAGE = 30;
     }
 

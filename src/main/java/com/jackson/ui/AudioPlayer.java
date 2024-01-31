@@ -8,7 +8,7 @@ import javafx.util.Duration;
 public class AudioPlayer {
 
     private final MediaPlayer mediaPlayer;
-    private Media media;
+    private final Media media;
 
     /*
  Adventure by Alexander Nakarada | https://creatorchords.com

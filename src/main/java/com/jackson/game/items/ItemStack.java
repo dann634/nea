@@ -4,12 +4,9 @@ import com.jackson.ui.hud.Inventory;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ItemStack extends Entity { //Child of Entity
     private SimpleIntegerProperty stackSize;
-    private int maxStackSize;
+    private final int maxStackSize;
     private Label stackSizeLabel;
 
 

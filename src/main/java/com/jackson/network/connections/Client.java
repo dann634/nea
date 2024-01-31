@@ -59,7 +59,7 @@ public class Client {
           thread.start(); //Start thread
     }
 
-    private void processPacket(Packet packet) throws IOException {
+    private void processPacket(Packet packet) {
         switch (packet.getMsg()) {
             case "map" -> {
                 //Receiving multiplayer map
@@ -102,31 +102,32 @@ public class Client {
                 String targetName = packet.getExt();
                 int[] posData = (int[]) packet.getObject();
                 for(PseudoPlayer player : players) {
-                    if(player.getDisplayName().equals(targetName)) {
-                        Platform.runLater(() -> {
-                            player.translateX(-posData[2]);
-                            player.translateY(-posData[3]);
-                            player.setXPos(posData[0]);
-                            player.setYPos(posData[1]);
-                        });
-                        return;
-                    }
+                    if(!player.getDisplayName().equals(targetName)) continue;
+                    Platform.runLater(() -> {
+                        player.translateX(-posData[2]);
+                        player.translateY(-posData[3]);
+                        player.setXPos(posData[0]);
+                        player.setYPos(posData[1]);
+                    });
+                    return;
                 }
             }
 
             case "disconnect" -> {
                 Iterator<PseudoPlayer> playerIterator = players.listIterator();
-                while(playerIterator.hasNext()) {
+                while (playerIterator.hasNext()) {
+                    //Get next player in list
                     PseudoPlayer player = playerIterator.next();
-                    if(player.getDisplayName().equals(packet.getObject())) {
-                        //If display name matches
-                        playerIterator.remove(); //Remove from list
+                    if (!player.getDisplayName().equals(packet.getObject())) continue;
+                    //If display name matches
+                    playerIterator.remove(); //Remove from list
+                    Platform.runLater(() -> {
                         //remove player from screen
-                        Platform.runLater(() -> {
-                            gameController.removePlayer(player);
-                            gameController.setEventMessage(player.getDisplayName() + " disconnected");
-                        });
-                    }
+                        gameController.removePlayer(player);
+                        //alert other players
+                        gameController.setEventMessage(player.getDisplayName() + " disconnected");
+                    });
+
                 }
             }
 
@@ -135,9 +136,7 @@ public class Client {
                 Platform.runLater(() -> {
                     try {
                         camera.removeBlock(blockPos[0], blockPos[1], false);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    } catch (IOException ignored) {}
                 });
             }
 
@@ -161,7 +160,8 @@ public class Client {
             }
 
             case "damage_zombie" -> {
-                Platform.runLater(() -> gameController.damageZombie(Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
+                Platform.runLater(() -> gameController.damageZombie(
+                        Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
             }
 
             case "update_zombie_pos" -> {

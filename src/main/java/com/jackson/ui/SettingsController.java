@@ -3,8 +3,6 @@ package com.jackson.ui;
 import com.jackson.io.TextIO;
 import com.jackson.main.Main;
 import com.jackson.network.connections.Client;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -17,7 +15,8 @@ import javafx.scene.shape.Circle;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,8 +135,12 @@ public class SettingsController extends Scene {
         deleteSaveBtn.setId("redBtn");
 
         deleteSaveBtn.setOnAction(e -> {
-            new File("src/main/resources/saves/singleplayer.txt").delete();
-            new File("src/main/resources/saves/single_data.txt").delete();
+            try {
+                Files.deleteIfExists(Path.of("src/main/resources/saves/singleplayer.txt"));
+                Files.deleteIfExists(Path.of("src/main/resources/saves/single_data.txt"));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
             deleteSaveBtn.setDisable(true);
             deleteSaveBtn.setOpacity(0.7);
         });

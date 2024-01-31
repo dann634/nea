@@ -2,10 +2,9 @@ package com.jackson.ui;
 
 import com.jackson.game.ProceduralGenerator;
 import com.jackson.game.characters.Boss;
-import com.jackson.game.characters.Character;
+import com.jackson.game.characters.Player;
 import com.jackson.game.characters.Zombie;
 import com.jackson.game.items.Block;
-import com.jackson.game.characters.Player;
 import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
@@ -14,18 +13,16 @@ import com.jackson.network.connections.PseudoPlayer;
 import com.jackson.ui.hud.Inventory;
 import javafx.animation.Animation;
 import javafx.animation.PathTransition;
-import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.shape.*;
-import javafx.scene.transform.Translate;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -33,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Camera {
 
@@ -85,17 +81,6 @@ public class Camera {
         this.inventory = inventory;
         backgroundBlocks = new ArrayList<>(List.of("air", "wood", "leaves"));
         checkAttackIntersect();
-
-//        spawnItem("wood_sword", 1, 500, 200);
-//        spawnItem("rifle", 1, 500, 200);
-//        spawnItem("sniper", 1, 500, 200);
-//        spawnItem("pistol", 1, 500, 200);
-//        spawnItem("metal", 20, 500, 200);
-//        spawnItem("metal_sword", 1, 500, 200);
-//        spawnItem("metal_pickaxe", 1, 500, 200);
-//        spawnItem("metal_axe", 1, 500, 200);
-//        spawnItem("metal_shovel", 1, 500, 200);
-//        spawnItem("metal", 10, 500, 200);
 
         this.isRainingRocks = isRainingRocks;
         isRainingRocks.addListener((observableValue, aBoolean, t1) -> {
@@ -348,10 +333,13 @@ public class Camera {
     }
 
     public void removeBlock(int xPos, int yPos, boolean isPacket) throws IOException {
-        map[xPos][yPos] = "0";
+        map[xPos][yPos] = "0"; //Update the map in memory
         for (List<Block> blocks : blocks) {
+            if(blocks.get(0).getXPos() != xPos) continue;
+            //Find correct column
             for (Block block : blocks) {
-                if(block.getXPos() == xPos && block.getYPos() == yPos) {
+                if(block.getYPos() == yPos) {
+                    //Block with same xPos, yPos
                     removeBlock(block, isPacket);
                 }
             }
@@ -566,11 +554,6 @@ public class Camera {
         blockJustBroken = true;
     }
 
-    public void checkBlockBorder() {
-        //If walk out of range
-
-    }
-
     public void respawn() {
         character.setHealth(100);
         sendToSpawn(false);
@@ -609,9 +592,7 @@ public class Camera {
 
         //Reset World
         if(blocks != null) {
-            blocks.forEach(n -> {
-                root.getChildren().removeAll(n);
-            });
+            blocks.forEach(n -> root.getChildren().removeAll(n));
         }
         initWorld();
     }

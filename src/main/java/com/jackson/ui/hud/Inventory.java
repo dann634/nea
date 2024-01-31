@@ -1,15 +1,10 @@
 package com.jackson.ui.hud;
 
-import com.jackson.game.characters.Player;
-import com.jackson.game.items.Block;
 import com.jackson.game.items.Entity;
 import com.jackson.game.items.Item;
 import com.jackson.game.items.ItemStack;
 import com.jackson.ui.GameController;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -36,7 +31,7 @@ public class Inventory {
     private final ImageView itemOnCursor;
     private ItemStack itemStackOnCursor;
     private boolean isCellHovered;
-    private SimpleIntegerProperty ammo;
+    private final SimpleIntegerProperty ammo;
 
 // FIXME: 06/11/2023 when player drops block it will place if block in hand
 
@@ -211,13 +206,13 @@ public class Inventory {
 
     //Returns itemstack if item is found else returns null
     private ItemStack doesItemExistAlready(ItemStack itemStack) {
-        for (int i = 0; i < itemArray.length; i++) {
-            for (int j = 0; j < itemArray[i].length; j++) {
-                if(itemArray[i][j] != null && itemArray[i][j].getItemName().equals(itemStack.getItemName())) {
+        for (ItemStack[] itemStacks : itemArray) {
+            for (int j = 0; j < itemStacks.length; j++) {
+                if (itemStacks[j] != null && itemStacks[j].getItemName().equals(itemStack.getItemName())) {
                     //Found
-                    if(itemArray[i][j].getStackSize() < itemArray[i][j].getMaxStackSize()) { //Full
+                    if (itemStacks[j].getStackSize() < itemStacks[j].getMaxStackSize()) { //Full
                         //Accept
-                        return itemArray[i][j];
+                        return itemStacks[j];
                     }
 
                 }
@@ -291,9 +286,9 @@ public class Inventory {
         }
 
 
-        for(int i = 0; i < recipe.size(); i++) {
+        for (ItemStack itemStack : recipe) {
             int amount = 0;
-            ItemStack item = recipe.get(i);
+            ItemStack item = itemStack;
             for (ItemStack[] itemStacks : itemArray) {
                 for (ItemStack targetItem : itemStacks) {
                     if (targetItem == null) continue;
@@ -303,7 +298,7 @@ public class Inventory {
                     }
                 }
             }
-            if(amount < item.getStackSize()) {
+            if (amount < item.getStackSize()) {
                 return false;
             }
         }
