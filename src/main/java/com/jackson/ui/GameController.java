@@ -286,10 +286,15 @@ public class GameController extends Scene {
     }
 
     public void damageZombie(int id, int damage) {
-        for(Zombie zombie : zombies) {
+        Iterator<Zombie> zombieIterator = zombies.listIterator();
+        while(zombieIterator.hasNext()) {
+            Zombie zombie = zombieIterator.next();
             if(zombie.getGameId() != id) continue;
+            //If ID matches
             if(zombie.takeDamage(damage)) {
+                //Zombie is dead
                 root.getChildren().removeAll(zombie.getNodes());
+                zombieIterator.remove();
             }
         }
     }
@@ -792,6 +797,7 @@ public class GameController extends Scene {
         item.addStackValue(amount);
         item.setId(id);
         Block block = camera.getBlock(xPos, yPos);
+        if(block == null) return;
         camera.createDroppedBlock(item, block.getTranslateX(), block.getTranslateY());
     }
 

@@ -91,6 +91,8 @@ public class Camera {
             isRainingRocks.set(false);
         });
 
+        spawnItem("dirt", 99, 300, 200);
+
 
     }
 

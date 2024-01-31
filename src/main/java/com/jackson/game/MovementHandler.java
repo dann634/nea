@@ -185,7 +185,8 @@ public class MovementHandler {
         //Move
         if(canMove) {
             zombie.addTranslateX((needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED);
-            if(client != null) client.updateZombiePos(zombie.getGameId(), (needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED, 0);
+            if(client != null) client.updateZombiePos
+                    (zombie.getGameId(), (needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED, 0);
         }
 
         //Needs to go in a direction but a wall is blocking

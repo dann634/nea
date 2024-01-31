@@ -116,6 +116,7 @@ public class Player extends Character implements PlayerInterface {
             handImageView.setScaleY(0.3);
         }
 
+        System.out.println("file:src/main/resources/images/" + itemName + ".png");
         handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
         handImageView.setVisible(true);
         //Offsets
@@ -311,6 +312,10 @@ public class Player extends Character implements PlayerInterface {
 
         if(itemName.equals("rifle") || itemName.contains("sniper")) {
             return new int[]{-50, -10, -5};
+        }
+
+        if(itemName.equals("coal")) {
+            return new int[]{-35, 0, -10};
         }
 
         return new int[]{-62, -3, -25};
