@@ -116,7 +116,6 @@ public class Player extends Character implements PlayerInterface {
             handImageView.setScaleY(0.3);
         }
 
-        System.out.println("file:src/main/resources/images/" + itemName + ".png");
         handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
         handImageView.setVisible(true);
         //Offsets
