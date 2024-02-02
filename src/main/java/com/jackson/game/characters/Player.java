@@ -114,7 +114,9 @@ public class Player extends Character implements PlayerInterface {
             handImageView.setRotate(isModelFacingRight.get() ? 45 : -45);
             handImageView.setScaleX(0.3);
             handImageView.setScaleY(0.3);
+
         }
+
 
         handImageView.setImage(new Image("file:src/main/resources/images/" + itemName + ".png"));
         handImageView.setVisible(true);

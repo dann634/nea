@@ -192,6 +192,12 @@ public class Client {
                 });
             }
 
+            case "kick" -> {
+                Platform.runLater(() -> {
+                    Main.setScene(new MainMenuController());
+                });
+            }
+
 
             }
 

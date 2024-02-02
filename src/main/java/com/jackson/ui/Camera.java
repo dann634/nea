@@ -91,7 +91,6 @@ public class Camera {
             isRainingRocks.set(false);
         });
 
-        spawnItem("dirt", 99, 300, 200);
 
 
     }
@@ -440,8 +439,8 @@ public class Camera {
         }
 
         double spawnChance = rand.nextDouble();
-        if(spawnChance < 0.1) {
-            return; //10% chance to spawn
+        if(spawnChance > 0.4) {
+            return; //40% chance to spawn
         }
 
         double itemSpawnChance = rand.nextDouble();

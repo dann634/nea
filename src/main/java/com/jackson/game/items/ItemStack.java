@@ -3,6 +3,7 @@ package com.jackson.game.items;
 import com.jackson.ui.hud.Inventory;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
+import javafx.scene.text.TextAlignment;
 
 public class ItemStack extends Entity { //Child of Entity
     private SimpleIntegerProperty stackSize;
@@ -51,6 +52,7 @@ public class ItemStack extends Entity { //Child of Entity
         this.stackSizeLabel.setTranslateX(5);
         //Width makes easier to manage
         this.stackSizeLabel.setMinWidth(Inventory.getSlotSize() - 10);
+        this.stackSizeLabel.setTextAlignment(TextAlignment.RIGHT);
         //Styling
         this.stackSizeLabel.getStyleClass().addAll("outline", "itemStack");
     }

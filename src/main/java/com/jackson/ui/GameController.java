@@ -102,7 +102,7 @@ public class GameController extends Scene {
         SimpleIntegerProperty killCounter = new SimpleIntegerProperty(0);
         killCounter.addListener((observableValue, number, t1) -> {
             //Must kill 50 zombies for boss to spawn
-            if(t1.intValue() == 50) spawnBoss();
+            if(t1.intValue() == 2) spawnBoss();
         });
 
         SimpleBooleanProperty isBloodMoonActive = new SimpleBooleanProperty(false);
@@ -323,6 +323,8 @@ public class GameController extends Scene {
 
         //Start Boss Music
         if(!bossMusic.isPlaying()) bossMusic.playFromBeginning();
+        audioplayer.pause();
+
 
         root.getChildren().addAll(boss.getNodes());
         boss.toFront();

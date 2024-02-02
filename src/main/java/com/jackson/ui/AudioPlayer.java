@@ -8,7 +8,6 @@ import javafx.util.Duration;
 public class AudioPlayer {
 
     private final MediaPlayer mediaPlayer;
-    private final Media media;
 
     /*
  Adventure by Alexander Nakarada | https://creatorchords.com
@@ -19,12 +18,12 @@ https://creativecommons.org/licenses/by/4.0/
      */
 
     public AudioPlayer(String sound) {
-        this.media = new Media(getClass().getResource("/sound/" + sound + ".mp3").toExternalForm());
+        Media media = new Media(getClass().getResource("/sound/" + sound + ".mp3").toExternalForm());
         this.mediaPlayer = new MediaPlayer(media);
         this.mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
 
         //volume
-        if(sound.equals("background")) {
+        if(sound.equals("background") || sound.equals("boss")) {
             setVolume(Double.parseDouble(TextIO.readFile("src/main/resources/settings/settings.txt").get(2)) / 100);
         } else {
             setVolume(Double.parseDouble(TextIO.readFile("src/main/resources/settings/settings.txt").get(1)) / 100);
