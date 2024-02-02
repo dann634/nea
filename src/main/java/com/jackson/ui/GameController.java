@@ -19,6 +19,7 @@ import javafx.animation.*;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.geometry.NodeOrientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -56,6 +57,7 @@ public class GameController extends Scene {
     private final PauseTransition bloodMoonTimer;
     private final Difficulty difficulty;
     private final boolean isSingleplayer;
+    private final SimpleIntegerProperty killCounter;
 
     private boolean blockDropped;
     private boolean isGamePaused;
@@ -99,10 +101,17 @@ public class GameController extends Scene {
         //HUD
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
         SimpleIntegerProperty ammo = new SimpleIntegerProperty(0);
-        SimpleIntegerProperty killCounter = new SimpleIntegerProperty(0);
+        killCounter = new SimpleIntegerProperty(0);
         killCounter.addListener((observableValue, number, t1) -> {
             //Must kill 50 zombies for boss to spawn
-            if(t1.intValue() == 50) spawnBoss();
+            if(t1.intValue() == 1) {
+                try {
+                    spawnBoss();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
         });
 
         SimpleBooleanProperty isBloodMoonActive = new SimpleBooleanProperty(false);
@@ -286,29 +295,41 @@ public class GameController extends Scene {
     }
 
     public void damageZombie(int id, int damage) {
-        Iterator<Zombie> zombieIterator = zombies.listIterator();
-        while(zombieIterator.hasNext()) {
-            Zombie zombie = zombieIterator.next();
-            if(zombie.getGameId() != id) continue;
+        Zombie deadZombie = null;
+        for (Zombie zombie : zombies) {
+            if (zombie.getGameId() != id) continue;
             //If ID matches
-            if(zombie.takeDamage(damage)) {
+            if (zombie.takeDamage(damage)) {
                 //Zombie is dead
+                deadZombie = zombie;
                 root.getChildren().removeAll(zombie.getNodes());
-                zombieIterator.remove();
+                killCounter.set(killCounter.get() + 1);
             }
         }
+        if(deadZombie != null) zombies.remove(deadZombie);
     }
 
     public void updateZombiePos(int id, double[] move) {
         for(Zombie zombie : zombies) {
             if(zombie.getGameId() != id) continue;
+            zombie.setNodeOrientation(move[0] < 0 ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
             zombie.addTranslateX((int) move[0]);
             zombie.addTranslateY(move[1]);
         }
     }
 
-    private void spawnBoss() {
-        Boss boss = new Boss(camera, character, rand.nextInt(400) + 300, 0, difficulty);
+    private void spawnBoss() throws IOException {
+
+        int screenX = rand.nextInt(400) + 300;
+        int screenY = 0;
+
+        if(!isSingleplayer && client != null) {
+            int[] worldPos = findWorldPos(screenX, screenY);
+            client.spawnBoss(worldPos);
+            return;
+        }
+
+        Boss boss = new Boss(camera, character, screenX, screenY, difficulty);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));
@@ -335,6 +356,61 @@ public class GameController extends Scene {
         root.getChildren().addAll(boss.getNodes());
         boss.toFront();
         zombies.add(boss);
+    }
+
+    public void spawnBoss(boolean isClientResposible, int[] data) {
+        //Find bounds of screen
+        List<List<Block>> blocks = camera.getBlocks();
+        int leftBorder = blocks.get(0).get(0).getXPos();
+        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
+        int topBorder = blocks.get(0).get(0).getYPos();
+        int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
+
+        //Spawn Location of Zombies
+        int xPos = data[1];
+        int yPos = data[2];
+        //Is off screen?
+        if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return;
+
+        //Find spawn tile
+        int index = 0;
+        for(int i = 0; i < blocks.size(); i++) {
+            List<Block> line = blocks.get(i);
+            if(line.get(0).getXPos() == xPos) {
+                index = i;
+                break;
+            }
+        }
+
+        Boss boss = new Boss(camera, character, index * 32, camera.getBlockTranslateY(index) - 48, difficulty);
+        boss.setId(data[0]);
+        boss.setClientResponsible(isClientResposible);
+
+        boss.translateXProperty().addListener((observableValue, number, t1) -> {
+            if(boss.canAttack()) {
+                boss.startAttackCooldown();
+                if(character.intersects(boss.getBoundsInParent())) {
+                    character.takeDamage(boss.getAttackDamage());
+                }
+            }
+        });
+
+        boss.translateYProperty().addListener((observableValue, number, t1) -> {
+            if(boss.canAttack()) {
+                boss.startAttackCooldown();
+                if(character.intersects(boss.getBoundsInParent())) {
+                    character.takeDamage(boss.getAttackDamage());
+                }
+            }
+        });
+
+        //Start Boss Music
+        if(!bossMusic.isPlaying()) bossMusic.playFromBeginning();
+        audioplayer.pause();
+
+        zombies.add(boss);
+        boss.toFront();
+        root.getChildren().addAll(boss.getNodes());
     }
 
     public void loadSaveData(List<String> playerData) {

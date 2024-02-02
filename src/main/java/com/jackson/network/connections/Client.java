@@ -161,8 +161,12 @@ public class Client {
             }
 
             case "damage_zombie" -> {
-                Platform.runLater(() -> gameController.damageZombie(
-                        Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
+                try {
+                    Platform.runLater(() -> gameController.damageZombie(
+                            Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
+                } catch (UnsupportedOperationException e) {
+                    e.getStackTrace();
+                }
             }
 
             case "update_zombie_pos" -> {
@@ -196,6 +200,10 @@ public class Client {
                 Platform.runLater(() -> {
                     Main.setScene(new MainMenuController());
                 });
+            }
+
+            case "spawn_boss" -> {
+                Platform.runLater(() -> gameController.spawnBoss(packet.getExt().equals(displayName), (int[]) packet.getObject()));
             }
 
 
@@ -279,6 +287,10 @@ public class Client {
     public void saveAndExit() throws IOException {
         savePlayerData(camera.getPlayerData());
         disconnect();
+    }
+
+    public void spawnBoss(int[] data) throws IOException {
+        send("spawn_boss", data);
     }
 
     public String[][] getMap() {

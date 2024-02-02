@@ -45,7 +45,6 @@ public class Boss extends Zombie {
 
         BASE_ATTACK_DAMAGE = 20;
 
-
         initArms(); //Sets up the arms and their offsets
         changeCollisions(); //Updates collisions for larger model
     }
@@ -210,5 +209,9 @@ public class Boss extends Zombie {
     @Override
     public double getAttack() {
         return super.getAttack();
+    }
+
+    public void startAttackCooldown() {
+        attackCooldown.play();
     }
 }
