@@ -39,13 +39,10 @@ public class PseudoPlayer implements PlayerInterface {
                 "-fx-alignment: center;");
     }
 
-    public void translateX(int value) { //This is being run as the legs are moving (person is not being translated with it)
+    public void translateX(int value) {
         this.imageView.setTranslateX(this.imageView.getTranslateX() + value);
-        if(value > 0) {
-            this.imageView.setNodeOrientation(NodeOrientation.LEFT_TO_RIGHT);
-        } else {
-            this.imageView.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
-        }
+        this.imageView.setNodeOrientation((value > 0) ?
+                NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
 
         //Walking Animation
         oldX -= Math.abs(value);

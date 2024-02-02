@@ -94,6 +94,7 @@ public class MovementHandler {
     public void calculateXProperties(boolean isAPressed, boolean isDPressed, Player player) throws IOException {
 
         if(isAPressed == isDPressed) { //For optimization
+            character.setIdleImage();
             return;
         }
 
@@ -120,11 +121,10 @@ public class MovementHandler {
         }
 
         //for walking animation
-        if(abs(oldX - camera.getxOffset()) > 31) {
+        oldX -= 4;
+        if(oldX < 0) {
             character.swapMovingImage();
-            oldX = character.getX();
-        } else if(oldX == character.getX()) {
-            character.setIdleImage();
+            oldX = 8;
         }
     }
 
@@ -185,7 +185,8 @@ public class MovementHandler {
         //Move
         if(canMove) {
             zombie.addTranslateX((needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED);
-            if(client != null) client.updateZombiePos(zombie.getGameId(), (needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED, 0);
+            if(client != null) client.updateZombiePos
+                    (zombie.getGameId(), (needsToMoveRight) ? Zombie.SPEED : -Zombie.SPEED, 0);
         }
 
         //Needs to go in a direction but a wall is blocking

@@ -3,6 +3,7 @@ package com.jackson.game.items;
 import com.jackson.ui.hud.Inventory;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.control.Label;
+import javafx.scene.text.TextAlignment;
 
 public class ItemStack extends Entity { //Child of Entity
     private SimpleIntegerProperty stackSize;
@@ -45,13 +46,13 @@ public class ItemStack extends Entity { //Child of Entity
         //If value is stack size is 1 label is invisible
         this.stackSizeLabel.opacityProperty().bind(this.stackSize.subtract(1));
 
-        this.stackSizeLabel.setMaxWidth(15);
         this.stackSizeLabel.setMouseTransparent(false);
         //Repositions Label in relation to image
         this.stackSizeLabel.setTranslateY(-10);
-        this.stackSizeLabel.setTranslateX(12);
+        this.stackSizeLabel.setTranslateX(5);
         //Width makes easier to manage
-        this.stackSizeLabel.setPrefWidth(Inventory.getSlotSize() - 6);
+        this.stackSizeLabel.setMinWidth(Inventory.getSlotSize() - 10);
+        this.stackSizeLabel.setTextAlignment(TextAlignment.RIGHT);
         //Styling
         this.stackSizeLabel.getStyleClass().addAll("outline", "itemStack");
     }

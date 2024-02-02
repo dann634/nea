@@ -147,6 +147,7 @@ public class Client {
                     Block block = camera.getBlock(blockPos[0], blockPos[1]);
                     if(block == null) return; //In case of invalid block
                     try {
+                        //Update Screen
                         camera.placeBlock(block, GameController.lookupTable.get(packet.getExt()), false);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
@@ -188,6 +189,12 @@ public class Client {
                         gameController.setPseudoPlayerPos(player);
                         return;
                     }
+                });
+            }
+
+            case "kick" -> {
+                Platform.runLater(() -> {
+                    Main.setScene(new MainMenuController());
                 });
             }
 
