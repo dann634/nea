@@ -17,12 +17,12 @@ import java.util.Random;
 public class Boss extends Zombie {
 
     private final int HEALTH = 1000;
-    private final int DAMAGE = 30;
     private ImageView leftArm;
     private ImageView rightArm;
     private boolean canJump;
     private final Camera camera;
     private final Player player;
+    private final PauseTransition abilityCooldown;
     private final Image bossImage1 = new Image("file:src/main/resources/images/boss_body1.png");
     private final Image bossImage2 = new Image("file:src/main/resources/images/boss_body2.png");
 
@@ -40,7 +40,11 @@ public class Boss extends Zombie {
         health.set(HEALTH);
 
         this.canJump = true; //Used during jump ability
-        attackCooldown.setDuration(Duration.seconds(5)); //5 Second cooldown between attacks
+        attackCooldown.setDuration(Duration.seconds(2)); //2 Second cooldown between attacks
+        abilityCooldown = new PauseTransition(Duration.seconds(5));
+
+        BASE_ATTACK_DAMAGE = 20;
+
 
         initArms(); //Sets up the arms and their offsets
         changeCollisions(); //Updates collisions for larger model
@@ -55,6 +59,8 @@ public class Boss extends Zombie {
     public void attack(Entity item) {
         super.attack(item); //Plays the attack cooldown
         //50% chance for either attack
+        if(!canUseAbility()) return;
+        abilityCooldown.play();
         if(new Random().nextBoolean()) {
             jumpAttack();
         } else {
@@ -165,14 +171,14 @@ public class Boss extends Zombie {
             setArms(15);
             //Make crater on impact point
             try {
-                camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 5, 2);
+                camera.makeCrater(this.getTranslateX() + 33, this.getTranslateY(), 4, 2);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
 
             //Player takes damage
             if(player.intersects(getBoundsInParent())) {
-                player.takeDamage(DAMAGE);
+                player.takeDamage(getAttack());
             }
         });
         //Play animations
@@ -197,5 +203,12 @@ public class Boss extends Zombie {
         return canJump;
     }
 
+    public boolean canUseAbility() {
+        return abilityCooldown.getStatus() == Animation.Status.STOPPED;
+    }
 
+    @Override
+    public double getAttack() {
+        return super.getAttack();
+    }
 }

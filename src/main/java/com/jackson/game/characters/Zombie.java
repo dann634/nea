@@ -45,8 +45,7 @@ public class Zombie extends Character {
         this.isClientResponsible = true;
 
         //Attack Cooldown
-        this.attackCooldown = new PauseTransition();
-        this.attackCooldown.setDuration(Duration.seconds(2));
+        this.attackCooldown = new PauseTransition(Duration.seconds(2));
 
         //Health Bar
         this.healthBar = initHealthBar();

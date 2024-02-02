@@ -102,7 +102,7 @@ public class GameController extends Scene {
         SimpleIntegerProperty killCounter = new SimpleIntegerProperty(0);
         killCounter.addListener((observableValue, number, t1) -> {
             //Must kill 50 zombies for boss to spawn
-            if(t1.intValue() == 50) spawnBoss();
+            if(t1.intValue() == 1) spawnBoss();
         });
 
         SimpleBooleanProperty isBloodMoonActive = new SimpleBooleanProperty(false);
@@ -307,12 +307,18 @@ public class GameController extends Scene {
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));
+                if(character.intersects(boss.getBoundsInParent())) {
+                    character.takeDamage(boss.getAttackDamage());
+                }
             }
         });
 
         boss.translateYProperty().addListener((observableValue, number, t1) -> {
             if(boss.canAttack()) {
                 boss.attack(new Item("fist"));
+                if(character.intersects(boss.getBoundsInParent())) {
+                    character.takeDamage(boss.getAttackDamage());
+                }
             }
         });
 
