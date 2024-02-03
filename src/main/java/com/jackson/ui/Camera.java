@@ -567,7 +567,7 @@ public class Camera {
 
     private int findStartingY(String[][] map) {
         for (int i = 0; i < ProceduralGenerator.getHeight(); i++) {
-            if(map[500][i].equals("2")) {
+            if(!backgroundBlocks.contains(GameController.lookupTable.get(map[500][i]))) {
                 return i;
             }
         }
