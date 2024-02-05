@@ -94,7 +94,6 @@ public class GameController extends Scene {
 
         levelUpSound = new AudioPlayer("levelup");
         levelUpSound.setCycleCount(1);
-        levelUpSound.setVolume(0.4);
 
         bossMusic = new AudioPlayer("boss_music");
 
@@ -222,7 +221,7 @@ public class GameController extends Scene {
         List<Zombie> pack = new ArrayList<>();
         List<Node> nodes = new ArrayList<>();
         for (int i = 0; i < packSize; i++) {
-            var zombie = getZombie(spawnTile * 32 + rand.nextDouble(25), camera.getBlockTranslateY(spawnTile) - 48);
+            var zombie = getZombie(spawnTile * 32 + rand.nextDouble(25), camera.getBlockTranslateY(spawnTile) - 48 - 64);
             pack.add(zombie);
             nodes.addAll(zombie.getNodes());
         }
