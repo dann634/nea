@@ -250,6 +250,7 @@ public class Camera {
             nodes.addAll(nodeList);
         }
         root.getChildren().addAll(nodes);
+
     }
 
     public void addLine(List<Block> line, boolean isLeft) {
@@ -428,14 +429,18 @@ public class Camera {
 
     }
 
-    private void spawnZombieDrop(double x, double y) {
+    private void spawnZombieDrop(double x, double y) throws IOException {
         killCounter.set(killCounter.get() + 1);
         //Add Strength XP
         character.addStrengthXP(5);
 
         //Random Chance to start blood moon
+
         if(rand.nextDouble() < 0.01) {
             isBloodMoonActive.set(true);
+            if(client != null) {
+                client.startBloodMoon();
+            }
         }
 
         double spawnChance = rand.nextDouble();
@@ -557,7 +562,7 @@ public class Camera {
 
     public void respawn() {
         character.setHealth(100);
-        sendToSpawn(false);
+        sendToSpawn(true);
 
         List<Node> nodes = new ArrayList<>();
         zombies.forEach(n -> nodes.addAll(n.getNodes()));

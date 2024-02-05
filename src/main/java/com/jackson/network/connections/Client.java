@@ -166,7 +166,7 @@ public class Client {
                             Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
                 } catch (UnsupportedOperationException e) {
                     e.getStackTrace();
-                }
+                } catch (ClassCastException ignored) {}
             }
 
             case "update_zombie_pos" -> {
@@ -204,6 +204,10 @@ public class Client {
 
             case "spawn_boss" -> {
                 Platform.runLater(() -> gameController.spawnBoss(packet.getExt().equals(displayName), (int[]) packet.getObject()));
+            }
+
+            case "start_blood_moon" -> {
+                gameController.setBloodMoon(true);
             }
 
 
@@ -291,6 +295,10 @@ public class Client {
 
     public void spawnBoss(int[] data) throws IOException {
         send("spawn_boss", data);
+    }
+
+    public void startBloodMoon() throws IOException {
+        send("start_blood_moon", null);
     }
 
     public String[][] getMap() {

@@ -104,7 +104,7 @@ public class GameController extends Scene {
         killCounter = new SimpleIntegerProperty(0);
         killCounter.addListener((observableValue, number, t1) -> {
             //Must kill 50 zombies for boss to spawn
-            if(t1.intValue() == 1) {
+            if(t1.intValue() == 50) {
                 try {
                     spawnBoss();
                 } catch (IOException e) {
@@ -331,20 +331,16 @@ public class GameController extends Scene {
 
         Boss boss = new Boss(camera, character, screenX, screenY, difficulty);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
-            if(boss.canAttack()) {
+            if(boss.canAttack() && character.intersects(boss.getBoundsInParent())) {
                 boss.attack(new Item("fist"));
-                if(character.intersects(boss.getBoundsInParent())) {
-                    character.takeDamage(boss.getAttackDamage());
-                }
+                character.takeDamage(boss.getAttackDamage());
             }
         });
 
         boss.translateYProperty().addListener((observableValue, number, t1) -> {
-            if(boss.canAttack()) {
+            if(boss.canAttack() && character.intersects(boss.getBoundsInParent())) {
                 boss.attack(new Item("fist"));
-                if(character.intersects(boss.getBoundsInParent())) {
-                    character.takeDamage(boss.getAttackDamage());
-                }
+                character.takeDamage(boss.getAttackDamage());
             }
         });
 
@@ -606,7 +602,7 @@ public class GameController extends Scene {
         TextIO.updateFile(playerData, "src/main/resources/saves/single_data.txt");
     }
 
-    private void setBloodMoon(boolean value) {
+    public void setBloodMoon(boolean value) {
         String backgroundColour = value ? "red, indianred" : "whitesmoke, deepskyblue";
         root.setStyle("-fx-background-color: linear-gradient(to top," + backgroundColour + ");" +
                 "-fx-min-width: 1024;" +
@@ -924,6 +920,8 @@ public class GameController extends Scene {
         }
         return new int[]{-1, -1};
     }
+
+
 
 
 
