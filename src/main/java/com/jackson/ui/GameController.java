@@ -691,7 +691,7 @@ public class GameController extends Scene {
         private Button addRespawnButton() {
             Button button = new Button("Respawn");
             button.setOnAction(e -> {
-                camera.respawn();
+                camera.respawn(isSingleplayer);
                 root.getChildren().removeAll(camera.getDroppedBlocks());
                 camera.getDroppedBlocks().clear();
                 root.getChildren().remove(this);

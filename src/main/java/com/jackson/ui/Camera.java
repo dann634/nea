@@ -560,9 +560,9 @@ public class Camera {
         blockJustBroken = true;
     }
 
-    public void respawn() {
+    public void respawn(boolean isSingleplayer) {
         character.setHealth(100);
-        sendToSpawn(true);
+        sendToSpawn(!isSingleplayer);
 
         List<Node> nodes = new ArrayList<>();
         zombies.forEach(n -> nodes.addAll(n.getNodes()));
@@ -594,7 +594,7 @@ public class Camera {
     public void sendToSpawn(boolean isMultiplayer) {
         character.setXPos(500);
         character.setYPos(findStartingY(map));
-        if(isMultiplayer) addYOffset(-46);
+        if(isMultiplayer) addYOffset(-46); // FIXME: 05/02/2024 causes respawn offset bug
 
         //Reset World
         if(blocks != null) {
