@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -76,7 +77,12 @@ public class Zombie extends Character {
         progressBar.setPrefHeight(8);
         progressBar.translateXProperty().bind(this.translateXProperty().subtract(2));
         progressBar.translateYProperty().bind(this.translateYProperty().subtract(10));
-        progressBar.progressProperty().bind(health.divide(100));
+        int normalise = switch(difficulty) {
+            case EASY -> 100;
+            case MEDIUM -> 120;
+            case HARD -> 150;
+        };
+        progressBar.progressProperty().bind(health.divide(normalise));
         return progressBar;
     }
 

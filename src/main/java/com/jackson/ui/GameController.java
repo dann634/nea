@@ -215,7 +215,7 @@ public class GameController extends Scene {
         }
 
         //Spawn
-        int packSize = (int) rand.nextGaussian(3, 1);
+        int packSize = 1; // (int) rand.nextGaussian(3, 1);
         int spawnTile = rand.nextInt(32) + 1;
 
         List<Zombie> pack = new ArrayList<>();
@@ -500,7 +500,6 @@ public class GameController extends Scene {
                     case W -> {
                         if(isGamePaused) return;
                         isWPressed = true;
-                        character.setIdleImage();
                     }
 
                     case DIGIT1 -> inventory.selectSlot(0);
