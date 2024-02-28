@@ -6,14 +6,10 @@ import javafx.scene.control.Label;
 import javafx.scene.text.TextAlignment;
 
 public class ItemStack extends Entity { //Child of Entity
-    private SimpleIntegerProperty stackSize;
     private final int maxStackSize;
+    private SimpleIntegerProperty stackSize;
     private Label stackSizeLabel;
-
-
-    //Multiplayer
-    private int id;
-
+    private int id; //Multiplayer
 
     public ItemStack(Entity item) {
         super(item.getItemName(), item.getTranslateX(), item.getTranslateY()); //Parent constructor
@@ -22,9 +18,9 @@ public class ItemStack extends Entity { //Child of Entity
         this.isUsable = item.isUsable;
 
         initStackSize(); //Inits Label
-        if(item instanceof Item) {
-            if(itemName.contains("axe") || itemName.contains("shovel") || itemName.contains("sword")
-            || itemName.contains("pistol") || itemName.contains("rifle") || itemName.contains("sniper")) {
+        if (item instanceof Item) {
+            if (itemName.contains("axe") || itemName.contains("shovel") || itemName.contains("sword")
+                    || itemName.contains("pistol") || itemName.contains("rifle") || itemName.contains("sniper")) {
                 maxStackSize = 1;
             } else {
                 maxStackSize = 20;
@@ -38,6 +34,7 @@ public class ItemStack extends Entity { //Child of Entity
 
     }
 
+    //Creates stack size label and binds it to the item
     private void initStackSize() {
         this.stackSize = new SimpleIntegerProperty(0); //Stack size starts at 0
         this.stackSizeLabel = new Label(); //Initialises Label
@@ -59,7 +56,6 @@ public class ItemStack extends Entity { //Child of Entity
 
 
     //Getters and Setters
-
     public int getStackSize() {
         return stackSize.get();
     }

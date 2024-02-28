@@ -21,15 +21,15 @@ import java.util.List;
 
 public class Client {
 
+    private static final int PORT = 4234;
     private final ObjectOutputStream outStream;
     private final ObjectInputStream inStream;
+    private final List<PseudoPlayer> players;
+    private final String displayName;
     private GameController gameController;
     private Camera camera;
-    private final List<PseudoPlayer> players;
     private List<String> playerData;
-    private final String displayName;
     private String[][] map;
-    private static final int PORT = 4234;
 
     public Client() throws IOException {
         Socket socket = new Socket("localhost", PORT); //initialises socket
@@ -39,7 +39,7 @@ public class Client {
         displayName = TextIO.readFile("src/main/resources/settings/settings.txt").get(0);
     }
 
-
+    //Starts the loop to listen for packets from the server
     public void startListening() {
         //Listen for object and pass it for processing
         //Error
@@ -55,10 +55,14 @@ public class Client {
                 Platform.runLater(() -> Main.setScene(new MainMenuController()));
             }
         });
-          thread.setDaemon(true); //So thread closes with program
-          thread.start(); //Start thread
+        thread.setDaemon(true); //So thread closes with program
+        thread.start(); //Start thread
     }
 
+    /*
+    Receives a packet as a parameter
+    Does appropriate action based on packet header
+     */
     private void processPacket(Packet packet) {
         switch (packet.getMsg()) {
             case "map" -> {
@@ -72,7 +76,11 @@ public class Client {
 
             case "difficulty" -> {
                 Platform.runLater(() -> {
-                    gameController = new GameController((Difficulty) packet.getObject(), false, this);
+                    try {
+                        gameController = new GameController((Difficulty) packet.getObject(), false, this);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     gameController.loadSaveData(playerData); //Load Player Data
                     gameController.setClient(this); //Set Client
                     camera = gameController.getGameCamera();
@@ -101,8 +109,8 @@ public class Client {
             case "pos_update" -> {
                 String targetName = packet.getExt();
                 int[] posData = (int[]) packet.getObject();
-                for(PseudoPlayer player : players) {
-                    if(!player.getDisplayName().equals(targetName)) continue;
+                for (PseudoPlayer player : players) {
+                    if (!player.getDisplayName().equals(targetName)) continue;
                     Platform.runLater(() -> {
                         player.translateX(-posData[2]);
                         player.translateY(-posData[3]);
@@ -136,7 +144,8 @@ public class Client {
                 Platform.runLater(() -> {
                     try {
                         camera.removeBlock(blockPos[0], blockPos[1], false);
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
                 });
             }
 
@@ -145,7 +154,7 @@ public class Client {
                 Platform.runLater(() -> {
                     camera.updateMap(blockPos[0], blockPos[1], packet.getExt());
                     Block block = camera.getBlock(blockPos[0], blockPos[1]);
-                    if(block == null) return; //In case of invalid block
+                    if (block == null) return; //In case of invalid block
                     try {
                         //Update Screen
                         camera.placeBlock(block, GameController.lookupTable.get(packet.getExt()), false);
@@ -166,7 +175,8 @@ public class Client {
                             Integer.parseInt(packet.getExt()), (Integer) packet.getObject()));
                 } catch (UnsupportedOperationException e) {
                     e.getStackTrace();
-                } catch (ClassCastException ignored) {}
+                } catch (ClassCastException ignored) {
+                }
             }
 
             case "update_zombie_pos" -> {
@@ -175,7 +185,8 @@ public class Client {
 
             case "create_dropped_item" -> {
                 int[] data = (int[]) packet.getObject();
-                Platform.runLater(() -> gameController.createDroppedBlock(data[3], packet.getExt(), data[2], data[0], data[1]));
+                Platform.runLater(() -> gameController.createDroppedBlock(
+                        data[3], packet.getExt(), data[2], data[0], data[1]));
             }
 
             case "pickup_item" -> {
@@ -184,8 +195,8 @@ public class Client {
 
             case "respawn" -> {
                 Platform.runLater(() -> {
-                    for(PseudoPlayer player : players) {
-                        if(!player.getDisplayName().equals(packet.getExt())) continue;
+                    for (PseudoPlayer player : players) {
+                        if (!player.getDisplayName().equals(packet.getExt())) continue;
                         player.setxOffset(0);
                         player.setyOffset(0);
                         player.setXPos(500);
@@ -211,11 +222,11 @@ public class Client {
             }
 
 
-            }
+        }
 
     }
 
-
+    //Send methods create a packet and send it to the server
     private void send(String msg, Object object) throws IOException {
         Packet packet = new Packet(msg, object);
         outStream.writeObject(packet);
@@ -225,85 +236,102 @@ public class Client {
         outStream.writeObject(new Packet(msg, object, ext));
     }
 
+    //Sends a packet to the server asking if a world already exists
     public boolean doesWorldExist() throws IOException, ClassNotFoundException {
         send("world_check", null);
         return (Boolean) ((Packet) inStream.readObject()).getObject(); //might cause errors
     }
 
+    //Sends a packet to the server asking if a display name is being used or not
     public boolean isUsernameUnique() throws IOException, ClassNotFoundException {
         send("username_check", displayName);
         return (Boolean) ((Packet) inStream.readObject()).getObject();
     }
 
+    //Sends a packet to the server to join the game
     public void joinGame() throws IOException {
         send("join", displayName);
     }
 
+    //Sends player data to the server in a packet
     public void savePlayerData(List<String> data) throws IOException {
         send("save_player_data", displayName, data);
     }
 
+    //Updates position of player on server
     public void updatePositionOnServer(int[] data) throws IOException {
         send("pos_update", data);
     }
 
+    //Sends a disconnect packet to the server
     public void disconnect() throws IOException {
         send("disconnect", null);
     }
 
-    public void placeBlock(Block block) throws IOException { // TODO: 16/01/2024 maybe change to xPos, yPos, blockName
+    //Sends a place block packet to the server
+    public void placeBlock(Block block) throws IOException {
         send("place_block", GameController.lookupTable.get(block.getItemName()), new int[]{block.getXPos(), block.getYPos()});
     }
 
-    public void removeBlock(Block block) throws IOException { // TODO: 16/01/2024 maybe change to xPos yPos
+    //Sends a remove block packet to the server
+    public void removeBlock(Block block) throws IOException {
         send("remove_block", new int[]{block.getXPos(), block.getYPos()});
     }
 
+    //Sends the server file to the server
     public void sendMap(String[][] map, Difficulty difficulty) throws IOException {
         send("map", map);
         send("difficulty", difficulty);
     }
 
+    //Sends a packet to the server which deletes the save files
     public void deleteSave() throws IOException {
         send("delete_save", null);
     }
 
+    //Sends a packet to the server when a zombie has taken damage
     public void damageZombie(int id, int damage) throws IOException {
         send("damage_zombie", String.valueOf(id), damage);
     }
 
+    //Sends a packet to the server updating a zombie position
     public void updateZombiePos(int id, double x, double y) throws IOException {
-        send("update_zombie_pos", String.valueOf(id), new double[]{x,y});
+        send("update_zombie_pos", String.valueOf(id), new double[]{x, y});
     }
 
+    //Sends a packet to the server when a block has been dropped
     public void createDroppedItem(String itemName, int amount, int xPos, int yPos) throws IOException {
         send("create_dropped_item", itemName, new int[]{xPos, yPos, amount, 0});
     }
 
+    //Sends a packet to the server when an item has been picked up by a player
     public void pickupItem(ItemStack itemStack) throws IOException {
         send("pickup_item", itemStack.getGameId());
     }
 
+    //Sends a packet to the server when a player needs to respawn
     public void respawn() throws IOException {
         send("respawn", null);
     }
 
+    //Saves player data and disconnects
     public void saveAndExit() throws IOException {
         savePlayerData(camera.getPlayerData());
         disconnect();
     }
 
+    //Sends a packet to the server which spawns the boss
     public void spawnBoss(int[] data) throws IOException {
         send("spawn_boss", data);
     }
 
+    //Sends a packet to the server which starts the blood moon
     public void startBloodMoon() throws IOException {
         send("start_blood_moon", null);
     }
 
+    //Map getter
     public String[][] getMap() {
         return map;
     }
-
-
 }

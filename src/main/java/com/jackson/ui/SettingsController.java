@@ -25,14 +25,12 @@ public class SettingsController extends Scene {
     private TextField displayNameTextField;
     private Slider backgroundSlider;
     private Slider soundEffectsSlider;
-
     private Button saveButton;
 
     public SettingsController() {
         super(new VBox());
 
-       //Load Settings from File
-
+        //Load Settings from File
         VBox root = new VBox();
         Main.applyWindowSize(root); //Applies standard window size
         root.setId("root");
@@ -44,14 +42,13 @@ public class SettingsController extends Scene {
         getStylesheets().add("file:src/main/resources/stylesheets/settings.css");
     }
 
+    //Reads text file and loads current settings onto scene
     private void loadSettings() {
         List<String> settingsList = TextIO.readFile("src/main/resources/settings/settings.txt"); //Reads settings file which holds display name, and if muted
-        if(settingsList.size() < 3) { //If there is less than 3 settings it will throw an ArrayOutOfBoundsException
+        if (settingsList.size() < 3) { //If there is less than 3 settings it will throw an ArrayOutOfBoundsException
             return;
         }
         this.displayNameTextField.setText(settingsList.get(0)); //Set text to current display name
-
-
 
         double backgroundVolume;
         double effectsVolume;
@@ -67,11 +64,9 @@ public class SettingsController extends Scene {
         }
         this.backgroundSlider.setValue(backgroundVolume);
         this.soundEffectsSlider.setValue(effectsVolume);
-
-
-
     }
 
+    //Adds each row of settings to the scene
     private void addContent(VBox root) {
         Label title = new Label("Settings");
         title.setId("title");
@@ -85,6 +80,7 @@ public class SettingsController extends Scene {
         addButtons(root);
     }
 
+    //Display name setting
     private void addDisplayName(VBox root) {
         //Display Name
         var displayNameLabel = new Label("Display Name:");
@@ -94,7 +90,6 @@ public class SettingsController extends Scene {
         Circle circle = new Circle(); //Circle that changes colour to indicate if display name is valid
         circle.setRadius(10);
 
-
         this.displayNameTextField = new TextField();
         this.displayNameTextField.setPromptText("Display Name");
         this.displayNameTextField.textProperty().addListener((observableValue, number, t1) -> { //Changes color of circle
@@ -102,11 +97,12 @@ public class SettingsController extends Scene {
             circle.setFill(Color.web(isInvalid ? "#c7200e" : "#0aad07"));
             saveButton.setDisable(isInvalid);
         });
-        var hbox  = createHBox(displayNameLabel, this.displayNameTextField);
+        var hbox = createHBox(displayNameLabel, this.displayNameTextField);
         hbox.getChildren().add(2, circle);
         root.getChildren().add(hbox);
     } //Adds option to change display name
 
+    //Sound effects volume setting
     private void addMuteSoundEffects(VBox root) {
         var muteSoundEffectsLabel = new Label("Sound Effects Volume:");
         this.soundEffectsSlider = new Slider();
@@ -117,6 +113,7 @@ public class SettingsController extends Scene {
         root.getChildren().add(createHBox(muteSoundEffectsLabel, valueLabel, soundEffectsSlider));
     } //Adds option to mute sound effects
 
+    //Background volume setting
     private void addMuteBackground(VBox root) {
         var muteBackgroundLabel = new Label("Background Music Volume:");
         this.backgroundSlider = new Slider();
@@ -124,11 +121,10 @@ public class SettingsController extends Scene {
         var valueLabel = new Label(String.valueOf(this.backgroundSlider.getValue()));
         valueLabel.setId("value");
         valueLabel.textProperty().bind(backgroundSlider.valueProperty().asString("%.0f"));
-
-
         root.getChildren().add(createHBox(muteBackgroundLabel, valueLabel, this.backgroundSlider));
     } //Adds option to mute background music
 
+    //Delete singleplayer save option
     private void deleteSinglePlayerSave(VBox root) {
         var deleteSaveLabel = new Label("Singleplayer Save:");
         var deleteSaveBtn = new Button("Delete");
@@ -148,6 +144,7 @@ public class SettingsController extends Scene {
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveBtn));
     } //Adds option to delete single-player save
 
+    //Delete multiplayer save option
     private void deleteMultiplayerSave(VBox root) {
         var deleteSaveLabel = new Label("Multiplayer Save:");
         var deleteSaveButton = new Button("Delete");
@@ -166,6 +163,7 @@ public class SettingsController extends Scene {
         root.getChildren().add(createHBox(deleteSaveLabel, deleteSaveButton));
     }
 
+    //Adds back and save buttons
     private void addButtons(VBox root) {
         saveButton = new Button("Save");
         saveButton.setId("confirmButton");
@@ -173,7 +171,7 @@ public class SettingsController extends Scene {
             //Update Settings Text File
             List<String> newSettings = new ArrayList<>();
             String displayName = this.displayNameTextField.getText();
-            if(displayName.length() < 3 || displayName.length() > 15) { //If display name is not valid, settings not updated
+            if (displayName.length() < 3 || displayName.length() > 15) { //If display name is not valid, settings not updated
                 return;
             }
 
@@ -194,7 +192,8 @@ public class SettingsController extends Scene {
         root.getChildren().add(createHBox(saveButton, backButton)); //Add Buttons to root
     }
 
-    private HBox createHBox(Node ... nodes) { //template for each row of settings (varargs for re-usability)
+    //Creates a hbox that takes nodes
+    private HBox createHBox(Node... nodes) { //template for each row of settings (varargs for re-usability)
 
         HBox hBox = new HBox();
         hBox.getStyleClass().add("hBox"); //Can't find css for Hbox name
@@ -207,8 +206,4 @@ public class SettingsController extends Scene {
 
         return hBox;
     }
-
-
-
-
 }

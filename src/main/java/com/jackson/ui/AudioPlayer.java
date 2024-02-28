@@ -14,7 +14,6 @@ public class AudioPlayer {
 Music promoted by https://www.chosic.com/free-music/all/
 Attribution 4.0 International (CC BY 4.0)
 https://creativecommons.org/licenses/by/4.0/
-
      */
 
     public AudioPlayer(String sound) {
@@ -50,6 +49,7 @@ https://creativecommons.org/licenses/by/4.0/
         return this.mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING;
     }
 
+    //Resets back to the beginning and plays
     public void playFromBeginning() {
         this.mediaPlayer.seek(Duration.millis(0));
         this.mediaPlayer.play();

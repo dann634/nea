@@ -25,15 +25,14 @@ public class Inventory {
     //Fields
     private final AnchorPane[][] inventoryArr;
     private final ItemStack[][] itemArray;
-    private VBox wholeInventoryVbox;
     private final SimpleIntegerProperty selectedSlotIndex;
-    private boolean isInventoryOpen;
     private final ImageView itemOnCursor;
+    private final SimpleIntegerProperty ammo;
+    private VBox wholeInventoryVbox;
+    private boolean isInventoryOpen;
     private ItemStack itemStackOnCursor;
     private boolean isCellHovered;
-    private final SimpleIntegerProperty ammo;
 
-// FIXME: 06/11/2023 when player drops block it will place if block in hand
 
     public Inventory(SimpleIntegerProperty ammo) {
         //Initialises all fields
@@ -55,11 +54,18 @@ public class Inventory {
         //Default appearance
         setHideInventory(true); //Should be hidden by default
         selectSlot(0); //Start with slot 1 selected
-
     }
 
-    private void initInventory() {
+    //get slot size
+    public static int getSlotSize() {
+        return SLOT_SIZE;
+    }
 
+    /*
+    Creates the 5x4 inventory size
+    Sets style of whole inventory
+     */
+    private void initInventory() {
         //Parent of whole inventory
         wholeInventoryVbox = new VBox(10); //Whole vbox
         wholeInventoryVbox.setStyle("-fx-padding: 10");
@@ -71,7 +77,7 @@ public class Inventory {
         List<HBox> tempHboxList = new ArrayList<>();
         tempHboxList.add(hotBarHBox);
 
-        for (int i = 0; i < HOTBAR_SIZE ; i++) { //Hotbar
+        for (int i = 0; i < HOTBAR_SIZE; i++) { //Hotbar
             AnchorPane pane = getInventorySquare(0, i);
             inventoryArr[i][0] = pane;
             hotBarHBox.getChildren().add(pane);
@@ -99,13 +105,13 @@ public class Inventory {
         pane.getStyleClass().addAll("inventory", "darkBackground");
         //On Click Listener
         pane.setOnMouseClicked(e -> {
-            if((itemStackOnCursor == null && itemArray[row][col] == null)) {
+            if ((itemStackOnCursor == null && itemArray[row][col] == null)) {
                 //If no item in square and nothing on cursor
                 //If item in square and item on cursor
                 return;
             }
             //Item on cursor and empty square (puts block down)
-            if(itemStackOnCursor != null && itemArray[row][col] == null) {
+            if (itemStackOnCursor != null && itemArray[row][col] == null) {
                 itemArray[row][col] = itemStackOnCursor;
                 itemStackOnCursor = null;
                 itemOnCursor.setVisible(false);
@@ -115,7 +121,7 @@ public class Inventory {
 
             //Item on cursor and full square
             //Swaps items
-            if(itemStackOnCursor != null && itemArray[row][col] != null) {
+            if (itemStackOnCursor != null && itemArray[row][col] != null) {
                 ItemStack tempItemStack = itemArray[row][col];
                 itemArray[row][col] = itemStackOnCursor;
                 inventoryArr[row][col].getChildren().set(0, itemArray[row][col]);
@@ -134,8 +140,9 @@ public class Inventory {
         return pane;
     }
 
-    public void toggleInventory() { //Toggles between inventory hidden and shown
-        if(isInventoryOpen) {
+    //Toggles between inventory hidden and shown
+    public void toggleInventory() {
+        if (isInventoryOpen) {
             setHideInventory(true);
             return;
         }
@@ -152,29 +159,30 @@ public class Inventory {
         }
     }
 
+    //Get whole inventory
     public VBox getInventoryVbox() {
         return wholeInventoryVbox;
     }
 
-    public static int getSlotSize() {
-        return SLOT_SIZE;
-    }
-
+    //Changes the visual indicator of what slot is selected
     public void selectSlot(int index) {
-        if(selectedSlotIndex.get() != -1) {
+        if (selectedSlotIndex.get() != -1) {
             inventoryArr[selectedSlotIndex.get()][0].setId("inventory-unselected");
         }
         inventoryArr[index][0].setId("selected");
         selectedSlotIndex.set(index);
-
     }
 
+    /*
+    Adds item to inventory
+    Sorts into next available slot
+     */
     public boolean addItem(ItemStack itemStack) {
         ItemStack checkItemStack = doesItemExistAlready(itemStack); //Does item already exist in inventory
         int[] index;
-        if(checkItemStack == null) {
+        if (checkItemStack == null) {
             index = findNextFreeIndex(); //Is there a free slot
-            if(index[0] == -1) { //No free slot
+            if (index[0] == -1) { //No free slot
                 return false;
             }
             //Is free slot and block doesn't already exist
@@ -196,7 +204,7 @@ public class Inventory {
     private int[] findNextFreeIndex() {
         for (int i = 0; i < INVENTORY_SIZE; i++) {
             for (int j = 0; j < HOTBAR_SIZE; j++) {
-                if(itemArray[j][i] == null) {
+                if (itemArray[j][i] == null) {
                     return new int[]{j, i};
                 }
             }
@@ -227,12 +235,13 @@ public class Inventory {
 
     //Returns String Item Name for the character to hold
     public String getBlockNameInHotbar(int index) {
-        if(itemArray[index][0] == null) {
+        if (itemArray[index][0] == null) {
             return "air";
         }
         return itemArray[index][0].getItemName();
     }
 
+    //Selected item getter
     public ItemStack getSelectedItemStack() {
         return itemArray[selectedSlotIndex.get()][0];
     }
@@ -245,7 +254,7 @@ public class Inventory {
     public void useBlockFromSelectedSlot() {
         ItemStack itemStack = itemArray[selectedSlotIndex.get()][0];
         itemStack.addStackValue(-1);
-        if(itemStack.getStackSize() == 0) {
+        if (itemStack.getStackSize() == 0) {
             //Remove from inventory
             itemArray[selectedSlotIndex.get()][0] = null;
             inventoryArr[selectedSlotIndex.get()][0].getChildren().clear();
@@ -260,14 +269,16 @@ public class Inventory {
     private void setItemOnCursor(String blockName) {
         try {
             itemOnCursor.setImage(new Image("file:src/main/resources/images/" + blockName + ".png"));
-        } catch (MissingResourceException ignored) {}
+        } catch (MissingResourceException ignored) {
+        }
     }
 
     public ItemStack getItemStackOnCursor() {
         return itemStackOnCursor;
     }
 
-    public void clearCursor() { //Removes item from cursor
+    //Removes item from cursor
+    public void clearCursor() {
         itemStackOnCursor = null;
         itemOnCursor.setVisible(false);
     }
@@ -280,11 +291,11 @@ public class Inventory {
         return itemArray;
     }
 
+    //Returns if an item can be crafted from the items in the inventory
     public boolean canCraft(List<ItemStack> recipe) {
-        if(recipe.isEmpty()) {
+        if (recipe.isEmpty()) {
             return false;
         }
-
 
         for (ItemStack itemStack : recipe) {
             int amount = 0;
@@ -306,22 +317,23 @@ public class Inventory {
         return true;
     }
 
+    //Takes items from inventory and puts target item back in
     public void craft(String item, List<ItemStack> recipe) {
         //Take items to craft
-        for(ItemStack itemStack : recipe) {
+        for (ItemStack itemStack : recipe) {
             for (int i = 0; i < itemArray.length; i++) {
                 for (int j = 0; j < itemArray[i].length; j++) {
                     ItemStack targetItem = itemArray[i][j];
-                    if(targetItem == null || itemStack.getStackSize() == 0) {
+                    if (targetItem == null || itemStack.getStackSize() == 0) {
                         continue;
                     }
-                    if(targetItem.getItemName().equals(itemStack.getItemName())) {
+                    if (targetItem.getItemName().equals(itemStack.getItemName())) {
                         //Is same so take away
-                        if(targetItem.getStackSize() > itemStack.getStackSize()) {
+                        if (targetItem.getStackSize() > itemStack.getStackSize()) {
                             //More than enough
                             targetItem.addStackValue(-itemStack.getStackSize());
                             itemStack.addStackValue(-itemStack.getStackSize());
-                        } else if(targetItem.getStackSize() <= itemStack.getStackSize()) {
+                        } else if (targetItem.getStackSize() <= itemStack.getStackSize()) {
                             //Will take all so needs to be removed from inventory
                             //Not Enough
                             itemStack.addStackValue(-targetItem.getStackSize());
@@ -337,7 +349,7 @@ public class Inventory {
 
         //Can craft so put item in inventory
         Entity entity;
-        if(GameController.lookupTable.containsKey(item)) {
+        if (GameController.lookupTable.containsKey(item)) {
             entity = new Entity(item);
         } else {
             entity = new Item(item);
@@ -345,13 +357,10 @@ public class Inventory {
 
         ItemStack craftedItem = new ItemStack(entity);
         craftedItem.addStackValue(1);
-        if(item.equals("bullet")) {
+        if (item.equals("bullet")) {
             ammo.set(ammo.get() + 20);
             return;
         }
         addItem(craftedItem);
     }
-
-
-
 }

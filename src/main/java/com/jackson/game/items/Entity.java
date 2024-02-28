@@ -44,11 +44,12 @@ public class Entity extends VBox {
         this.getChildren().add(this.imageView);
     }
 
-
+    //Item name getter
     public String getItemName() {
         return itemName;
     }
 
+    //Sets entity size
     public void setSize(double size) {
         this.setPrefHeight(size);
         this.setPrefWidth(size);
@@ -56,16 +57,19 @@ public class Entity extends VBox {
         this.imageView.setFitWidth(size);
     }
 
+    //Sets position on screen
     public void setPos(double x, double y) {
         this.setTranslateX(x);
         this.setTranslateY(y);
     }
 
+    //Updates the position on screen
     public void addPos(double x, double y) {
         this.setTranslateX(getTranslateX() + x);
         this.setTranslateY(getTranslateY() + y);
     }
 
+    //Screen position getters
     public double getX() {
         return this.getTranslateX();
     }
@@ -74,14 +78,17 @@ public class Entity extends VBox {
         return this.getTranslateY();
     }
 
+    //Resets entity rotation back to 0
     public void resetRotation() {
         this.imageView.setRotate(0);
     }
 
+    //Gives the entity a random rotation
     public void randomRotation() {
         this.imageView.setRotate(new Random().nextDouble(360));
     }
 
+    //is entity usable getter
     public boolean isUsable() {
         return isUsable;
     }

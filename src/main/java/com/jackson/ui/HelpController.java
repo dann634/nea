@@ -18,6 +18,7 @@ public class HelpController extends Scene {
 
     private final Label sectionTitle;
     private final Label descriptionLabel;
+
     public HelpController() {
         super(new VBox());
         BorderPane root = new BorderPane();
@@ -59,16 +60,18 @@ public class HelpController extends Scene {
         setRoot(root);
     }
 
+    //creates a map for title to help text
     private void initMap() {
         List<String> helpInfo = TextIO.readFile("src/main/resources/settings/help.txt");
-        for(String line : helpInfo) {
+        for (String line : helpInfo) {
             //Split line up
             String[] splitLine = line.split(" ", 2);
-            if(splitLine.length < 2) continue;
+            if (splitLine.length < 2) continue;
             map.put(splitLine[0], splitLine[1]);
         }
     }
 
+    //Creates the menu to select each heading
     private VBox getSelectorMenu() {
         VBox vBox = new VBox();
         vBox.setId("selectorVbox");
@@ -83,6 +86,7 @@ public class HelpController extends Scene {
         return vBox;
     }
 
+    //Updates the text in the middle of the screen
     private void updateText(String menuName) {
         sectionTitle.setText(menuName);
         descriptionLabel.setText(map.get(menuName));

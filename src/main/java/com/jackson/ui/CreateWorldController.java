@@ -25,7 +25,6 @@ public class CreateWorldController extends Scene {
     private final ComboBox<String> difficultyComboBox;
 
 
-    // TODO: 21/08/2023 Maybe break this down into methods
     public CreateWorldController() {
         super(new VBox()); //Super constructor with placeholder pane
 
@@ -48,7 +47,7 @@ public class CreateWorldController extends Scene {
         description.setId("descriptionLabel");
 
         //Combobox changes description to match difficulty chosen
-        difficultyComboBox.setOnAction(e -> { // FIXME: 21/08/2023 BUG: Combobox won't close first time clicking item
+        difficultyComboBox.setOnAction(e -> {
             switch (difficultyComboBox.getValue().toString()) {
                 case "Easy" -> description.setText(EASY_DESCRIPTION);
                 case "Medium" -> description.setText(MEDIUM_DESCRIPTION);
@@ -73,7 +72,11 @@ public class CreateWorldController extends Scene {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toUpperCase()), true, null));
+            try {
+                Main.setScene(new GameController(Difficulty.valueOf(difficultyComboBox.getValue().toUpperCase()), true, null));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
 
         //Back button (back to main menu)
@@ -92,6 +95,7 @@ public class CreateWorldController extends Scene {
         getStylesheets().add("file:src/main/resources/stylesheets/createWorld.css");
     }
 
+    //Changes for multiplayer
     public void multiplayer() {
         title.setText("Host Game");
         root.setSpacing(40);

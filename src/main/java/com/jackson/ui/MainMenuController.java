@@ -18,11 +18,6 @@ import java.util.ResourceBundle;
 
 public class MainMenuController extends Scene implements Initializable {
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        System.gc(); //Advises Garbage Collection
-    }
-
     public MainMenuController() {
         super(new VBox());
         VBox root = new VBox(); //Initialise the parent root
@@ -36,6 +31,12 @@ public class MainMenuController extends Scene implements Initializable {
         getStylesheets().add("file:src/main/resources/stylesheets/mainMenu.css"); //Add stylesheets to scene
     }
 
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        System.gc(); //Advises Garbage Collection
+    }
+
+    //Adds all the content to the middle of the screen
     private void addContent(VBox root) {
         //Add Title
         var title = new Label("Main Menu");
@@ -46,7 +47,7 @@ public class MainMenuController extends Scene implements Initializable {
         var singlePlayerButton = new Button("Singleplayer");
 
         //Does save exist
-        if(new File("src/main/resources/saves/singleplayer.txt").exists()) {
+        if (new File("src/main/resources/saves/singleplayer.txt").exists()) {
             singlePlayerButton.setText("Continue Singleplayer");
         }
 
@@ -58,31 +59,34 @@ public class MainMenuController extends Scene implements Initializable {
         addFunctionality(singlePlayerButton, multiPlayerButton, settingsButton, helpButton, exitButton);
 
         root.getChildren().addAll(singlePlayerButton, multiPlayerButton, settingsButton, helpButton, exitButton);
-
     }
 
+    //Adds the functionality to all the buttons
     private void addFunctionality(Button singlePlayerButton, Button multiplayerButton,
                                   Button settingsButton, Button helpButton, Button exitButton) { //Adds functionality to each individual button
         singlePlayerButton.setOnAction(e -> {
-            if(singlePlayerButton.getText().equals("Singleplayer")) {
+            if (singlePlayerButton.getText().equals("Singleplayer")) {
                 Main.setScene(new CreateWorldController());
                 return;
             }
 
-            Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9)), true, null));
+            try {
+                Main.setScene(new GameController(Difficulty.valueOf(TextIO.readFile("src/main/resources/saves/single_data.txt").get(9)), true, null));
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         });
-
 
         multiplayerButton.setOnAction(e -> {
             //Does multiplayer world already exist
             try {
                 Client client = new Client();
-                if(!client.doesWorldExist()) {
+                if (!client.doesWorldExist()) {
                     CreateWorldController createWorldController = new CreateWorldController();
                     createWorldController.multiplayer();
                     Platform.runLater(() -> Main.setScene(createWorldController));
                 } else {
-                    if(!client.isUsernameUnique()) {
+                    if (!client.isUsernameUnique()) {
                         Main.setScene(new ErrorScreen("Username already in use. Please Change"));
                     } else {
                         client.joinGame();
@@ -98,10 +102,9 @@ public class MainMenuController extends Scene implements Initializable {
         settingsButton.setOnAction(e -> Main.setScene(new SettingsController())); //Goes to settings scene
         helpButton.setOnAction(e -> Main.setScene(new HelpController())); //Goes to help scene
         exitButton.setOnAction(e -> System.exit(0)); //Exits Game
-
-
     }
 
+    //Scene that shows when an error has occured
     private static class ErrorScreen extends Scene {
 
         public ErrorScreen(String errorMessage) {
@@ -130,15 +133,7 @@ public class MainMenuController extends Scene implements Initializable {
             backButton.setOnAction(e -> Main.setScene(new MainMenuController()));
 
             root.getChildren().addAll(title, errorText, backButton);
-
-
             setRoot(root);
         }
     }
-
-
-
-
-
-
 }

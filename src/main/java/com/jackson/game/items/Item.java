@@ -14,8 +14,9 @@ public class Item extends Entity {
         fixGuns();
     }
 
+    //If item is gun the size must be reduced
     private void fixGuns() {
-        if(itemName.equals("rifle") || itemName.equals("sniper")) {
+        if (itemName.equals("rifle") || itemName.equals("sniper")) {
             setSize(100);
         }
     }

@@ -17,14 +17,14 @@ import java.util.Random;
 public class Boss extends Zombie {
 
     private final int HEALTH = 1000;
-    private ImageView leftArm;
-    private ImageView rightArm;
-    private boolean canJump;
     private final Camera camera;
     private final Player player;
     private final PauseTransition abilityCooldown;
     private final Image bossImage1 = new Image("file:src/main/resources/images/boss_body1.png");
     private final Image bossImage2 = new Image("file:src/main/resources/images/boss_body2.png");
+    private ImageView leftArm;
+    private ImageView rightArm;
+    private boolean canJump;
 
     public Boss(Camera camera, Player player, double spawnX, double spawnY, Difficulty difficulty) {
         super(difficulty); //Initialises fields in zombie class
@@ -49,34 +49,40 @@ public class Boss extends Zombie {
         changeCollisions(); //Updates collisions for larger model
     }
 
+    //Boss doesn't have an idle image so changes it to one of the walking images
     @Override
     public void setIdleImage() {
         setImage(bossImage1);
     }
 
+    /*
+    Starts attack cooldown
+    If cooldown is reset it randomly picks one of two attacks
+     */
     @Override
     public void attack(Entity item) {
         super.attack(item); //Plays the attack cooldown
         //50% chance for either attack
-        if(!canUseAbility()) return;
+        if (!canUseAbility()) return;
         abilityCooldown.play();
-        if(new Random().nextBoolean()) {
+        if (new Random().nextBoolean()) {
             jumpAttack();
         } else {
             rockAttack();
         }
     }
 
+    //Alternates between images to create walking animation
     @Override
     public void swapMovingImage() {
-        //Swaps image to create the walking animation
-        if(getImage() == bossImage1) {
+        if (getImage() == bossImage1) {
             setImage(bossImage2);
         } else {
             setImage(bossImage1);
         }
     }
 
+    //Gets all nodes associated with boss and returns them in a list
     @Override
     public List<Node> getNodes() {
         //Gets all previous nodes from zombie class and adds arms
@@ -86,11 +92,16 @@ public class Boss extends Zombie {
         return nodes;
     }
 
+    //Boss can jump higher than regular zombies
     @Override
     public double JUMPING_POWER() {
         return 1.5;
-    } //Boss can jump higher than regular zombies
+    }
 
+    /*
+    Collisions are inherited from zombie which has a different size
+    They need to be mapped to the size of the boss
+     */
     private void changeCollisions() {
         int collisionHeight = 85;
         int topOffset = 5;
@@ -117,6 +128,7 @@ public class Boss extends Zombie {
         rightCollision.setHeight(collisionHeight);
     }
 
+    //Creates two arms and binds them to the boss
     private void initArms() {
         Image arm = new Image("file:src/main/resources/images/boss_arm.png");
 
@@ -130,11 +142,14 @@ public class Boss extends Zombie {
         rightArm.setRotate(45);
 
         setArms(15);
-
     }
 
 
-
+    /*
+    One of the boss's attacks
+    Jumps into sky and moves to players location
+    Dives head first down onto player and creates a crater at fist location
+     */
     private void jumpAttack() {
         canJump = false; //Stops normal gravity
         //Point arms to sky
@@ -176,7 +191,7 @@ public class Boss extends Zombie {
             }
 
             //Player takes damage
-            if(player.intersects(getBoundsInParent())) {
+            if (player.intersects(getBoundsInParent())) {
                 player.takeDamage(getAttack());
             }
         });
@@ -185,32 +200,35 @@ public class Boss extends Zombie {
         resetAnimation.play();
     }
 
+    //Used to change the position of the arms for attacks and general walking
     private void setArms(int yOffset) {
         int shoulderOffset = 30;
         leftArm.translateYProperty().bind(translateYProperty().add(shoulderOffset + yOffset));
         rightArm.translateYProperty().bind(translateYProperty().add(shoulderOffset + yOffset));
     }
 
+    /*
+    Start the rock attack
+    Move signal rock into sky
+    Set rocks falling value to true
+     */
     private void rockAttack() {
         camera.moveRock(getTranslateX() + 10, getTranslateY() + 20, getTranslateX() + (isModelFacingRight.get() ? 30 : -30), -100);
         camera.setIsRainingRocks(true);
     }
 
 
-
+    //canJump getter
     public boolean isCanJump() {
         return canJump;
     }
 
+    //canUseAbility getter
     public boolean canUseAbility() {
         return abilityCooldown.getStatus() == Animation.Status.STOPPED;
     }
 
-    @Override
-    public double getAttack() {
-        return super.getAttack();
-    }
-
+    //Starts cooldown of attack
     public void startAttackCooldown() {
         attackCooldown.play();
     }

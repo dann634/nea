@@ -37,11 +37,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameController extends Scene {
 
-    private double ZOMBIE_SPAWN_RATE;
-    private final AnchorPane root;
-    private Player character;
-    private final List<Zombie> zombies;
     public static HashMap<String, String> lookupTable;
+    private final AnchorPane root;
+    private final List<Zombie> zombies;
     private final Inventory inventory;
     private final HealthBar healthBar;
     private final StatMenu statMenu;
@@ -58,7 +56,9 @@ public class GameController extends Scene {
     private final Difficulty difficulty;
     private final boolean isSingleplayer;
     private final SimpleIntegerProperty killCounter;
-
+    private double ZOMBIE_SPAWN_RATE;
+    private int BOSS_SPAWN_REQUIRMENT = 50;
+    private Player character;
     private boolean blockDropped;
     private boolean isGamePaused;
     private boolean isAPressed;
@@ -67,10 +67,8 @@ public class GameController extends Scene {
     private boolean isSpacePressed;
     private Client client;
 
-    // TODO: 24/10/2023 Add autosave feature -> on close and save
 
-
-    public GameController(Difficulty difficulty, boolean isSingleplayer, Client client) {
+    public GameController(Difficulty difficulty, boolean isSingleplayer, Client client) throws IOException {
         super(new VBox());
 
         this.client = client;
@@ -97,13 +95,14 @@ public class GameController extends Scene {
 
         bossMusic = new AudioPlayer("boss_music");
 
+
         //HUD
         SimpleBooleanProperty isHoldingGun = new SimpleBooleanProperty(false);
         SimpleIntegerProperty ammo = new SimpleIntegerProperty(0);
         killCounter = new SimpleIntegerProperty(0);
         killCounter.addListener((observableValue, number, t1) -> {
             //Must kill 50 zombies for boss to spawn
-            if(t1.intValue() == 50) {
+            if (t1.intValue() == BOSS_SPAWN_REQUIRMENT) {
                 try {
                     spawnBoss();
                 } catch (IOException e) {
@@ -120,7 +119,7 @@ public class GameController extends Scene {
         inventory = new Inventory(ammo);
         craftingMenu = new CraftingMenu(inventory);
         spawnCharacter(isHoldingGun, ammo);
-        camera = new Camera(character, map, root, inventory, zombies, isBloodMoonActive, isRainingRocks, killCounter, bossMusic, this);
+        camera = new Camera(map, isBloodMoonActive, isRainingRocks, this);
         healthBar = new HealthBar(character.healthProperty());
         statMenu = new StatMenu(character);
         eventMessage = new EventMessage(character);
@@ -139,7 +138,7 @@ public class GameController extends Scene {
 
         blockDropped = false;
 
-        if(isSingleplayer) loadSaveData(TextIO.readFile("src/main/resources/saves/single_data.txt"));
+        if (isSingleplayer) loadSaveData(TextIO.readFile("src/main/resources/saves/single_data.txt"));
 
         bloodMoonTimer = new PauseTransition();
         bloodMoonTimer.setDuration(Duration.minutes(2));
@@ -171,12 +170,12 @@ public class GameController extends Scene {
             }
             movementHandler.calculateZombieMovement(zombies);
 
-            if(camera.isBlockJustBroken() || blockDropped) { //Check to save cpu
+            if (camera.isBlockJustBroken() || blockDropped) { //Check to save cpu
                 movementHandler.calculateDroppedBlockGravity(); //Block dropping
                 blockDropped = false;
             }
 
-            if(isSpacePressed) {
+            if (isSpacePressed) {
                 character.attack(inventory.getSelectedItemStack());
             }
 
@@ -192,9 +191,10 @@ public class GameController extends Scene {
         gameTimeline.play();
     }
 
+    //Push elements to be in front of blocks
     private void pushElementsToFront(EventMessage eventMessage, HBox ammoHbox, HBox killCounterHBox) {
         //Everything to front (maybe make a method for it)
-        if(isGamePaused) return;
+        if (isGamePaused) return;
         inventory.getInventoryVbox().toFront();
         inventory.getItemOnCursor().toFront();
         character.toFront();
@@ -207,6 +207,7 @@ public class GameController extends Scene {
         killCounterHBox.toFront();
     }
 
+    //Spawns multiple zombies
     private void spawnZombiePack() {
         //Do check first
         if (!isSingleplayer) return;
@@ -229,33 +230,34 @@ public class GameController extends Scene {
         zombies.addAll(pack);
     }
 
+    //Get single zombie object
     private Zombie getZombie(double x, double y) {
-            var zombie = new Zombie(difficulty);
-            zombie.setTranslateX(x);
-            zombie.setTranslateY(y);
-            zombie.translateXProperty().addListener((observableValue, number, t1) -> {
-                if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
-                    zombie.attack(new Item("fist"));
-                    character.takeDamage(zombie.getAttack());
-                }
-            });
+        var zombie = new Zombie(difficulty);
+        zombie.setTranslateX(x);
+        zombie.setTranslateY(y);
+        zombie.translateXProperty().addListener((observableValue, number, t1) -> {
+            if (zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
+                zombie.attack(new Item("fist"));
+                character.takeDamage(zombie.getAttack());
+            }
+        });
 
-            zombie.translateYProperty().addListener((observableValue, number, t1) -> {
-                if(zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
-                    zombie.attack(new Item("fist"));
-                    character.takeDamage(zombie.getAttack());
-                }
-            });
+        zombie.translateYProperty().addListener((observableValue, number, t1) -> {
+            if (zombie.canAttack() && character.intersects(zombie.getBoundsInParent())) {
+                zombie.attack(new Item("fist"));
+                character.takeDamage(zombie.getAttack());
+            }
+        });
         return zombie;
     }
 
-
+    //Spawn multiple zombies (multiplayer)
     public void spawnZombiePack(int[][] data, boolean isResponsible) {
 
         //Find bounds of screen
         List<List<Block>> blocks = camera.getBlocks();
         int leftBorder = blocks.get(0).get(0).getXPos();
-        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
+        int rightBorder = blocks.get(blocks.size() - 1).get(0).getXPos();
         int topBorder = blocks.get(0).get(0).getYPos();
         int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
 
@@ -263,7 +265,7 @@ public class GameController extends Scene {
         int xPos = data[0][0];
         int yPos = data[0][1];
         //Is off screen?
-        if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return;
+        if (xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return;
 
         //Find x and y translate
         List<Zombie> pack = new ArrayList<>();
@@ -271,9 +273,9 @@ public class GameController extends Scene {
 
         //Find spawn tile
         int index = 0;
-        for(int i = 0; i < blocks.size(); i++) {
+        for (int i = 0; i < blocks.size(); i++) {
             List<Block> line = blocks.get(i);
-            if(line.get(0).getXPos() == xPos) {
+            if (line.get(0).getXPos() == xPos) {
                 index = i;
                 break;
             }
@@ -293,6 +295,7 @@ public class GameController extends Scene {
         zombies.addAll(pack);
     }
 
+    //Damage Zombies (Multiplayer)
     public void damageZombie(int id, int damage) {
         Zombie deadZombie = null;
         for (Zombie zombie : zombies) {
@@ -305,24 +308,26 @@ public class GameController extends Scene {
                 killCounter.set(killCounter.get() + 1);
             }
         }
-        if(deadZombie != null) zombies.remove(deadZombie);
+        if (deadZombie != null) zombies.remove(deadZombie);
     }
 
+    //Updates position of zombies (multiplayer)
     public void updateZombiePos(int id, double[] move) {
-        for(Zombie zombie : zombies) {
-            if(zombie.getGameId() != id) continue;
+        for (Zombie zombie : zombies) {
+            if (zombie.getGameId() != id) continue;
             zombie.setNodeOrientation(move[0] < 0 ? NodeOrientation.LEFT_TO_RIGHT : NodeOrientation.RIGHT_TO_LEFT);
             zombie.addTranslateX((int) move[0]);
             zombie.addTranslateY(move[1]);
         }
     }
 
+    //Spawns boss randomly on the screen
     private void spawnBoss() throws IOException {
 
         int screenX = rand.nextInt(400) + 300;
         int screenY = 0;
 
-        if(!isSingleplayer && client != null) {
+        if (!isSingleplayer && client != null) {
             int[] worldPos = findWorldPos(screenX, screenY);
             client.spawnBoss(worldPos);
             return;
@@ -330,48 +335,48 @@ public class GameController extends Scene {
 
         Boss boss = new Boss(camera, character, screenX, screenY, difficulty);
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
-            if(boss.canAttack() && character.intersects(boss.getBoundsInParent())) {
+            if (boss.canAttack() && character.intersects(boss.getBoundsInParent())) {
                 boss.attack(new Item("fist"));
                 character.takeDamage(boss.getAttackDamage());
             }
         });
 
         boss.translateYProperty().addListener((observableValue, number, t1) -> {
-            if(boss.canAttack() && character.intersects(boss.getBoundsInParent())) {
+            if (boss.canAttack() && character.intersects(boss.getBoundsInParent())) {
                 boss.attack(new Item("fist"));
                 character.takeDamage(boss.getAttackDamage());
             }
         });
 
         //Start Boss Music
-        if(!bossMusic.isPlaying()) bossMusic.playFromBeginning();
+        if (!bossMusic.isPlaying()) bossMusic.playFromBeginning();
         audioplayer.pause();
-
 
         root.getChildren().addAll(boss.getNodes());
         boss.toFront();
         zombies.add(boss);
     }
 
+    //Spawn Boss (Multiplayer)
     public void spawnBoss(boolean isClientResposible, int[] data) {
         //Find bounds of screen
         List<List<Block>> blocks = camera.getBlocks();
         int leftBorder = blocks.get(0).get(0).getXPos();
-        int rightBorder = blocks.get(blocks.size()-1).get(0).getXPos();
+        int rightBorder = blocks.get(blocks.size() - 1).get(0).getXPos();
         int topBorder = blocks.get(0).get(0).getYPos();
         int bottomBorder = blocks.get(0).get(blocks.get(0).size() - 1).getYPos();
 
         //Spawn Location of Zombies
         int xPos = data[1];
         int yPos = data[2];
-        //Is off screen?
-        if(xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return;
+        //Is off screen
+        if (xPos < leftBorder || xPos > rightBorder || yPos < topBorder || yPos > bottomBorder) return;
 
         //Find spawn tile
         int index = 0;
-        for(int i = 0; i < blocks.size(); i++) {
+        for (int i = 0; i < blocks.size(); i++) {
             List<Block> line = blocks.get(i);
-            if(line.get(0).getXPos() == xPos) {
+            if (line.get(0).getXPos() == xPos) {
                 index = i;
                 break;
             }
@@ -382,25 +387,25 @@ public class GameController extends Scene {
         boss.setClientResponsible(isClientResposible);
 
         boss.translateXProperty().addListener((observableValue, number, t1) -> {
-            if(boss.canAttack()) {
+            if (boss.canAttack()) {
                 boss.startAttackCooldown();
-                if(character.intersects(boss.getBoundsInParent())) {
+                if (character.intersects(boss.getBoundsInParent())) {
                     character.takeDamage(boss.getAttackDamage());
                 }
             }
         });
 
         boss.translateYProperty().addListener((observableValue, number, t1) -> {
-            if(boss.canAttack()) {
+            if (boss.canAttack()) {
                 boss.startAttackCooldown();
-                if(character.intersects(boss.getBoundsInParent())) {
+                if (character.intersects(boss.getBoundsInParent())) {
                     character.takeDamage(boss.getAttackDamage());
                 }
             }
         });
 
         //Start Boss Music
-        if(!bossMusic.isPlaying()) bossMusic.playFromBeginning();
+        if (!bossMusic.isPlaying()) bossMusic.playFromBeginning();
         audioplayer.pause();
 
         zombies.add(boss);
@@ -408,6 +413,7 @@ public class GameController extends Scene {
         root.getChildren().addAll(boss.getNodes());
     }
 
+    //Load save file into game
     public void loadSaveData(List<String> playerData) {
         if (playerData.isEmpty()) {
             camera.sendToSpawn(true);
@@ -449,18 +455,17 @@ public class GameController extends Scene {
         }
     }
 
-
+    //Spawns a character and sets up ammo and kill counter
     private void spawnCharacter(SimpleBooleanProperty isHoldingGun, SimpleIntegerProperty ammo) {
         character = new Player(isHoldingGun, ammo);
 
         character.healthProperty().addListener((observableValue, number, t1) -> {
-            if(t1.doubleValue() <= 0) {
+            if (t1.intValue() <= 0) {
                 root.getChildren().add(new PauseMenuController(true));
-            } else if(t1.intValue() > 100) {
+            } else if (t1.intValue() > 100) {
                 System.err.println("Error: Health cannot be set above 100");
             }
         });
-
 
         inventory.getSelectedSlotIndex().addListener((observableValue, number, t1) -> character.updateBlockInHand(inventory.getSelectedItemStack()));
 
@@ -471,59 +476,61 @@ public class GameController extends Scene {
         initOnKeyPressed();
     }
 
+    //Adds a player to the game (multiplayer)
     public void addPlayer(PseudoPlayer player) {
         setPseudoPlayerPos(player);
         root.getChildren().addAll(player.getImageView(), player.getDisplayNameLabel());
         camera.addOnlinePlayer(player);
     }
 
+    //removes a player from the game (multiplayer)
     public void removePlayer(PseudoPlayer player) {
         root.getChildren().removeAll(player.getImageView(), player.getDisplayNameLabel());
     }
 
-
+    //Binds all keys and mouse events
     private void initOnKeyPressed() {
 
-            setOnKeyPressed(e -> {
-                switch (e.getCode()) {
-                    case A -> {
-                        if(isGamePaused) return;
-                        isAPressed = true;
-                        character.setIsModelFacingRight(false);
-                    }
-                    case D -> {
-                        if(isGamePaused) return;
-                        isDPressed = true;
-                        character.setIsModelFacingRight(true);
-                    }
+        setOnKeyPressed(e -> {
+            switch (e.getCode()) {
+                case A -> {
+                    if (isGamePaused) return;
+                    isAPressed = true;
+                    character.setIsModelFacingRight(false);
+                }
+                case D -> {
+                    if (isGamePaused) return;
+                    isDPressed = true;
+                    character.setIsModelFacingRight(true);
+                }
 
-                    case W -> {
-                        if(isGamePaused) return;
-                        isWPressed = true;
-                        character.setIdleImage();
-                    }
+                case W -> {
+                    if (isGamePaused) return;
+                    isWPressed = true;
+                    character.setIdleImage();
+                }
 
-                    case DIGIT1 -> inventory.selectSlot(0);
-                    case DIGIT2 -> inventory.selectSlot(1);
-                    case DIGIT3 -> inventory.selectSlot(2);
-                    case DIGIT4 -> inventory.selectSlot(3);
-                    case DIGIT5 -> inventory.selectSlot(4);
+                case DIGIT1 -> inventory.selectSlot(0);
+                case DIGIT2 -> inventory.selectSlot(1);
+                case DIGIT3 -> inventory.selectSlot(2);
+                case DIGIT4 -> inventory.selectSlot(3);
+                case DIGIT5 -> inventory.selectSlot(4);
 
-                    case I -> inventory.toggleInventory();
-                    case K -> statMenu.toggleShown();
-                    case C -> craftingMenu.toggleShown(gameTimeline, isSingleplayer);
+                case I -> inventory.toggleInventory();
+                case K -> statMenu.toggleShown();
+                case C -> craftingMenu.toggleShown(gameTimeline, isSingleplayer);
 
-                    case ESCAPE -> {
-                        if(gameTimeline.getStatus() != Animation.Status.PAUSED && !this.isGamePaused) {
-                            root.getChildren().add(new PauseMenuController(false));
-                        }
-                    }
-                    case SPACE -> {
-                        if(isGamePaused) return;
-                        isSpacePressed = true;
+                case ESCAPE -> {
+                    if (gameTimeline.getStatus() != Animation.Status.PAUSED && !this.isGamePaused) {
+                        root.getChildren().add(new PauseMenuController(false));
                     }
                 }
-            });
+                case SPACE -> {
+                    if (isGamePaused) return;
+                    isSpacePressed = true;
+                }
+            }
+        });
 
         setOnKeyReleased(e -> {
             switch (e.getCode()) {
@@ -546,15 +553,15 @@ public class GameController extends Scene {
         setOnMouseClicked(e -> {
             //Move hand towards cursor
 
-            if(inventory.getItemStackOnCursor() != null
-            && !inventory.isCellHovered()) {
+            if (inventory.getItemStackOnCursor() != null
+                    && !inventory.isCellHovered()) {
                 //Drop item
-                if(isSingleplayer) {
+                if (isSingleplayer) {
                     camera.createDroppedBlock(inventory.getItemStackOnCursor(), e.getSceneX(), e.getSceneY());
                 }
                 blockDropped = true;
                 character.updateBlockInHand(inventory.getSelectedItemStack());
-                if(client != null) {
+                if (client != null) {
                     ItemStack itemStack = inventory.getItemStackOnCursor();
                     int[] worldPos = findWorldPos(e.getSceneX(), e.getSceneY());
                     try {
@@ -566,9 +573,9 @@ public class GameController extends Scene {
                 inventory.clearCursor();
             }
         });
-
     }
 
+    //Initialises conversion from map to block name
     private void initLookupTable() {
         lookupTable = new HashMap<>();
         lookupTable.put("0", "air");
@@ -594,6 +601,7 @@ public class GameController extends Scene {
         lookupTable.put("coal_ore", "9");
     }
 
+    //Saves map file and player save to a text file
     public void saveGame() {
         TextIO.writeMap(camera.getMap(), "src/main/resources/saves/singleplayer.txt");
         List<String> playerData = camera.getPlayerData();
@@ -601,6 +609,7 @@ public class GameController extends Scene {
         TextIO.updateFile(playerData, "src/main/resources/saves/single_data.txt");
     }
 
+    //Enables / Disables Blood Moon
     public void setBloodMoon(boolean value) {
         String backgroundColour = value ? "red, indianred" : "whitesmoke, deepskyblue";
         root.setStyle("-fx-background-color: linear-gradient(to top," + backgroundColour + ");" +
@@ -615,22 +624,226 @@ public class GameController extends Scene {
         if (value) bloodMoonTimer.play();
     }
 
+    //Sets the text and shows the label briefly
+    public void setEventMessage(String text) {
+        eventMessage.setText(text);
+        eventMessage.setVisible(true);
+        eventMessage.timer.play();
+    }
 
+    //Creates an indicator for ammo and kill counter
+    private HBox createCounterHBox(SimpleIntegerProperty property, String imageName, boolean imageOnLeft, double x) {
+        //Label styling
+        Label label = new Label();
+        label.textProperty().bind(property.asString());
+        label.setStyle("-fx-font-size: 24;" +
+                "-fx-font-weight: bold;" +
+                "-fx-min-width: 50");
+        label.setAlignment(imageOnLeft ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
+
+        //Image
+        ImageView imageView = new ImageView("file:src/main/resources/images/" + imageName + ".png");
+        imageView.setFitWidth(32);
+        imageView.setFitHeight(32);
+        imageView.setPreserveRatio(true);
+
+        //Hbox that contains both
+        HBox hbox = new HBox(12);
+        if (imageOnLeft) {
+            hbox.getChildren().addAll(imageView, label);
+        } else {
+            hbox.getChildren().addAll(label, imageView);
+        }
+        hbox.setMouseTransparent(true);
+        hbox.setAlignment(Pos.CENTER_RIGHT);
+        hbox.setTranslateX(x);
+        hbox.setTranslateY(500);
+        return hbox;
+    }
+
+    //Client setter
+    public void setClient(Client client) {
+        this.client = client;
+        camera.setClient(client);
+    }
+
+    //Creates a dropped block (multiplayer)
+    public void createDroppedBlock(int id, String itemName, int amount, int xPos, int yPos) {
+        ItemStack item = new ItemStack(new Entity(itemName));
+        item.addStackValue(amount); //How many in stack
+        item.setId(id); //Give multiplayer ID
+        Block block = camera.getBlock(xPos, yPos); //Get Block to get screen x and y
+        if (block == null) return; //If not on screen return
+        camera.createDroppedBlock(item, block.getTranslateX(), block.getTranslateY());
+    }
+
+    //Player picks up an item (multiplayer)
+    public void pickupItem(int id) {
+        Iterator<ItemStack> droppedBlocks = camera.getDroppedBlocks().listIterator();
+        while (droppedBlocks.hasNext()) {
+            ItemStack itemStack = droppedBlocks.next();
+            if (itemStack.getGameId() != id) continue;
+            droppedBlocks.remove();
+            root.getChildren().remove(itemStack);
+        }
+    }
+
+    //Sets the screen position of another player on the screen (multiplayer)
+    public void setPseudoPlayerPos(PseudoPlayer player) {
+
+        List<List<Block>> blocks = camera.getBlocks();
+        Block block = blocks.get(0).get(0);
+        double leftXTranslate = block.getTranslateX();
+        double leftYTranslate = block.getTranslateY();
+        int blockXPos = block.getXPos();
+        int blockYPos = block.getYPos();
+
+        player.getImageView().setTranslateX(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset() - 32);
+        player.getImageView().setTranslateY(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset() - 64);
+    }
+
+    //Finds the world pos from the screen x, y
+    public int[] findWorldPos(double screenX, double screenY) {
+        List<List<Block>> blocks = camera.getBlocks();
+        for (int i = 0; i < blocks.size() - 1; i++) {
+            List<Block> line = blocks.get(i);
+            List<Block> nextLine = blocks.get(i + 1);
+            if (line.isEmpty() || nextLine.isEmpty()) continue;
+            Block block = line.get(0);
+            Block nextBlock = nextLine.get(0);
+            if (screenX < block.getTranslateX() || screenX > nextBlock.getTranslateX()) continue;
+            for (int j = 0; j < line.size() - 1; j++) {
+                if (screenY < line.get(j).getTranslateY() || screenY > line.get(j + 1).getTranslateY()) continue;
+                return new int[]{line.get(j).getXPos(), line.get(j).getYPos()};
+            }
+        }
+        return new int[]{-1, -1};
+    }
+
+    //getters
+    public Player getCharacter() {
+        return character;
+    }
+
+    public AnchorPane getSceneRoot() {
+        return root;
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    public List<Zombie> getZombies() {
+        return zombies;
+    }
+
+    public SimpleIntegerProperty killCounterProperty() {
+        return killCounter;
+    }
+
+    public AudioPlayer getBossMusic() {
+        return bossMusic;
+    }
 
     public Camera getGameCamera() {
         return camera;
     }
 
+    //Health Bar in top right which shows player health
+    private static class HealthBar extends HBox {
+        public HealthBar(SimpleDoubleProperty healthProperty) {
+            //Initialising Values
+            ProgressBar healthBar = new ProgressBar(1);
+            Label healthLabel = new Label("");
+            getStyleClass().add("darkBackground");
+
+            //Binds label and progress bar to health
+            healthBar.progressProperty().bind(healthProperty.divide(100));
+            healthLabel.textProperty().bind(healthProperty.asString("%.0f"));
+
+            setId("healthBox");
+            healthBar.setId("healthBar");
+            healthLabel.setId("healthLabel");
+
+            this.getChildren().addAll(healthLabel, healthBar);
+        }
+    }
+
+    //Player stat menu which can be toggled
+    private static class StatMenu extends VBox {
+        private final TranslateTransition translate;
+        private boolean isVisible;
+
+        public StatMenu(Player player) {
+            //Initialise the hbox's
+            HBox strengthHBox = createHBox("Strength", player.strengthLevelProperty(), player.strengthXPProperty());
+            HBox agilityHBox = createHBox("Agility", player.agilityLevelProperty(), player.agilityXPProperty());
+            HBox defenceHBox = createHBox("Defence", player.defenceLevelProperty(), player.defenceXPProperty());
+            this.isVisible = false;
+
+            Label title = new Label("Stats");
+            title.getStyleClass().add("title");
+
+            //Adds elements to main vbox
+            getChildren().addAll(title, strengthHBox, agilityHBox, defenceHBox);
+            setId("statMenu");
+            getStyleClass().add("darkBackground");
+
+            //Initialise animation
+            this.translate = new TranslateTransition();
+            this.translate.setNode(this);
+            this.translate.setRate(1);
+            this.translate.setInterpolator(Interpolator.EASE_BOTH);
+            this.translate.setOnFinished(e -> isVisible = !isVisible);
+        }
+
+        //Creates a stat line which title, current level and a bar for level progress
+        private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleIntegerProperty currentXP) {
+            Label statNameLabel = new Label(statName + ":"); //What the stat is called
+            statNameLabel.getStyleClass().add("statNumbers");
+
+            Pane spacer = new Pane(); //Invisible to account for different text lengths
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            Label currentLevel = new Label("1"); //Current level
+            currentLevel.getStyleClass().add("statNumbers");
+            currentLevel.textProperty().bind(stat.asString()); //Binds to current level property
+
+            ProgressBar xpBar = new ProgressBar();
+            xpBar.getStyleClass().add("xpBar");
+            currentXP.addListener((observableValue, number, t1) -> {
+                //When current xp changes, the progress bar is updated
+                double currentexp = t1.doubleValue();
+                double lastLevelReq = 50 * Math.pow(stat.get() - 1, 1.5);
+                double nextLevelReq = 50 * Math.pow(stat.get(), 1.5);
+                xpBar.setProgress((currentexp - lastLevelReq) / (nextLevelReq - lastLevelReq));
+            });
+
+            //Adds everything to a hbox
+            HBox hBox = new HBox();
+            hBox.getChildren().addAll(statNameLabel, spacer, currentLevel, xpBar);
+            hBox.getStyleClass().add("stat");
+            return hBox;
+        }
+
+        //Switches between shown and hidden
+        public void toggleShown() {
+            this.translate.setToX(this.isVisible ? 1324 : 714);
+            this.translate.play();
+        }
+    }
+
+    //Pause / Repspawn Menu which stops the game
     private class PauseMenuController extends VBox {
 
         public PauseMenuController(boolean isDead) {
-            String colour  = isDead ? "247, 45, 0" : "209, 222, 227";
+            String colour = isDead ? "247, 45, 0" : "209, 222, 227";
             setStyle("-fx-background-color: rgba(" + colour + ",.5);" +
                     "-fx-min-height: 544;" +
                     "-fx-min-width: 1024;" +
                     "-fx-alignment: center;" +
                     "-fx-spacing: 12;");
-            if(gameTimeline != null && isSingleplayer) {
+            if (gameTimeline != null && isSingleplayer) {
                 gameTimeline.pause();
             }
             audioplayer.pause();
@@ -642,22 +855,19 @@ public class GameController extends Scene {
                     "-fx-font-size: 42");
             title.setTextFill(isDead ? Color.WHITE : Color.BLACK);
 
-
             getChildren().addAll(title, isDead ? addRespawnButton() : addResumeButton(), addSaveAndExitButton());
             toFront();
 
-
-            if(isDead) {
+            if (isDead) {
                 //Stupid way of doing it (concurrency issue)
                 PauseTransition bringToFront = new PauseTransition();
                 bringToFront.setDuration(Duration.millis(10));
                 bringToFront.setOnFinished(e -> toFront());
                 bringToFront.play();
             }
-
-
         }
 
+        //Adds a button which removes the menu and plays the game
         private Button addResumeButton() {
             Button button = new Button("Resume");
             button.setOnAction(e -> { //Resume game
@@ -669,11 +879,12 @@ public class GameController extends Scene {
             return button;
         }
 
+        //Adds a button which saves the game and changes scene to the main menu
         private Button addSaveAndExitButton() {
             Button button = new Button("Save and Exit");
             button.setOnAction(e -> {
                 //Save first
-                if(isSingleplayer) {
+                if (isSingleplayer) {
                     saveGame();
                 } else {
                     try {
@@ -688,6 +899,7 @@ public class GameController extends Scene {
             return button;
         }
 
+        //Adds a respawn button which sends the player back to spawn
         private Button addRespawnButton() {
             Button button = new Button("Respawn");
             button.setOnAction(e -> {
@@ -699,7 +911,7 @@ public class GameController extends Scene {
                 audioplayer.play();
                 isGamePaused = false;
 
-                if(client != null && !isSingleplayer) {
+                if (client != null && !isSingleplayer) {
                     try {
                         client.respawn();
                     } catch (IOException ex) {
@@ -712,6 +924,7 @@ public class GameController extends Scene {
         }
     }
 
+    //Label in middle of screen which notifies player of events
     private class EventMessage extends Label {
 
         private final PauseTransition timer;
@@ -746,182 +959,5 @@ public class GameController extends Scene {
             });
         }
     }
-
-    private static class HealthBar extends HBox {
-        public HealthBar(SimpleDoubleProperty healthProperty) {
-            //Initialising Values
-            ProgressBar healthBar = new ProgressBar(1);
-            Label healthLabel = new Label("");
-            getStyleClass().add("darkBackground");
-
-            //Binds label and progress bar to health
-            healthBar.progressProperty().bind(healthProperty.divide(100));
-            healthLabel.textProperty().bind(healthProperty.asString("%.0f"));
-
-            setId("healthBox");
-            healthBar.setId("healthBar");
-            healthLabel.setId("healthLabel");
-
-            this.getChildren().addAll(healthLabel, healthBar);
-        }
-    }
-
-    private static class StatMenu extends VBox {
-        private final TranslateTransition translate;
-        private boolean isVisible;
-
-        public StatMenu(Player player) {
-            //Initialise the hbox's
-            HBox strengthHBox = createHBox("Strength", player.strengthLevelProperty(), player.strengthXPProperty());
-            HBox agilityHBox = createHBox("Agility", player.agilityLevelProperty(), player.agilityXPProperty());
-            HBox defenceHBox = createHBox("Defence", player.defenceLevelProperty(), player.defenceXPProperty());
-            this.isVisible = false;
-
-            Label title = new Label("Stats");
-            title.getStyleClass().add("title");
-
-            //Adds elements to main vbox
-            getChildren().addAll(title, strengthHBox, agilityHBox, defenceHBox);
-            setId("statMenu");
-            getStyleClass().add("darkBackground");
-
-            //Initialise animation
-            this.translate = new TranslateTransition();
-            this.translate.setNode(this);
-            this.translate.setRate(1);
-            this.translate.setInterpolator(Interpolator.EASE_BOTH);
-            this.translate.setOnFinished(e -> isVisible = !isVisible);
-        }
-
-        private HBox createHBox(String statName, SimpleIntegerProperty stat, SimpleIntegerProperty currentXP) {
-            Label statNameLabel = new Label(statName + ":"); //What the stat is called
-            statNameLabel.getStyleClass().add("statNumbers");
-
-            Pane spacer = new Pane(); //Invisible to account for different text lengths
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-
-            Label currentLevel = new Label("1"); //Current level
-            currentLevel.getStyleClass().add("statNumbers");
-            currentLevel.textProperty().bind(stat.asString()); //Binds to current level property
-
-            ProgressBar xpBar = new ProgressBar();
-            xpBar.getStyleClass().add("xpBar");
-            currentXP.addListener((observableValue, number, t1) -> {
-                //When current xp changes, the progress bar is updated
-                double currentexp = t1.doubleValue();
-                double lastLevelReq = 50 * Math.pow(stat.get() - 1, 1.5);
-                double nextLevelReq =  50 * Math.pow(stat.get(), 1.5);
-                xpBar.setProgress((currentexp - lastLevelReq) / (nextLevelReq - lastLevelReq));
-            });
-
-            //Adds everything to a hbox
-            HBox hBox = new HBox();
-            hBox.getChildren().addAll(statNameLabel, spacer, currentLevel, xpBar);
-            hBox.getStyleClass().add("stat");
-            return hBox;
-        }
-
-        //Switches between shown and hidden
-        public void toggleShown() {
-            this.translate.setToX(this.isVisible ? 1324 : 714);
-            this.translate.play();
-        }
-    }
-    public void setEventMessage(String text) {
-        eventMessage.setText(text);
-        eventMessage.setVisible(true);
-        eventMessage.timer.play();
-    }
-
-
-
-    private HBox createCounterHBox(SimpleIntegerProperty property, String imageName, boolean imageOnLeft, double x) {
-        //Label styling
-        Label label = new Label();
-        label.textProperty().bind(property.asString());
-        label.setStyle("-fx-font-size: 24;" +
-                "-fx-font-weight: bold;" +
-                "-fx-min-width: 50");
-        label.setAlignment(imageOnLeft ? Pos.CENTER_LEFT : Pos.CENTER_RIGHT);
-
-        //Image
-        ImageView imageView = new ImageView("file:src/main/resources/images/" + imageName + ".png");
-        imageView.setFitWidth(32);
-        imageView.setFitHeight(32);
-        imageView.setPreserveRatio(true);
-
-        //Hbox that contains both
-        HBox hbox = new HBox(12);
-        if(imageOnLeft) {
-            hbox.getChildren().addAll(imageView, label);
-        } else {
-            hbox.getChildren().addAll(label, imageView);
-        }
-        hbox.setMouseTransparent(true);
-        hbox.setAlignment(Pos.CENTER_RIGHT);
-        hbox.setTranslateX(x);
-        hbox.setTranslateY(500);
-        return hbox;
-    }
-
-    public void setClient(Client client) {
-        this.client = client;
-        camera.setClient(client);
-    }
-
-
-
-    public void createDroppedBlock(int id, String itemName, int amount, int xPos, int yPos) {
-        ItemStack item = new ItemStack(new Entity(itemName));
-        item.addStackValue(amount);
-        item.setId(id);
-        Block block = camera.getBlock(xPos, yPos);
-        if(block == null) return;
-        camera.createDroppedBlock(item, block.getTranslateX(), block.getTranslateY());
-    }
-
-    public void pickupItem(int id) {
-        Iterator<ItemStack> droppedBlocks = camera.getDroppedBlocks().listIterator();
-        while(droppedBlocks.hasNext()) {
-            ItemStack itemStack = droppedBlocks.next();
-            if(itemStack.getGameId() != id) continue;
-            droppedBlocks.remove();
-            root.getChildren().remove(itemStack);
-        }
-    }
-
-    public void setPseudoPlayerPos(PseudoPlayer player) {
-
-        List<List<Block>> blocks = camera.getBlocks();
-        Block block = blocks.get(0).get(0);
-        double leftXTranslate = block.getTranslateX();
-        double leftYTranslate = block.getTranslateY();
-        int blockXPos = block.getXPos();
-        int blockYPos = block.getYPos();
-
-        player.getImageView().setTranslateX(leftXTranslate + ((player.getXPos() - blockXPos) * 32) + player.getxOffset() - 32);
-        player.getImageView().setTranslateY(leftYTranslate + ((player.getYPos() - blockYPos) * 32) + player.getyOffset() - 64);
-    }
-
-    public int[] findWorldPos(double screenX, double screenY) {
-        List<List<Block>> blocks = camera.getBlocks();
-        for (int i = 0; i < blocks.size() - 1; i++) {
-            List<Block> line = blocks.get(i);
-            List<Block> nextLine = blocks.get(i + 1);
-            if(line.isEmpty() || nextLine.isEmpty()) continue;
-            Block block = line.get(0);
-            Block nextBlock = nextLine.get(0);
-            if(screenX < block.getTranslateX() || screenX > nextBlock.getTranslateX()) continue;
-            for (int j = 0; j < line.size() - 1; j++) {
-                if(screenY < line.get(j).getTranslateY() || screenY > line.get(j + 1).getTranslateY()) continue;
-                return new int[]{line.get(j).getXPos(), line.get(j).getYPos()};
-            }
-        }
-        return new int[]{-1, -1};
-    }
-
-
-
-
 
 }

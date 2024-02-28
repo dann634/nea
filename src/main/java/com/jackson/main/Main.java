@@ -9,12 +9,28 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-    private static Stage stage;
     private static final double HEIGHT = 544.0; // Height of window
     private static final double WIDTH = 1024.0; //Width of window
+    private static Stage stage;
+
+    public static void setScene(Scene scene) {
+        stage.setScene(scene);
+    }
+
+    //Applies correct width and height to scenes
+    public static void applyWindowSize(Parent root) {
+        root.setStyle("-fx-min-height: " + HEIGHT + ";" +
+                "-fx-min-width: " + WIDTH + ";");
+
+    }
+
+    //getter
+    public static Stage getStage() {
+        return stage;
+    }
 
     @Override
-    public void start(Stage pstage)  { //Start point of program
+    public void start(Stage pstage) { //Start point of program
         stage = pstage;
         stage.setTitle("Game"); //Set Window Title
         stage.getIcons().add(new Image("file:src/main/resources/images/grass.png")); //Add Window Icon
@@ -22,19 +38,5 @@ public class Main extends Application {
         stage.setResizable(false); //Window cannot be resized
         stage.show(); //Show GUI
 
-    }
-
-    public static void setScene(Scene scene) {
-        stage.setScene(scene);
-    }
-
-    public static void applyWindowSize(Parent root) {
-        root.setStyle("-fx-min-height: " + HEIGHT + ";" +
-                "-fx-min-width: " + WIDTH + ";");
-
-    }
-
-    public static Stage getStage() {
-        return stage;
     }
 }

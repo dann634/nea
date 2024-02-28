@@ -13,7 +13,7 @@ public class Block extends Entity {
 
     private int xPos;
     private int yPos;
-    private Timeline breakingTimeline; //Maybe change to a transition
+    private Timeline breakingTimeline;
     private  Camera camera;
     private  Inventory inventory;
     private boolean isBreakable;
@@ -26,6 +26,7 @@ public class Block extends Entity {
         this.isUsable = false;
     }
 
+    //Initialises the value for the fields
     private void initFields(int xPos, int yPos, Camera camera, Inventory inventory) {
         this.camera = camera;
         this.inventory = inventory;
@@ -40,6 +41,10 @@ public class Block extends Entity {
         setSize(32);
     }
 
+    /*
+    Adds event handling to mouse actions
+    Deals with block breaking and placing
+     */
     private void initButtonPresses() {
 
         setOnMouseEntered(e -> toFront());
@@ -92,6 +97,10 @@ public class Block extends Entity {
         });
     }
 
+    /*
+    Gets break time for block
+    Depends on what item the player is holding
+     */
     private double getWaitTime() {
         double waitTime = 200; //Default break time
         if(inventory.getSelectedItemStack() != null) {
@@ -114,6 +123,7 @@ public class Block extends Entity {
         return waitTime;
     }
 
+    //World position getters
     public int getXPos() {
         return xPos;
     }
@@ -121,7 +131,7 @@ public class Block extends Entity {
         return yPos;
     }
 
-
+    //Changes the block when its drop into a smaller version of itself
     private void drop() throws IOException {
         int blockHeight = 16;
         this.imageView.setFitHeight(blockHeight);

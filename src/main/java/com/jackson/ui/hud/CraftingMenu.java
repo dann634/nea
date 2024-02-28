@@ -21,10 +21,10 @@ public class CraftingMenu extends BorderPane {
     private final HBox bottomMenu;
     private final VBox centerMenu;
     private final Label selectedItem;
-    private VBox recipeVbox;
-    private Button craftButton;
     private final List<String> fileData;
     private final Inventory inventory;
+    private VBox recipeVbox;
+    private Button craftButton;
 
     public CraftingMenu(Inventory inventory) {
         this.leftMenu = new ScrollPane();
@@ -46,10 +46,14 @@ public class CraftingMenu extends BorderPane {
     }
 
 
+    /*
+    Gets the left menu
+    The menu adds all the available items to craft in a list
+     */
     private void setLeftMenu() {
         int width = 250;
         VBox vBox = new VBox();
-        vBox.setMinWidth(width-18);
+        vBox.setMinWidth(width - 18);
         vBox.setMinHeight(350);
         vBox.setStyle("-fx-background-color: rgba(0,0,0,.65);" +
                 "-fx-border-color: black;" +
@@ -65,9 +69,9 @@ public class CraftingMenu extends BorderPane {
         setLeft(leftMenu);
 
         //Add new item
-        for(String line : fileData) {
+        for (String line : fileData) {
             String[] splitLine = line.split(" ");
-            if(splitLine[0].equals("axe") || splitLine[0].equals("sword") || splitLine[0].equals("pickaxe") || splitLine[0].equals("shovel")) {
+            if (splitLine[0].equals("axe") || splitLine[0].equals("sword") || splitLine[0].equals("pickaxe") || splitLine[0].equals("shovel")) {
                 vBox.getChildren().addAll(getItemOption("wood_" + splitLine[0]));
                 vBox.getChildren().addAll(getItemOption("stone_" + splitLine[0]));
                 vBox.getChildren().addAll(getItemOption("metal_" + splitLine[0]));
@@ -75,9 +79,9 @@ public class CraftingMenu extends BorderPane {
             }
             vBox.getChildren().add(getItemOption(line.split(" ")[0]));
         }
-
     }
 
+    //Creates a box for the item provided that can be clicked
     private HBox getItemOption(String itemName) {
         HBox hBox = new HBox();
         hBox.setOnMouseClicked(e -> updateCenterMenu(itemName));
@@ -91,10 +95,10 @@ public class CraftingMenu extends BorderPane {
                 "-fx-min-width: 50");
 
         hBox.getChildren().addAll(icon, label);
-
         return hBox;
     }
 
+    //Sets the center menu with panes
     private void setCenterMenu() {
         centerMenu.setMinWidth(450);
         centerMenu.setMinHeight(350);
@@ -112,9 +116,9 @@ public class CraftingMenu extends BorderPane {
         //Embedded Vbox
         recipeVbox = new VBox();
         centerMenu.getChildren().addAll(selectedItem, recipeVbox);
-
     }
 
+    //Sets the bottom menu with a craft button
     private void setBottomMenu() {
         setBottom(bottomMenu);
         bottomMenu.setMinWidth(800);
@@ -132,7 +136,7 @@ public class CraftingMenu extends BorderPane {
         craftButton.setDisable(true);
         craftButton.setOnAction(e -> {
             List<ItemStack> recipe = getCraftingRecipe(selectedItem.getText());
-            if(!inventory.canCraft(recipe)) {
+            if (!inventory.canCraft(recipe)) {
                 return;
             }
             inventory.craft(selectedItem.getText(), recipe);
@@ -142,27 +146,29 @@ public class CraftingMenu extends BorderPane {
         Pane pusherPane = new Pane();
         HBox.setHgrow(pusherPane, Priority.ALWAYS);
         bottomMenu.getChildren().addAll(craftButton);
-
     }
 
+    //Changes if the crafting menu is shown or not
     public void toggleShown(Timeline gameTimeline, boolean isSingleplayer) {
-        if(getTranslateX() == 2000) {
+        if (getTranslateX() == 2000) {
             setTranslateX((1024 / 2) - (800 / 2));
-            if(isSingleplayer) gameTimeline.pause();
+            if (isSingleplayer) gameTimeline.pause();
             setNodeDisable(false);
             return;
         }
         setTranslateX(2000);
         setNodeDisable(true);
-        if(isSingleplayer) gameTimeline.play();
+        if (isSingleplayer) gameTimeline.play();
     }
 
+    //Disables the scrolling aspects of the menu to keep the game working
     private void setNodeDisable(boolean disable) {
         //Fixes crafting buttons disabling attacking
         leftMenu.setDisable(disable);
         bottomMenu.setDisable(disable);
     }
 
+    //Changes what item is displayed in the center and shows the required items to craft it
     private void updateCenterMenu(String itemName) {
         selectedItem.setText(itemName);
         craftButton.setDisable(false);
@@ -171,6 +177,11 @@ public class CraftingMenu extends BorderPane {
         craftButton.setDisable(!inventory.canCraft(getCraftingRecipe(itemName)));
     }
 
+    /*
+    Gets all the items needed to craft it
+    Puts them next to each other in a line evenly spaced
+    Each item can be clicked to go to its crafting recipe
+     */
     private AnchorPane getRecipeTree(String item) {
         AnchorPane pane = new AnchorPane();
 
@@ -201,6 +212,7 @@ public class CraftingMenu extends BorderPane {
         return pane;
     }
 
+    //Creates an icon for the image
     private Pane getRecipeIcon(String item) {
         Pane pane = new Pane();
 
@@ -209,7 +221,7 @@ public class CraftingMenu extends BorderPane {
         imageView.setFitHeight(64);
         imageView.setFitWidth(64);
 
-        if(item.equals("bullet")) {
+        if (item.equals("bullet")) {
             ItemStack itemStack = new ItemStack(new Item("bullet"));
             itemStack.addStackValue(20);
             itemStack.setSize(64);
@@ -222,10 +234,13 @@ public class CraftingMenu extends BorderPane {
         return pane;
     }
 
-
-    private List<ItemStack> getCraftingRecipe(String item) { // FIXME: 19/12/2023 isnt given stack size
+    /*
+    Gets the list of items needed to craft an item
+    Reads the list from the text file
+     */
+    private List<ItemStack> getCraftingRecipe(String item) {
         String itemType;
-        if(item.contains("_")) {
+        if (item.contains("_")) {
             itemType = item.split("_")[1];
         } else {
             itemType = item;
@@ -233,12 +248,12 @@ public class CraftingMenu extends BorderPane {
 
         List<ItemStack> recipe = new ArrayList<>();
 
-        for(String line : fileData) {
+        for (String line : fileData) {
             String[] splitLine = line.split(" ");
-            if(itemType.equals(splitLine[0])) {
+            if (itemType.equals(splitLine[0])) {
                 for (int i = 1; i < splitLine.length; i++) {
                     ItemStack craftingItem;
-                    if(splitLine[i].contains("ingot")) {
+                    if (splitLine[i].contains("ingot")) {
                         craftingItem = new ItemStack(new Item(item.split("_")[0]));
                     } else {
                         craftingItem = new ItemStack(new Item(splitLine[i].substring(1)));
@@ -250,8 +265,4 @@ public class CraftingMenu extends BorderPane {
         }
         return recipe;
     }
-
-
-
-
 }

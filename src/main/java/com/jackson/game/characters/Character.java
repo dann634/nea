@@ -36,6 +36,7 @@ public abstract class Character extends ImageView {
         BASE_ATTACK_DAMAGE = 30;
     }
 
+    //Create head collision and bind to player
     private void initHeadCollision() {
         headCollision = new Rectangle(25, 6); //Width of 25, Height of 6
         headCollision.xProperty().bind(xProperty().add(3)); //Binds x to player
@@ -43,6 +44,7 @@ public abstract class Character extends ImageView {
         headCollision.setVisible(false); //Hides the rectangle
     }
 
+    //Create feet collision and bind to player
     private void initFeetCollision() {
         feetCollision = new Rectangle(25, 6);
         feetCollision.xProperty().bind(xProperty().add(3));
@@ -50,15 +52,13 @@ public abstract class Character extends ImageView {
         feetCollision.setVisible(false);
     }
 
+    //Create left and right collisions
     private void initBodyCollision() {
         leftCollision = getBodyCollision(0);
         rightCollision = getBodyCollision(30);
     }
 
-
-
-
-
+    //Create vertical collision and bind according to parameter
     private Rectangle getBodyCollision(int offset) {
         Rectangle rectangle = new Rectangle(5, 45);
         rectangle.xProperty().bind(xProperty().add(offset));
@@ -67,62 +67,68 @@ public abstract class Character extends ImageView {
         return rectangle;
     }
 
+    //Set health from integer
     public void setHealth(int health) {
         this.health.set(health);
     }
 
+    //Set health from double
     public void setHealth(double value) {
         health.set(value);
     }
 
+    //Get a list of all collisions
     public List<Rectangle> getCollisions() {
         return List.of(feetCollision, leftCollision, rightCollision, headCollision);
     }
 
+    //Collision getters
     public Rectangle getFeetCollision() {
         return feetCollision;
     }
+
     public Rectangle getLeftCollision() {
         return leftCollision;
     }
+
     public Rectangle getRightCollision() {
         return rightCollision;
     }
+
     public Rectangle getHeadCollision() {
         return headCollision;
     }
 
+    //get health property
     public SimpleDoubleProperty healthProperty() {
         return health;
     }
 
+    //set idle animation according to inherited class name
     public void setIdleImage() {
         setImage(new Image("file:src/main/resources/images/" + getClass().getSimpleName() + "Idle.png"));
     }
 
+    //Swap moving image for walking animation according to inherited class name
     public void swapMovingImage() {
-        if(getImage().getUrl().contains("1")) {
+        if (getImage().getUrl().contains("1")) {
             setImage(new Image("file:src/main/resources/images/" + getClass().getSimpleName() + "Run2.png"));
             return;
         }
         setImage(new Image("file:src/main/resources/images/" + getClass().getSimpleName() + "Run1.png"));
     }
 
-
-
+    //Children must implement this method
     public abstract void attack(Entity item);
 
-    public boolean takeDamage(double amount) { //Returns true if dead
+    //Makes character take damage and returns true if dead
+    public boolean takeDamage(double amount) {
         health.set(health.get() - amount);
         //Die
         return health.get() <= 0;
     }
 
-
-    public boolean isIsModelFacingRight() {
-        return isModelFacingRight.get();
-    }
-
+    //Attack damage getter
     public double getAttackDamage() {
         return BASE_ATTACK_DAMAGE;
     }

@@ -15,21 +15,14 @@ import java.util.Random;
 
 public class Zombie extends Character {
 
-    /*
-    Have chance to spawn pack
-    use normal distribution again
-    change mean on difficulty
-     */
-
     public static final int SPEED = 1;
-    private int xCounter;
     protected final PauseTransition attackCooldown;
+    protected final ProgressBar healthBar;
+    protected final Difficulty difficulty;
+    private int xCounter;
     private double jumpAcceleration;
     private double jumpVelocity;
     private boolean needsToJump;
-    protected final ProgressBar healthBar;
-    protected final Difficulty difficulty;
-
     //Multiplayer
     private int id;
     private boolean isClientResponsible;
@@ -50,7 +43,7 @@ public class Zombie extends Character {
         //Health Bar
         this.healthBar = initHealthBar();
         //Update Health for Difficulty
-        switch(difficulty) {
+        switch (difficulty) {
             case EASY -> health.set(100);
             case MEDIUM -> health.set(120);
             case HARD -> health.set(150);
@@ -65,11 +58,13 @@ public class Zombie extends Character {
         rebindCollisions();
     }
 
+    //Overrides method as zombies don't have an idle image
     @Override
     public void setIdleImage() {
         setImage(new Image("file:src/main/resources/images/zombieRun1.png"));
     }
 
+    //create health bar and bind to zombie
     private ProgressBar initHealthBar() {
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(34);
@@ -80,6 +75,7 @@ public class Zombie extends Character {
         return progressBar;
     }
 
+    //Updates the offsets for the collisions and rebinds it
     private void rebindCollisions() {
         //Using translate instead because its more optimised
         this.leftCollision.xProperty().bind(this.translateXProperty().subtract(1));
@@ -92,31 +88,35 @@ public class Zombie extends Character {
         this.headCollision.yProperty().bind(this.translateYProperty().add(-3));
     }
 
+    //Updates the x position of the zombie on screen
     public void addTranslateX(int value) {
         this.setTranslateX(this.getTranslateX() + value);
         //counter to change the image for walking animation
         this.xCounter -= 1;
-        if(xCounter <= 0) {
+        if (xCounter <= 0) {
             this.xCounter = 30;
             this.swapMovingImage();
         }
     }
 
 
-
+    //Plays attack cooldown so they can't attack multiple times a second
     @Override
     public void attack(Entity item) {
         attackCooldown.play();
     }
 
+    //Update the y position of the zombie on the screen
     public void addTranslateY(double value) {
         this.setTranslateY(this.getTranslateY() + value);
     }
 
-    public List<Node> getNodes() { //More Optimised
+    //Gets list of all nodes required for the zombie
+    public List<Node> getNodes() {
         return new ArrayList<>(List.of(this, this.leftCollision, this.rightCollision, this.feetCollision, this.healthBar, this.headCollision));
     }
 
+    //Movement getters and setters
     public double getJumpAcceleration() {
         return jumpAcceleration;
     }
@@ -149,14 +149,20 @@ public class Zombie extends Character {
         this.needsToJump = needsToJump;
     }
 
-    public boolean canAttack() {
-        return attackCooldown.getStatus() == Animation.Status.STOPPED;
-    }
-
     public double JUMPING_POWER() {
         return 1;
     }
 
+
+    //Attack getter
+    public boolean canAttack() {
+        return attackCooldown.getStatus() == Animation.Status.STOPPED;
+    }
+
+    /*
+    Gets attack damage value
+    Returns base attack times a multiplier
+     */
     public double getAttack() {
         Random rand = new Random();
         //Multiplier between 1 and 2
@@ -164,6 +170,7 @@ public class Zombie extends Character {
         return BASE_ATTACK_DAMAGE * multiplier;
     }
 
+    //Multiplayer getters and setters
     public int getGameId() {
         return id;
     }

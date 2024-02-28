@@ -21,6 +21,7 @@ public class Packet implements Serializable {
         this.ext = ext;
     }
 
+    //Getters
     public String getExt() {
         return ext;
     }
