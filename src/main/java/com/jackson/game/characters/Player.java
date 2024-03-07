@@ -361,20 +361,45 @@ public class Player extends Character implements PlayerInterface {
 
     //Sets strength level and xp
     public void setStrength(int level, int xp) {
-        strengthLevel.set(level);
-        strengthXP.set(xp);
+        if(level < 0) {
+            System.err.println("Error: Level must be a positive integer");
+        } else {
+            strengthLevel.set(level);
+        }
+        if(xp < 0) {
+            System.err.println("Error: XP must be greater than 0");
+        } else {
+            strengthXP.set(xp);
+        }
     }
 
     //Sets agility level and xp
     public void setAgility(int level, int xp) {
-        agilityLevel.set(level);
-        agilityXP.set(xp);
+        if(level < 0) {
+            System.err.println("Error: Level must be a positive integer");
+        } else {
+            agilityLevel.set(level);
+        }
+        if(xp < 0) {
+            System.err.println("Error: XP must be greater than 0");
+        } else {
+            agilityXP.set(xp);
+        }
     }
 
     //Sets defence level and xp
     public void setDefence(int level, int xp) {
-        defenceLevel.set(level);
-        defenceXP.set(xp);
+        if(level < 0) {
+            System.err.println("Error: Level must be a positive integer");
+        } else {
+            defenceLevel.set(level);
+        }
+
+        if(xp < 0) {
+            System.err.println("Error: XP must be greater than 0");
+        } else {
+            defenceXP.set(xp);
+        }
     }
 
     //Aiming line getter

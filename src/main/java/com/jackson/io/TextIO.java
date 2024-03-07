@@ -14,6 +14,10 @@ public class TextIO {
     }
 
 
+    /*
+    Reads every line of a file that has text on it
+    Adds to an arraylist and returns it
+     */
     public static List<String> readFile(String dir) {
 
         List<String> data = new ArrayList<>();
@@ -34,6 +38,10 @@ public class TextIO {
         return data;
     }
 
+    /*
+    Writes text to a file
+    A list is given and each entry is a new line in the file
+     */
     public static void updateFile(List<String> data, String dir) {
 
         if(data == null || data.isEmpty()) { //Gatekeeping
@@ -54,9 +62,7 @@ public class TextIO {
         }
     }
 
-
-
-
+    //A map object is given, and it's written to a text file
     public static void writeMap(String[][] bitmap, String dir) {
         if(bitmap == null || bitmap.length == 0) { //Gate keeping
             return;
@@ -81,6 +87,7 @@ public class TextIO {
         }
     }
 
+    //Reads a map file and returns it in a 2D array
     public static String[][] readMapFile() {
         String dir = "src/main/resources/saves/singleplayer.txt";
 
